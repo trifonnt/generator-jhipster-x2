@@ -30,7 +30,7 @@
     },
     "main": "cli/index.js",
     "bin": {
-        "jhipster": "./cli/jhipster.js"
+        "jhipster-x2": "./cli/jhipster.js"
     },
     "repository": {
         "type": "git",
