@@ -29,7 +29,7 @@ _%>
 import <%= packageName %>.service.dto.<%= asDto(entityClass) %>;
 <%_ } else { _%>
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
-import <%= packageName %>.domain.<%= asEntity(entityClass)Builder %>; //@Trifon
+import <%= packageName %>.domain.<%= asEntity(entityClass) %>Builder; //@Trifon
 <%_ } _%>
 <%_ if (pagination !== 'no' || fieldsContainOwnerManyToMany === true) { _%>
 

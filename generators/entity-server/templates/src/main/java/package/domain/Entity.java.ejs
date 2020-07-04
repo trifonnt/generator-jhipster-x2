@@ -216,6 +216,7 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     if (typeof fields[idx].javadoc !== 'undefined') { _%>
 <%- formatAsFieldJavadoc(fields[idx].javadoc) %>
     <%_ }
+    let defaultValueConstant = ';'; // @Trifon
     let required = false;
     let unique = false;
     const fieldValidate = fields[idx].fieldValidate;
@@ -266,12 +267,11 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     @Property("<%=fieldNameUnderscored %>")
     <%_ } _%>
     <%_ if (fieldTypeBlobContent !== 'text') { _%>
-    let defaultValueConstant = ';';
     if (fields[idx].defaultValueConstant && fields[idx].defaultValueConstant !== '') {
       defaultValueConstant = ' = ' + fields[idx].defaultValueConstant + ';'
     }
     _%>
-    private <%= fieldType %> <%= fieldName %><%- defaultValueConstant %> //@Trifon
+    private <%= fieldType %> <%= fieldName %><%= defaultValueConstant %> //@Trifon
     <%_ } else { _%>
     private String <%= fieldName %>;
     <%_ } _%>
