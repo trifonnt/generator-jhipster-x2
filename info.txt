@@ -9,6 +9,7 @@ $ jhipster-x2 --version
 	"version": "6.9.1-a01",
 
 $ git commit -m "Version ..."
+$ git push --set-upstream origin v6.9.1-axx
 $ git push
 
 $ npm version 6.9.1-a01 --allow-same-version
