@@ -190,6 +190,27 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     <%_ } _%>
     private <%= primaryKeyType %> id;
 
+<% include('../common/functions', {capitalLetter: false});
+    if (hasUniqueField(fields) == false) {
+%>//	private RecordSource recordSource; //@Trifon
+
+	private String code;
+
+	public String getCode() {
+		return code;
+	}
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	@PrePersist
+	public void prePersist() {
+		if (code == null || code.isEmpty()) {
+			code = java.util.UUID.randomUUID().toString();
+		}
+	}
+<% } %>
+
 <%_ } _%>
 <%_ for (idx in fields) {
     if (typeof fields[idx].javadoc !== 'undefined') { _%>
@@ -245,7 +266,12 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     @Property("<%=fieldNameUnderscored %>")
     <%_ } _%>
     <%_ if (fieldTypeBlobContent !== 'text') { _%>
-    private <%= fieldType %> <%= fieldName %>;
+    let defaultValueConstant = ';';
+    if (fields[idx].defaultValueConstant && fields[idx].defaultValueConstant !== '') {
+      defaultValueConstant = ' = ' + fields[idx].defaultValueConstant + ';'
+    }
+    _%>
+    private <%= fieldType %> <%= fieldName %><%- defaultValueConstant %> //@Trifon
     <%_ } else { _%>
     private String <%= fieldName %>;
     <%_ } _%>
@@ -265,8 +291,67 @@ public class <%= asEntity(entityClass) %> implements Serializable {
       <%_ } _%>
     private String <%= fieldName %>ContentType;
 
+      <%_ if (databaseType === 'sql' || databaseType === 'cassandra') { _%>
+    @Column(<% if (databaseType !== 'cassandra') { %>name = <% } %>"<%-fieldNameAsDatabaseColumn %>_file_name"<% if (required && databaseType !== 'cassandra') { %>, nullable = false<% } %>)
+        <%_ if (required && databaseType === 'cassandra') { _%>
+    @NotNull
+        <%_ } _%>
+      <%_ } _%>
+      <%_ if (databaseType === 'mongodb' || databaseType === 'couchbase') { _%>
+    @Field("<%=fieldNameUnderscored %>_file_name")
+      <%_ } _%>
+      <%_ if (databaseType === 'neo4j') { _%>
+    @Property("<%=fieldNameUnderscored %>_file_name")
+      <%_ } _%>
+    private String <%= fieldName %>FileName; //@Trifon
+
+      <%_ if (databaseType === 'sql' || databaseType === 'cassandra') { _%>
+    @Column(<% if (databaseType !== 'cassandra') { %>name = <% } %>"<%-fieldNameAsDatabaseColumn %>_file_size"<% if (required && databaseType !== 'cassandra') { %>, nullable = false<% } %>)
+        <%_ if (required && databaseType === 'cassandra') { _%>
+    @NotNull
+        <%_ } _%>
+      <%_ } _%>
+      <%_ if (databaseType === 'mongodb' || databaseType === 'couchbase') { _%>
+    @Field("<%=fieldNameUnderscored %>_file_size")
+      <%_ } _%>
+      <%_ if (databaseType === 'neo4j') { _%>
+    @Property("<%=fieldNameUnderscored %>_file_size")
+      <%_ } _%>
+    private long <%= fieldName %>FileSize; //@Trifon
+
     <%_ }
-    }
+    } _%>
+
+	@PreRemove
+	private void preRemove() {
+<%_
+    for (idx in relationships) {
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(entityTableName, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+        const isUsingMapsId = relationships[idx].useJPADerivedIdentifier;
+        if (otherEntityRelationshipName) {
+            mappedBy = otherEntityRelationshipName.charAt(0).toLowerCase() + otherEntityRelationshipName.slice(1)
+        }
+        if (relationshipType === 'many-to-one') {
+            if (databaseType === 'sql') { _%>
+		if (<%= relationshipName %> != null) {
+			System.err.println("TRIFON - PreRemove -- <%= entityClass %>");
+			<%= relationshipName %>.remove<%= entityClass %>(this);
+		}
+    <%_ } } } _%>
+	}
+
+<%_ 
 
     for (idx in relationships) {
         const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
@@ -282,6 +367,10 @@ public class <%= asEntity(entityClass) %> implements Serializable {
         const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
         const ownerSide = relationships[idx].ownerSide;
         const isUsingMapsId = relationships[idx].useJPADerivedIdentifier;
+        let includeAsObjectInDTOValue = '  '; //@Trifon
+        if (relationships[idx].includeAsObjectInDTO) {
+          includeAsObjectInDTOValue = '//';
+        }
         if (otherEntityRelationshipName) {
             mappedBy = otherEntityRelationshipName.charAt(0).toLowerCase() + otherEntityRelationshipName.slice(1)
         }
@@ -448,16 +537,48 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     public String get<%= fieldInJavaBeanMethod %>ContentType() {
         return <%= fieldName %>ContentType;
     }
+
+	//@Trifon
+    public String get<%= fieldInJavaBeanMethod %>FileName() {
+        return <%= fieldName %>FileName;
+    }
+
+	//@Trifon
+    public long get<%= fieldInJavaBeanMethod %>FileSize() {
+        return <%= fieldName %>FileSize;
+    }
     <%_ if (fluentMethods) { _%>
 
     public <%= asEntity(entityClass) %> <%= fieldName %>ContentType(String <%= fieldName %>ContentType) {
         this.<%= fieldName %>ContentType = <%= fieldName %>ContentType;
         return this;
     }
+
+	//@Trifon
+    public <%= asEntity(entityClass) %> <%= fieldName %>FileName(String <%= fieldName %>FileName) {
+        this.<%= fieldName %>FileName = <%= fieldName %>FileName;
+        return this;
+    }
+
+	//@Trifon
+    public <%= asEntity(entityClass) %> <%= fieldName %>FileSize(long <%= fieldName %>FileSize) {
+        this.<%= fieldName %>FileSize = <%= fieldName %>FileSize;
+        return this;
+    }
     <%_ } _%>
 
     public void set<%= fieldInJavaBeanMethod %>ContentType(String <%= fieldName %>ContentType) {
         this.<%= fieldName %>ContentType = <%= fieldName %>ContentType;
+    }
+
+	//@Trifon
+    public void set<%= fieldInJavaBeanMethod %>FileName(String <%= fieldName %>FileName) {
+        this.<%= fieldName %>FileName = <%= fieldName %>FileName;
+    }
+
+	//@Trifon
+    public void set<%= fieldInJavaBeanMethod %>FileSize(long <%= fieldName %>FileSize) {
+        this.<%= fieldName %>FileSize = <%= fieldName %>FileSize;
     }
     <%_ } _%>
 <%_ } _%>
@@ -591,6 +712,8 @@ public class <%= asEntity(entityClass) %> implements Serializable {
             ", <%= fieldName %>=<% if (! isNumeric) { %>'<% } %>" + <% if (fieldType.toLowerCase() === 'boolean') { %>is<% } else { %>get<% } %><%= fieldInJavaBeanMethod %>() <% if (! isNumeric) { %>+ "'" <% } %>+
                 <%_ if ((fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent !== 'text') { _%>
             ", <%= fieldName %>ContentType='" + get<%= fieldInJavaBeanMethod %>ContentType() + "'" +
+            ", <%= fieldName %>FileName='" + get<%= fieldInJavaBeanMethod %>FileName() + "'" +
+            ", <%= fieldName %>FileSize=" + get<%= fieldInJavaBeanMethod %>FileSize() + "" +
                 <%_ } _%>
             <%_ } _%>
             <%_ for (idx in relationships) {

@@ -1,0 +1,110 @@
+<%#
+ Copyright 2013-2018 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%><%
+	// Returns true if entity contains unique field.
+	hasUniqueField = function(fields) {
+
+	  let hasUniqField = false;
+
+	  for (idx in fields) {
+	    const field = fields[idx];
+
+	    const fieldType = field.fieldType;
+	    const fieldTypeBlobContent = field.fieldTypeBlobContent;
+	    const fieldName = field.fieldName;
+	    const fieldNameHumanized = field.fieldNameHumanized;
+	    const fieldNameCapitalized = field.fieldNameCapitalized;
+	    const fieldInJavaBeanMethod = field.fieldInJavaBeanMethod;
+
+	    if (field.fieldValidate === true && field.fieldValidateRules.includes('unique')) {
+	      return true;
+	    }
+	  }
+	  return hasUniqField;
+	}
+
+	// Returns name of unique field.
+	getNameOfUniqueField = function(fields, capitalLetter = false) {
+
+	  let resultName = '';
+//	  let hasUniqField = false;
+
+	  for (idx in fields) {
+	    const field = fields[idx];
+
+	    const fieldType = field.fieldType;
+	    const fieldTypeBlobContent = field.fieldTypeBlobContent;
+	    const fieldName = field.fieldName;
+	    const fieldNameHumanized = field.fieldNameHumanized;
+	    const fieldNameCapitalized = field.fieldNameCapitalized;
+	    const fieldInJavaBeanMethod = field.fieldInJavaBeanMethod;
+
+	    if (field.fieldValidate === true && field.fieldValidateRules.includes('unique')) {
+	      if (capitalLetter) {
+	      	resultName = fieldNameCapitalized;
+	      } else {
+	      	resultName = fieldName;
+	      }
+	      return resultName;
+//	      hasUniqField = true;
+	    }
+	  }
+	  return resultName;
+	}
+
+	getRelationshipNamesForOtherEntityName = function(relationships, searchedEntityName) {
+		return relationships
+			.filter(relationship=>relationship.otherEntityName == searchedEntityName)
+			.map(relationship=>relationship.relationshipName)
+			.join(', ')
+		;
+	}
+	
+	toSpaced = function toSpaced(str) {
+		str = str.replace(/([A-Z])/g," $1")
+		return str.charAt(0).toUpperCase() + str.slice(1);
+	}
+
+	toDashed = function toDashed(str) {
+	  return str.replace(/([a-zA-Z])(?=[A-Z])/g, '$1-').toLowerCase()
+	}
+
+	toLower = function toLower(str) {
+		return str.toLowerCase();
+	}
+
+	addS = function addS(str) {
+		return str+'s';
+	}
+
+	firstToUpper = function firstToUpper(str) {
+		return str.charAt(0).toUpperCase() + str.slice(1);
+	}
+
+	firstToLower = function firstToLower(str) {
+		return str.charAt(0).toLowerCase() + str.slice(1);
+	}
+
+	firstToUpper2 = function firstToUpper2(str) {
+		// If SECOND Character is Upper case then first MUST also be Upper case
+		if (str.charAt(1) == str.charAt(1).toUpperCase()) {
+			return str.charAt(0).toUpperCase() + str.slice(1);
+		}
+		return str;
+	}
+%>

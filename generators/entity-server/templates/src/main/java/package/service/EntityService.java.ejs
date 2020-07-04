@@ -29,6 +29,7 @@ _%>
 import <%= packageName %>.service.dto.<%= asDto(entityClass) %>;
 <%_ } else { _%>
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
+import <%= packageName %>.domain.<%= asEntity(entityClass)Builder %>; //@Trifon
 <%_ } _%>
 <%_ if (pagination !== 'no' || fieldsContainOwnerManyToMany === true) { _%>
 
@@ -64,6 +65,15 @@ public interface <%= entityClass %>Service {
      * @return the persisted entity.
      */
     <% if (reactive) { %>Mono<<% } %><%= instanceType %><% if (reactive) { %>><% } %> save(<%= instanceType %> <%= instanceName %>);
+
+    /**
+     * Save a <%= entityInstance %>.
+     *
+     * @param <%= entityInstance %> the entity to save.
+     * @return the persisted entity.
+     */
+     // @Trifon
+    <%= entityClass %> save(<%= entityClass %> <%= entityInstance %>);
 
     /**
      * Get all the <%= entityInstancePlural %>.
@@ -131,4 +141,39 @@ public interface <%= entityClass %>Service {
      * @return the list of entities.
      */
     <% if (pagination !== 'no') { %><%= pageOrFlux %><<%= instanceType %><% } else { %><%= listOrFlux %><<%= instanceType %><% } %>> search(String query<% if (pagination !== 'no') { %>, Pageable pageable<% } %>);<% } %>
+
+<%_ for (idx in fields) {
+      const fieldType = fields[idx].fieldType;
+      const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
+      const fieldName = fields[idx].fieldName;
+      const fieldInJavaBeanMethod = fields[idx].fieldInJavaBeanMethod;
+      if (fields[idx].fieldValidate === true && fields[idx].fieldValidateRules.includes('unique')) { _%>
+    //@Trifon
+    /**
+     * Get one <%= entityInstance %> by <%= fieldName %>.
+     *
+     * @param <%= fieldName %> the <%= fieldName %> of the entity
+     * @return the entity
+     */
+    Optional<<%= instanceType %>> findOneBy<%= fieldInJavaBeanMethod %>(<%= fieldType %> <%= fieldName %>);
+
+    //@Trifon
+    /**
+     * Get or Create <%= entityInstance %> by <%= fieldName %>.
+     *
+     * @return the entity
+     */
+     <%= entityClass %> getOrCreate<%= entityClass %>By<%= fieldInJavaBeanMethod %>(<%= entityClass %> param<%= entityClass %>);
+
+    //@Trifon
+    /**
+     * Import one <%= entityInstance %> by <%= fieldName %>.
+     *
+     * @param columns list of columns
+     * @return the entity
+     */
+    <%= instanceType %> import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(String[] columns);
+
+    <%_ }
+    } _%>
 }

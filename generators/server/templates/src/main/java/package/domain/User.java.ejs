@@ -367,6 +367,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
     public void setId(<% if (databaseType === 'sql' && authenticationType !== 'oauth2') { %>Long<% } else { %>String<% } %> id) {
         this.id = id;
     }
+    //@Trifon
+    public User id(<% if (databaseType === 'sql' && authenticationType !== 'oauth2') { %>Long<% } else { %>String<% } %> id) {
+        this.id = id;
+        return this;
+    }
 
     public String getLogin() {
         return login;
@@ -375,6 +380,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
     // Lowercase the login before saving it in database
     public void setLogin(String login) {
         this.login = StringUtils.lowerCase(login, Locale.ENGLISH);
+    }
+    //@Trifon
+    public User login(String login) {
+    	setLogin(login);
+        return this;
     }
 <%_ if (authenticationType !== 'oauth2') { _%>
 
@@ -385,6 +395,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
     public void setPassword(String password) {
         this.password = password;
     }
+    //@Trifon
+    public User password(String password) {
+        this.password = password;
+        return this;
+    }
 <%_ } _%>
 
     public String getFirstName() {
@@ -394,6 +409,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
+    //@Trifon
+    public User firstName(String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
 
     public String getLastName() {
         return lastName;
@@ -402,6 +422,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+    //@Trifon
+    public User lastName(String lastName) {
+        this.lastName = lastName;
+        return this;
+    }
 
     public String getEmail() {
         return email;
@@ -409,6 +434,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
 
     public void setEmail(String email) {
         this.email = email;
+    }
+    //@Trifon
+    public User email(String email) {
+        this.email = email;
+        return this;
     }
     <%_ if (databaseType === 'mongodb' || databaseType === 'neo4j' || databaseType === 'couchbase' || databaseType === 'sql') { _%>
 
@@ -419,6 +449,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+    //@Trifon
+    public User imageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+        return this;
+    }
     <%_ } _%>
 
     public boolean getActivated() {
@@ -427,6 +462,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
 
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+    //@Trifon
+    public User activated(boolean activated) {
+        this.activated = activated;
+        return this;
     }
 <%_ if (authenticationType !== 'oauth2') { _%>
 
@@ -437,6 +477,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
     public void setActivationKey(String activationKey) {
         this.activationKey = activationKey;
     }
+    //@Trifon
+    public User activationKey(String activationKey) {
+        this.activationKey = activationKey;
+        return this;
+    }
 
     public String getResetKey() {
         return resetKey;
@@ -445,6 +490,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
     public void setResetKey(String resetKey) {
         this.resetKey = resetKey;
     }
+    //@Trifon
+    public User resetKey(String resetKey) {
+        this.resetKey = resetKey;
+        return this;
+    }
 
     public Instant getResetDate() {
         return resetDate;
@@ -452,6 +502,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
 
     public void setResetDate(Instant resetDate) {
         this.resetDate = resetDate;
+    }
+    //@Trifon
+    public User resetDate(Instant resetDate) {
+        this.resetDate = resetDate;
+        return this;
     }
 <%_ } _%>
 
@@ -462,6 +517,11 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
     public void setLangKey(String langKey) {
         this.langKey = langKey;
     }
+    //@Trifon
+    public User langKey(String langKey) {
+        this.langKey = langKey;
+        return this;
+    }
 
     public Set<<% if (databaseType === 'sql' || databaseType === 'mongodb' || databaseType === 'neo4j')  { %>Authority<% } %><% if (databaseType === 'cassandra' || databaseType === 'couchbase') { %>String<% } %>> getAuthorities() {
         return authorities;
@@ -469,12 +529,21 @@ public class <%= asEntity('User') %><% if (databaseType === 'sql' || databaseTyp
 
     public void setAuthorities(Set<<% if (databaseType === 'sql' || databaseType === 'mongodb' || databaseType === 'neo4j') { %>Authority<% } %><% if (databaseType === 'cassandra' || databaseType === 'couchbase') { %>String<% } %>> authorities) {
         this.authorities = authorities;
+    }
+    //@Trifon
+    public User authorities(Set<<% if (databaseType === 'sql' || databaseType === 'mongodb' || databaseType === 'neo4j') { %>Authority<% } %><% if (databaseType === 'cassandra' || databaseType === 'couchbase') { %>String<% } %>> authorities) {
+        this.authorities = authorities;
+        return this;
     }<% if (authenticationType === 'session' && databaseType === 'sql' && !reactive) { %>
 
     public Set<PersistentToken> getPersistentTokens() {
         return persistentTokens;
     }
-
+    //@Trifon
+    public User persistentTokens(Set<PersistentToken> persistentTokens) {
+        this.persistentTokens = persistentTokens;
+        return this;
+    }
     public void setPersistentTokens(Set<PersistentToken> persistentTokens) {
         this.persistentTokens = persistentTokens;
     }<% } %>

@@ -69,6 +69,25 @@ import <%= packageName %>.domain.enumeration.<%= element %>;
 @ApiModel(description = "<%- formatAsApiDescription(javadoc) %>")
 <%_ } _%>
 public class <%= asDto(entityClass) %> implements Serializable {
+
+	//@Trifon
+	private static final long serialVersionUID = 1L;
+
+<% include('../../common/functions', {capitalLetter: false});
+    if (hasUniqueField(fields) == false) {
+%>//	private RecordSource recordSource;
+
+	private String code;
+
+	public String getCode() {
+		return code;
+	}
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+<% } %>
+
     <% if (!embedded) { %>
     private <%= primaryKeyType %> id;
     <%_ } _%>
@@ -102,14 +121,21 @@ public class <%= asDto(entityClass) %> implements Serializable {
     <%_ if (fieldType === 'byte[]' && databaseType === 'sql') { _%>
     @Lob
     <%_ } _%>
-    <%_ if (fieldTypeBlobContent !== 'text') { _%>
-    private <%= fieldType %> <%= fieldName %>;
+    <%_ if (fieldTypeBlobContent !== 'text') {
+    let defaultValueConstant = ';';
+    if (fields[idx].defaultValueConstant && fields[idx].defaultValueConstant !== '') {
+      defaultValueConstant = ' = ' + fields[idx].defaultValueConstant + ';'
+    }
+    _%>
+    private <%= fieldType %> <%= fieldName %><%- defaultValueConstant %> //@Trifon
     <%_ } else { _%>
     private String <%= fieldName %>;
     <%_ } _%>
 
     <%_ if ((fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent !== 'text') { _%>
     private String <%= fieldName %>ContentType;
+    private String <%= fieldName %>FileName; //@Trifon
+    private long <%= fieldName %>FileSize; //@Trifon
         <%_ } _%>
     <%_ } _%>
     <%_ for (idx in relationships) {
@@ -176,6 +202,26 @@ public class <%= asDto(entityClass) %> implements Serializable {
 
     public void set<%= fieldInJavaBeanMethod %>ContentType(String <%= fieldName %>ContentType) {
         this.<%= fieldName %>ContentType = <%= fieldName %>ContentType;
+    }
+
+    public String get<%= fieldInJavaBeanMethod %>FileName() {
+        return <%= fieldName %>FileName;
+    }
+
+    public boolean is<%= fieldInJavaBeanMethod %>Multiple() {
+        return false;
+    }
+
+    public void set<%= fieldInJavaBeanMethod %>FileName(String <%= fieldName %>FileName) {
+        this.<%= fieldName %>FileName = <%= fieldName %>FileName;
+    }
+
+    public long get<%= fieldInJavaBeanMethod %>FileSize() {
+        return <%= fieldName %>FileSize;
+    }
+
+    public void set<%= fieldInJavaBeanMethod %>FileSize(long <%= fieldName %>FileSize) {
+        this.<%= fieldName %>FileSize = <%= fieldName %>FileSize;
     }
         <%_ } _%>
     <%_ } _%>

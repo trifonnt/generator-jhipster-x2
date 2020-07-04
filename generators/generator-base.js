@@ -37,7 +37,7 @@ const NeedleApi = require('./needle-api');
 
 const JHIPSTER_CONFIG_DIR = '.jhipster';
 const MODULES_HOOK_FILE = `${JHIPSTER_CONFIG_DIR}/modules/jhi-hooks.json`;
-const GENERATOR_JHIPSTER = 'generator-jhipster';
+const GENERATOR_JHIPSTER = 'generator-jhipster-x2'; //@Trifon
 
 const SERVER_MAIN_RES_DIR = constants.SERVER_MAIN_RES_DIR;
 const ANGULAR = constants.SUPPORTED_CLIENT_FRAMEWORKS.ANGULAR;

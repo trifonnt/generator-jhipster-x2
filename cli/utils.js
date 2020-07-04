@@ -28,7 +28,7 @@ const path = require('path');
 const { normalizeBlueprintName, packageNameToNamespace, loadYoRc, loadBlueprintsFromConfiguration } = require('../generators/utils');
 
 const CLI_NAME = 'jhipster';
-const GENERATOR_NAME = 'generator-jhipster';
+const GENERATOR_NAME = 'generator-jhipster-x2'; //@Trifon
 
 const SUCCESS_MESSAGE = 'Congratulations, JHipster execution is complete!';
 

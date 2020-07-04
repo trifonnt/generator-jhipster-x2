@@ -1,0 +1,32 @@
+= Steps when installing generator-x2
+$ sudo npm install -g generator-jhipster-x2
+## Show which version is installed
+$ jhipster-x2 --version
+
+
+= Steps when publishing new version
+## modify package.json
+	"version": "6.9.1-a01",
+
+$ git commit -m "Version ..."
+$ git push
+
+$ npm version 6.9.1-a01 --allow-same-version
+$ npm publish
+
+
+= Step when UPDATING to new version
+<PROJECT WHICH USES GENERATOR>
+$ npm update generator-jhipster-vuejs2
+
+
+= Step when UPDATING to new version of LOCAL GIT version generator
+<PROJECT WHICH USES GENERATOR>
+$ npm link generator-vue
+
+
+
+= Steps when using MasterDetail VUEJS generator
+$ yo vue:masterSlave Dokumenti EDocument DocumentComment 1253
+   URL
+ - http://localhost:8888/entities/masterslave/Dokumenti/new/1253

@@ -15,7 +15,7 @@
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
--%>
+-%><%_ include ../../common/functions.ejs _%>
 package <%= packageName %>.web.rest;
 
 <%_
@@ -55,7 +55,14 @@ import <%= packageName %>.repository.search.<%= entityClass %>SearchRepository;
 import <%= packageName %>.repository.UserRepository;
 <%_ } _%>
 import <%= packageName %>.web.rest.errors.BadRequestAlertException;
+import <%=packageName%>.web.rest.errors.EntityNotFoundException; //@Trifon
+import <%=packageName%>.web.rest.common.JsonPatcher; //@Trifon
+import <%=packageName%>.web.rest.common.RestMediaType; //@Trifon
+import <%=packageName%>.service.dto.IdArrayDTO; //@Trifon
+import com.github.fge.jsonpatch.JsonPatchException; //@Trifon
+import io.swagger.annotations.Api; //@Trifon
 <%_ if (dto === 'mapstruct') { _%>
+import <%= packageName %>.service.dto.*; //@Trifon
 import <%= packageName %>.service.dto.<%= asDto(entityClass) %>;
     <%_ if (service === 'no') { _%>
 import <%= packageName %>.service.mapper.<%= entityClass %>Mapper;
@@ -96,7 +103,9 @@ import org.springframework.http.HttpStatus;
 <%_ if (reactiveRepositories) { _%>
 import org.springframework.http.MediaType;
 <%_ } _%>
+import org.springframework.http.MediaType; //@Trifon
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired; //@Trifon
 <%_ if (!viaService && !saveUserSnapshot) { _%>
 import org.springframework.transaction.annotation.Transactional;
 <%_ } _%>
@@ -259,6 +268,40 @@ public class <%= entityClass %>Resource {
     }
 <%_ } _%>
 
+    // @Trifon
+    // JSON PATCH - V3
+    // echo '[{ "op": "replace", "path": "/description", "value": "Patched Description" }]' | http PATCH :10000/api/<%= entityApiUrl %>/1 Content-Type:application/json-patch+json
+    /**
+     * PATCH  /<%= entityApiUrl %>/:id : Patches an existing <%= entityInstance %>.
+     *
+     * @param <%= instanceName %> the <%= instanceName %> to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated <%= instanceName %>,
+     * or with status 400 (Bad Request) if the <%= instanceName %> is not valid,
+     * or with status 500 (Internal Server Error) if the <%= instanceName %> couldn't be updated
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PatchMapping(value = "/<%= entityApiUrl %>/{id}", 
+    	consumes = RestMediaType.APPLICATION_PATCH_JSON_VALUE,
+		produces = MediaType.APPLICATION_JSON_VALUE)
+	@Timed
+    public ResponseEntity<<%= instanceType %>> partialUpdate<%= entityClass %>(@PathVariable Long id, @RequestBody String patchCommand) {
+        log.debug("REST request to PATCH <%= entityClass %> : {}", id);
+
+		<%= instanceType %> existing<%= instanceType %> = <%= entityInstance %>Service.findOne(id).orElseThrow(() -> new EntityNotFoundException());
+		<%= instanceType %> <%= instanceName %> = null;
+		try {
+			<%= instanceName %> = (<%= instanceType %>)jsonPatcher.patch(patchCommand, existing<%= instanceType %>).get();
+		} catch (RuntimeException ex) {
+			if (JsonPatchException.class.isAssignableFrom(ex.getCause().getClass())) {
+				ex.printStackTrace();
+			}
+		}
+
+<%- include('../../common/save_template', {asEntity, asDto, viaService: viaService, returnDirectly: false, isUsingMapsId: false, mapsIdAssoc: mapsIdAssoc}); -%>
+		return ResponseEntity.ok()
+			.headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
+			.body(result);
+	}
     /**
      * {@code GET  /<%= entityApiUrl %>} : get all the <%= entityInstancePlural %>.
      *
@@ -317,6 +360,60 @@ public class <%= entityClass %>Resource {
         log.debug("REST request to get <%= entityClass %> : {}", id);<%- include('../../common/get_template', {asEntity, asDto, viaService, returnDirectly:false}); -%>
         return ResponseUtil.wrapOrNotFound(<%= instanceName %>);
     }
+
+    /**
+     * GET  /<%= entityApiUrl %>/template : get the Template JSON for <%= entityInstance %>.
+     *
+     * @return the ResponseEntity with status 200 (OK) and with body the <%= instanceName %>, or with status 404 (Not Found)
+     */
+    @GetMapping("/<%= entityApiUrl %>/template")
+    @Timed
+    public ResponseEntity<<%= instanceType %>> getTemplate<%= entityClass %>() {
+        log.debug("REST request to get Template for <%= entityClass %>");        
+
+        <%= instanceType %> <%= instanceName %> = new <%= instanceType %>();
+        // Populate all automatically populated fields!
+//        <%= instanceName %>.setCode();
+
+        return ResponseEntity.ok().body(<%= instanceName %>);
+    }
+<%_ for (idx in relationships) {
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipNamePlural = relationships[idx].relationshipNamePlural;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(name, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityName = relationships[idx].otherEntityName;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+        if (relationshipType === 'one-to-many') { _%>
+
+    @GetMapping("/<%= entityApiUrl %>/{id}/<%= relationshipNamePlural %>/template")
+    @Timed
+    public ResponseEntity<<%= otherEntityNameCapitalized %>DTO> get<%= firstToUpper(relationshipName) %>Template(@PathVariable Long id) {
+        log.debug("REST request to get Template for <%= firstToUpper(relationshipNamePlural) %> in <%= entityClass %> : {}", id);
+
+        Optional<<%= instanceType %>> <%= instanceName %> = <%= entityInstance %>Service.findOne(id);
+        if (!<%= instanceName %>.isPresent()) {
+        	return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        <%= otherEntityNameCapitalized %>DTO <%= otherEntityName %>DTO = new <%= otherEntityNameCapitalized %>DTO();
+        <%= otherEntityName %>DTO.set<%= firstToUpper(otherEntityRelationshipName) %>Id(id);
+        // Populate all automatically populated fields!
+//      <%= otherEntityName %>DTO.setCode(...);
+
+		HttpHeaders headers = HeaderUtil.createHiddenFieldsHeader("<%= firstToLower(entityClass) %>Id");
+
+        return ResponseEntity.ok().headers(headers).body(<%= otherEntityName %>DTO);
+    }
+<%_ }
+} _%>
+
 <%_ if (!readOnly) { _%>
 
     /**
@@ -346,7 +443,27 @@ public class <%= entityClass %>Resource {
         <%_ } _%>
     <%_ } _%>
     }
+
+	//@Trifon
+    /**
+     * DELETE  /<%= entityApiUrl %>/ : delete list of <%= entityInstancePlural %>.
+     *
+     * @param IdArrayDTO the list with <%= entityClass %> ids to delete
+     * @return the ResponseEntity with status 200 (OK)
+     */
+    //   Delete multiple records using REST
+    // - https://stackoverflow.com/questions/21863326/delete-multiple-records-using-rest
+    @DeleteMapping("/<%= entityApiUrl %>")
+    @Timed
+    public ResponseEntity<Void> delete<%= entityClassPlural %>(@Valid @RequestBody IdArrayDTO idArrayDTO) {
+        log.debug("REST request to delete MULTIPLE <%= entityClassPlural %> : {}", idArrayDTO);
+        for (Long id : idArrayDTO.getIds()) {
+    <%- include('../../common/delete_template', {viaService: viaService}); -%>
+        }
+        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(applicationName, <%= enableTranslation %>, ENTITY_NAME, idArrayDTO.getIds().toString())).build();
+    }
 <%_ } _%>
+
 <%_ if (searchEngine !== false) { _%>
 
     /**
@@ -363,5 +480,61 @@ public class <%= entityClass %>Resource {
      * @return the result of the search.
      */
     @GetMapping("/_search/<%= entityApiUrl %>")<%- include('../../common/search_template', {asEntity, asDto, viaService}); -%>
+
 <%_ } _%>
+
+<%_ for (idx in fields) {
+      const fieldType = fields[idx].fieldType;
+      const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
+      const fieldName = fields[idx].fieldName;
+      const fieldInJavaBeanMethod = fields[idx].fieldInJavaBeanMethod;
+      if (fields[idx].fieldValidate === true && fields[idx].fieldValidateRules.includes('unique')) { _%>
+	/**
+	 * Import <%= entityInstance %> by <%= fieldName %> from .csv file
+	 * 
+	 * @param file
+	 * @return
+	 * @throws URISyntaxException, IOException
+	 */
+	@PostMapping("/<%= entityApiUrl %>/import-by-<%= fieldName %>.csv")
+	@Timed
+	public ResponseEntity<String> import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(@RequestParam("file") MultipartFile file) throws URISyntaxException, IOException {
+		if (!file.isEmpty()) {
+			log.debug("REST request to import <%= entityClass %> by <%= fieldName %> with file: {}", file);
+			BufferedReader buffReader = null;
+			try {
+				// Open the file
+				buffReader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+
+				int numImportedRecords = 0;
+				boolean isFirstLine = true;
+				String strLine;
+				// Read file line by line
+				while ((strLine = buffReader.readLine()) != null) {
+					if (isFirstLine) {  // TODO - Add it as parameter of REST request.
+						isFirstLine = false;
+					} else {
+						String[] columns = strLine.split(";"); // TODO - Add separator as parameter of REST request.
+
+						<%= instanceType %> <%= instanceName %> = <%= entityInstance %>Service.import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(columns);
+
+						<%= instanceName %> = <%= entityInstance %>Service.save(<%= instanceName %>);
+
+						numImportedRecords = numImportedRecords + 1;
+					}
+				}
+				return ResponseEntity.ok().body(String.format("Imported #%s records from file %s", numImportedRecords, file.getOriginalFilename()));
+			} finally {
+				if (buffReader != null) {
+					buffReader.close();
+				}
+			}
+		} else {
+			return ResponseEntity.ok().body("File is empty, no records were imported.");
+		}
+	}
+
+<%_ }
+}
+_%>
 }

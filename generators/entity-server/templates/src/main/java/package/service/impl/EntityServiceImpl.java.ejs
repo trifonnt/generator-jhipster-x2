@@ -45,6 +45,7 @@ _%>
 import <%= packageName %>.service.<%= entityClass %>Service;
 <%_ } _%>
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
+import <%= packageName %>.domain.<%= entityClass %>Builder; //@Trifon
 import <%= packageName %>.repository.<%= entityClass %>Repository;
 <%_ if (isUsingMapsId === true) { _%>
 import <%= packageName %>.repository.<%= mapsIdAssoc.otherEntityNameCapitalized %>Repository;
@@ -58,6 +59,12 @@ import <%= packageName %>.service.mapper.<%= entityClass %>Mapper;
 <%_ } _%>
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.math.BigDecimal; //@Trifon
+import java.time.Instant; //@Trifon
+import java.time.ZoneId; //@Trifon
+import java.time.format.DateTimeFormatter; //@Trifon
+import java.time.format.DateTimeFormatterBuilder; //@Trifon
+import java.time.temporal.ChronoField; //@Trifon
 
 <%_ if (pagination !== 'no' || fieldsContainOwnerManyToMany === true) { _%>
     <%_ if (!reactive) { _%>
@@ -118,12 +125,34 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
     <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %><%= instanceType %><% if (reactive) { %>><% } %> save(<%= instanceType %> <%= instanceName %>) {
         log.debug("Request to save <%= entityClass %> : {}", <%= instanceName %>);
+<%- include('../../common/nullify-file-name_template', {useDTO: true}); -%>
         <%_ if (!reactive) { _%>
 <%- include('../../common/save_template', {asEntity, asDto, viaService: false, returnDirectly: true, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: false}); -%>
         <%_ } else { _%>
 <%- include('../../common/save_reactive_template', {asEntity, asDto, viaService: false, returnDirectly: true}); -%>
         <%_ } _%>
     }
+
+	/**
+	 * Save a <%= entityInstance %>.
+	 *
+	 * @param <%= instanceName %> the entity to save.
+	 * @return the persisted entity.
+	 */
+	<%_ if (service === 'serviceImpl') { _%>
+	@Override
+	<%_ } _%>
+	// @Trifon
+	public <%= entityClass %> save(<%= entityClass %> <%= entityInstance %>) {
+		log.debug("Request to save <%= entityClass %> : {}", <%= entityInstance %>);
+<%- include('../../common/nullify-file-name_template', {useDTO: false}); -%>
+
+		<%= entityInstance %> = <%= entityInstance %>Repository.save(<%= entityInstance %>);
+		<%_ if (searchEngine === 'elasticsearch') { _%>
+		<%= entityInstance %>SearchRepository.save(<%= entityInstance %>);
+		<%_ } _%>
+		return <%= entityInstance %>;
+	}
 
     /**
      * Get all the <%= entityInstancePlural %>.
@@ -194,7 +223,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
     @Transactional(readOnly = true)
     <%_ } _%>
     public <%= optionalOrMono %><<%= instanceType %>> findOne(<%= primaryKeyType %> id) {
-        log.debug("Request to get <%= entityClass %> : {}", id);<%- include('../../common/get_template', {asEntity, asDto, viaService: false, returnDirectly:true}); -%>
+        log.debug("Request to get <%= entityClass %> by id: {}", id);<%- include('../../common/get_template', {asEntity, asDto, viaService: false, returnDirectly:true}); -%>
     }
 
     /**
@@ -206,7 +235,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
     @Override
     <%_ } _%>
     public <%- reactive ? 'Mono<Void>' : 'void' %> delete(<%= primaryKeyType %> id) {
-        log.debug("Request to delete <%= entityClass %> : {}", id);
+        log.debug("Request to delete <%= entityClass %> by Id: {}", id);
 <%- include('../../common/delete_template', {viaService: false, fromResource: false}); -%>
     }
     <%_ if (searchEngine !== false) { _%>
@@ -234,4 +263,136 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
         <%_ } } _%>
     }
     <%_ } _%>
+
+<%_ for (idx in fields) {
+      const fieldType = fields[idx].fieldType;
+      const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
+      const fieldName = fields[idx].fieldName;
+      const fieldInJavaBeanMethod = fields[idx].fieldInJavaBeanMethod;
+      if (fields[idx].fieldValidate === true && fields[idx].fieldValidateRules.includes('unique')) { _%>
+    //@Trifon
+    /**
+     * Get one <%= entityInstance %> by <%= fieldName %>.
+     *
+     * @param <%= fieldName %> the <%= fieldName %> of the entity.
+     * @return the entity.
+     */
+    <%_ if (service === 'serviceImpl') { _%>
+    @Override
+    <%_ } _%>
+    <%_ if (databaseType === 'sql') { _%>
+    @Transactional(readOnly = true)
+    <%_ } _%>
+    public Optional<<%= instanceType %>> findOneBy<%= fieldInJavaBeanMethod %>(<%= fieldType %> <%= fieldName %>) {
+      log.debug("Request to get <%= entityClass %> by <%= fieldName %>: {}", <%= fieldName %>);<%- include('../../common/get_by_unique_template', {viaService: viaService, returnDirectly:true, fieldName: fieldName, fieldInJavaBeanMethod: fieldInJavaBeanMethod}); -%>
+    }
+
+	//@Trifon
+	/**
+	 * Get or Create <%= entityInstance %> by <%= fieldName %>.
+	 *
+	 * @return the entity.
+	 */
+	public <%= entityClass %> getOrCreate<%= entityClass %>By<%= fieldInJavaBeanMethod %>(<%= entityClass %> param<%= entityClass %>) {
+		<%= entityClass %> <%= entityInstance %> = <%= entityInstance %>Repository.findOneBy<%= fieldInJavaBeanMethod %>(param<%= entityClass %>.get<%= fieldInJavaBeanMethod %>())
+				.orElse(null);
+		if (<%= entityInstance %> == null) {
+			<%= entityInstance %> = save(param<%= entityClass %>);
+		}
+		log.debug("Trifon - <%= entityClass %>.Id = " + <%= entityInstance %>.getId());
+
+		return <%= entityInstance %>;
+	}
+
+	//@Trifon
+	private BigDecimal parseBigDecimalColumn(String[] columns, int indx) {
+		BigDecimal result = null;
+		if (columns.length > indx && columns[indx] != null && !columns[indx].isEmpty()) {
+			String contents = columns[indx];
+			contents = contents.replaceAll(" ", "");
+			contents = contents.replaceAll("\t", "");
+			if (!contents.isEmpty()) {
+				result = new BigDecimal(contents);
+			}
+		}
+		return result;
+	}
+
+	//@Trifon
+	/**
+	 * Import one <%= entityInstance %> by <%= fieldName %>.
+	 *
+	 * @param columns list of columns.
+	 * @return the entity.
+	 */
+	public <%= instanceType %> import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(String[] columns) {
+		DateTimeFormatter FMT = new DateTimeFormatterBuilder()
+			.appendPattern("yyyy-MM-dd")
+			.parseDefaulting(ChronoField.NANO_OF_DAY, 0)
+			.toFormatter()
+			.withZone(ZoneId.systemDefault()); // ZoneId.of("Europe/Sofia")
+
+<%_ for (idx2 in fields) {
+      let fieldType2 = fields[idx2].fieldType;
+      const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
+      const fieldName2 = fields[idx2].fieldName;
+      const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
+
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'text') {
+        fieldType2 = "String";
+      }
+
+      let columnValue = 'columns['+ idx2 + ']';
+      if (fieldType2.toLowerCase() === 'integer') {
+        columnValue = 'Integer.parseInt(columns['+ idx2 +'])';
+
+      } else if (fieldType2.toLowerCase() === 'long') {
+        columnValue = 'Long.parseLong(columns['+ idx2 +'])';
+
+      } else if (fieldType2.toLowerCase() === 'float') {
+        columnValue = 'Float.parseFloat(columns['+ idx2 +'])';
+
+      } else if (fieldType2.toLowerCase() === 'double') {
+        columnValue = 'Double.parseDouble(columns['+ idx2 +'])';
+
+      } else if (fieldType2.toLowerCase() === 'bigdecimal') {
+        columnValue = 'parseBigDecimalColumn(columns, '+ idx2 +')';
+
+      } else if (fieldType2.toLowerCase() === 'boolean') {
+        columnValue = 'Boolean.valueOf(columns['+ idx2 +'])';
+      } else if (fieldType2.toLowerCase() === 'instant') {
+        columnValue = 'FMT.parse(columns['+ idx2 +'], Instant::from)';
+      }
+      _%>
+		<%= fieldType2 %> <%= fieldName2 %> = null;
+		if (columns.length > <%= idx2 %>) {
+			<%= fieldName2 %> = <%= columnValue %>;
+		}
+<%_	} _%>
+
+		<%= instanceType %> <%= instanceName %> = null;
+		// +01) Search for existing <%= instanceName %> by <%= fieldName %>
+		Optional<<%= instanceType %>> optional<%= instanceType %> = findOneBy<%= fieldInJavaBeanMethod %>(<%= fieldName %>);
+		if (optional<%= instanceType %>.isPresent()) {
+			<%= instanceName %> = optional<%= instanceType %>.get();
+		} else {
+			<%= instanceName %> = new <%= instanceType %>();
+			<%= instanceName %>.set<%= fieldInJavaBeanMethod %>(<%= fieldName %>);
+			// +02) Set default values
+//			setDefaultValues(<%= instanceName %>);
+		}
+
+		// +03) Update <%= instanceName %>
+<%_ for (idx2 in fields) {
+      const fieldName2 = fields[idx2].fieldName;
+      const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
+      _%>
+		<%= instanceName %>.set<%= fieldInJavaBeanMethod2 %>(<%= fieldName2 %>);
+<%_	} _%>
+
+		return <%= instanceName %>;
+	}
+    <%_ }
+    }
+    _%>
 }

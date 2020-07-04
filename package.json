@@ -1,6 +1,6 @@
 {
-    "name": "generator-jhipster",
-    "version": "6.9.1",
+    "name": "generator-jhipster-x2",
+    "version": "6.9.1-a01",
     "description": "Spring Boot + Angular/React in one handy generator",
     "files": [
         "cli",
@@ -22,7 +22,7 @@
         "Docker"
     ],
     "homepage": "https://www.jhipster.tech/",
-    "bugs": "https://github.com/jhipster/generator-jhipster/issues",
+    "bugs": "https://github.com/trifonnt/generator-jhipster-x2/issues",
     "author": {
         "name": "Julien Dubois",
         "email": "",
@@ -34,7 +34,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git://github.com/jhipster/generator-jhipster.git"
+        "url": "git://github.com/trifonnt/generator-jhipster-x2.git"
     },
     "scripts": {
         "prettier:format": "prettier --write \"{,**/}*.{js,json,md,yml,java}\"",
