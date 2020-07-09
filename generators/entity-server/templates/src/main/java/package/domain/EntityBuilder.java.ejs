@@ -16,13 +16,17 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%=packageName%>.domain;<%
-let importApiModelProperty = false;
-let importJsonIgnore = false;
-let importJsonIgnoreProperties = false;
-let importSet = false;
-const uniqueEnums = {}; %><%- include imports -%>
+package <%= packageName %>.domain;
 
+<%_
+
+let { importApiModelProperty, importJsonIgnore, importJsonIgnoreProperties, importSet, uniqueEnums } = _processJavaEntityImports(fields, relationships);
+
+let hasDto = dto === 'mapstruct';
+let isUsingMapsId = false;
+let hasTextBlob = false;
+let hasRelationship = relationships.length !== 0;
+_%>
 <%_ if (fieldsContainInstant) { _%>
 import java.time.Instant;
 <%_ } _%>
@@ -52,6 +56,7 @@ import javax.persistence.Lob;
 import <%=packageName%>.domain.enumeration.<%= fields[idx].fieldType %>;
 <%_ } } _%>
 
+//@Trifon
 /**
  * A Builder for the <%= entityClass %> entity.
  */

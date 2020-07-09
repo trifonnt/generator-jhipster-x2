@@ -27,6 +27,7 @@ const pageOrFlux = (reactive === true) ? 'Flux' : 'Page';
 _%>
 <%_ if (dto === 'mapstruct') { _%>
 import <%= packageName %>.service.dto.<%= asDto(entityClass) %>;
+import <%= packageName %>.domain.<%= asEntity(entityClass) %>; //@Trifon
 <%_ } else { _%>
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>Builder; //@Trifon

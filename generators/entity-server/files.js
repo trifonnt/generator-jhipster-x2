@@ -135,6 +135,10 @@ const serverFiles = {
                     file: 'package/domain/Entity.java',
                     renameTo: generator => `${generator.packageFolder}/domain/${generator.asEntity(generator.entityClass)}.java`,
                 },
+                {
+                    file: 'package/domain/EntityBuilder.java',
+                    renameTo: generator => `${generator.packageFolder}/domain/${generator.asEntity(generator.entityClass)}Builder.java`,
+                }, /* Trifon */
             ],
         },
         {

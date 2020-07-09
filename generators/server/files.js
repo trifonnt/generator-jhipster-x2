@@ -1596,6 +1596,7 @@ const serverFiles = {
                     file: 'package/service/dto/package-info.java',
                     renameTo: generator => `${generator.javaDir}service/dto/package-info.java`,
                 },
+                { file: 'package/service/dto/IdArrayDTO.java', renameTo: generator => `${generator.javaDir}service/dto/IdArrayDTO.java` }, /* @Trifon */
                 {
                     file: 'package/service/dto/UserDTO.java',
                     renameTo: generator => `${generator.javaDir}service/dto/${generator.asDto('User')}.java`,
@@ -1632,6 +1633,7 @@ const serverFiles = {
                     file: 'package/web/rest/vm/ManagedUserVM.java',
                     renameTo: generator => `${generator.javaDir}web/rest/vm/ManagedUserVM.java`,
                 },
+                { file: 'package/web/AngularJsForwardController.java', renameTo: generator => `${generator.javaDir}web/AngularJsForwardController.java` }, /* @Trifon */
             ],
         },
         {
@@ -1827,6 +1829,7 @@ const serverFiles = {
                     file: 'package/service/dto/package-info.java',
                     renameTo: generator => `${generator.javaDir}service/dto/package-info.java`,
                 },
+                { file: 'package/service/dto/IdArrayDTO.java', renameTo: generator => `${generator.javaDir}service/dto/IdArrayDTO.java` }, /* @Trifon */
                 {
                     file: 'package/service/dto/UserDTO.java',
                     renameTo: generator => `${generator.javaDir}service/dto/${generator.asDto('User')}.java`,
@@ -1856,6 +1859,7 @@ const serverFiles = {
                     file: 'package/service/mapper/UserMapper.java',
                     renameTo: generator => `${generator.javaDir}service/mapper/UserMapper.java`,
                 },
+                { file: 'package/web/AngularJsForwardController.java', renameTo: generator => `${generator.javaDir}web/AngularJsForwardController.java` }, /* @Trifon */
             ],
         },
         {

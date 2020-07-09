@@ -266,14 +266,13 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     <%_ if (databaseType === 'neo4j') { _%>
     @Property("<%=fieldNameUnderscored %>")
     <%_ } _%>
+    <%_ if (fields[idx].defaultValueConstant && fields[idx].defaultValueConstant !== '') {
+        defaultValueConstant = ' = ' + fields[idx].defaultValueConstant + ';'
+      } _%>
     <%_ if (fieldTypeBlobContent !== 'text') { _%>
-    if (fields[idx].defaultValueConstant && fields[idx].defaultValueConstant !== '') {
-      defaultValueConstant = ' = ' + fields[idx].defaultValueConstant + ';'
-    }
-    _%>
     private <%= fieldType %> <%= fieldName %><%= defaultValueConstant %> //@Trifon
     <%_ } else { _%>
-    private String <%= fieldName %>;
+    private String <%= fieldName %><%= defaultValueConstant %> //@Trifon
     <%_ } _%>
 
     <%_ if ((fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent !== 'text') { _%>
