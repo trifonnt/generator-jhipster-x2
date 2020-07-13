@@ -114,6 +114,12 @@
             <column name="<%= columnName %>_content_type" type="<%= contentTypeColumnType %>">
                 <constraints nullable="<%= nullable %>" />
             </column>
+            <column name="<%= columnName %>_file_name" type="varchar(255)"><!-- @Trifon -->
+                <constraints nullable="<%= nullable %>" />
+            </column>
+            <column name="<%= columnName %>_file_size" type="bigint"><!-- @Trifon -->
+                <constraints nullable="<%= nullable %>" />
+            </column>
                 <%_ }
                 fields[idx].columnType = columnType;
             } _%>
