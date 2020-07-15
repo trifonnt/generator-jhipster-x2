@@ -316,7 +316,7 @@ public class <%= asEntity(entityClass) %> implements Serializable {
       <%_ if (databaseType === 'neo4j') { _%>
     @Property("<%=fieldNameUnderscored %>_file_size")
       <%_ } _%>
-    private long <%= fieldName %>FileSize; //@Trifon
+    private Long <%= fieldName %>FileSize; //@Trifon
 
     <%_ }
     } _%>
@@ -543,7 +543,7 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     }
 
 	//@Trifon
-    public long get<%= fieldInJavaBeanMethod %>FileSize() {
+    public Long get<%= fieldInJavaBeanMethod %>FileSize() {
         return <%= fieldName %>FileSize;
     }
     <%_ if (fluentMethods) { _%>
@@ -560,7 +560,7 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     }
 
 	//@Trifon
-    public <%= asEntity(entityClass) %> <%= fieldName %>FileSize(long <%= fieldName %>FileSize) {
+    public <%= asEntity(entityClass) %> <%= fieldName %>FileSize(Long <%= fieldName %>FileSize) {
         this.<%= fieldName %>FileSize = <%= fieldName %>FileSize;
         return this;
     }
@@ -576,7 +576,7 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     }
 
 	//@Trifon
-    public void set<%= fieldInJavaBeanMethod %>FileSize(long <%= fieldName %>FileSize) {
+    public void set<%= fieldInJavaBeanMethod %>FileSize(Long <%= fieldName %>FileSize) {
         this.<%= fieldName %>FileSize = <%= fieldName %>FileSize;
     }
     <%_ } _%>

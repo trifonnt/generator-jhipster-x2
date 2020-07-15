@@ -135,7 +135,7 @@ public class <%= asDto(entityClass) %> implements Serializable {
     <%_ if ((fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent !== 'text') { _%>
     private String <%= fieldName %>ContentType;
     private String <%= fieldName %>FileName; //@Trifon
-    private long <%= fieldName %>FileSize; //@Trifon
+    private Long <%= fieldName %>FileSize; //@Trifon
         <%_ } _%>
     <%_ } _%>
     <%_ for (idx in relationships) {
@@ -216,11 +216,11 @@ public class <%= asDto(entityClass) %> implements Serializable {
         this.<%= fieldName %>FileName = <%= fieldName %>FileName;
     }
 
-    public long get<%= fieldInJavaBeanMethod %>FileSize() {
+    public Long get<%= fieldInJavaBeanMethod %>FileSize() {
         return <%= fieldName %>FileSize;
     }
 
-    public void set<%= fieldInJavaBeanMethod %>FileSize(long <%= fieldName %>FileSize) {
+    public void set<%= fieldInJavaBeanMethod %>FileSize(Long <%= fieldName %>FileSize) {
         this.<%= fieldName %>FileSize = <%= fieldName %>FileSize;
     }
         <%_ } _%>
