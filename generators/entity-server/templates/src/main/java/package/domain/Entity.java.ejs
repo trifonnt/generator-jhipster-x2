@@ -178,8 +178,13 @@ public class <%= asEntity(entityClass) %> implements Serializable {
         <%_ if (prodDatabaseType === 'mysql' || prodDatabaseType === 'mariadb') { _%>
     @GeneratedValue(strategy = GenerationType.IDENTITY)
         <%_ }  else { _%>
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
+//@Trifon
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+//    @SequenceGenerator(name = "sequenceGenerator")
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "<%= entityTableName %>_id_generator")
+    @TableGenerator(name = "<%= entityTableName %>_id_generator"
+    	, table = "identifier", pkColumnName = "sequence_name"
+    	, valueColumnName = "next_value", pkColumnValue = "<%= entityTableName %>_ids")
         <%_ } _%>
     <%_ } _%>
     <%_ if (databaseType === 'couchbase' && !embedded) { _%>
