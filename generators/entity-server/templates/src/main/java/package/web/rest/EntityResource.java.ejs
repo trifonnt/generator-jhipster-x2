@@ -158,6 +158,7 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 <%_ if (databaseType === 'sql' && !viaService && !saveUserSnapshot) { _%>
 @Transactional
 <%_ } _%>
+@Api(tags={"<%= entityApiUrl %>"}) //@Trifon
 public class <%= entityClass %>Resource {
 
     private final Logger log = LoggerFactory.getLogger(<%= entityClass %>Resource.class);

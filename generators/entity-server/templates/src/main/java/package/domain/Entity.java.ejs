@@ -184,7 +184,7 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "<%= entityTableName %>_id_generator")
     @TableGenerator(name = "<%= entityTableName %>_id_generator"
     	, table = "identifier", pkColumnName = "sequence_name"
-    	, valueColumnName = "next_value", pkColumnValue = "<%= entityTableName %>_ids")
+    	, valueColumnName = "next_value", pkColumnValue = "<%= entityTableName %>_ids", allocationSize = 1)
         <%_ } _%>
     <%_ } _%>
     <%_ if (databaseType === 'couchbase' && !embedded) { _%>
