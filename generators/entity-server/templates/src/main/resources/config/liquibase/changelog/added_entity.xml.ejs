@@ -191,7 +191,8 @@
         <loadData
                   file="config/liquibase/fake-data/<%= entityTableName %>.csv"
                   separator=";"
-                  tableName="<%= entityTableName %>">
+                  tableName="<%= entityTableName %>"
+                  commentLineStartsWith="#">
             <column name="id" type="numeric"/>
             <%_ for (idx in fields) {
                 let loadColumnType = 'string';
