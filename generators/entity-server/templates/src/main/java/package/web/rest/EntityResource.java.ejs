@@ -131,6 +131,7 @@ import java.util.LinkedList;
 <%_ if (pagination !== 'no' && reactive) { _%>
 import java.util.ArrayList;
 <%_ } _%>
+import java.util.Map; //@Trifon
 import java.util.List;
 <%_ if (isUsingMapsId === true) { _%>
 import java.util.Objects;
@@ -511,16 +512,24 @@ public class <%= entityClass %>Resource {
 
 				int numImportedRecords = 0;
 				boolean isFirstLine = true;
+				boolean useMapMethodForImport = false;
 				String strLine;
 				// Read file line by line
 				while ((strLine = buffReader.readLine()) != null) {
 					if (isFirstLine) {  // TODO - Add it as parameter of REST request.
 						isFirstLine = false;
+					} else if (strLine.startsWith("#")) {
+						useMapMethodForImport = true;
 					} else {
 						String[] columns = strLine.split(";"); // TODO - Add separator as parameter of REST request.
-
-						<%= instanceType %> <%= instanceName %> = <%= entityInstance %>Service.import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(columns);
-
+						<%= instanceType %> <%= instanceName %> = null;
+						
+						if (useMapMethodForImport) {
+							Map<String, String> columnNameValueMap = <%= entityInstance %>Service.columnsToNameValueMap(columns);
+							<%= instanceName %> = <%= entityInstance %>Service.import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(columnNameValueMap);
+						} else {
+							<%= instanceName %> = <%= entityInstance %>Service.import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(columns);
+						}
 						<%= instanceName %> = <%= entityInstance %>Service.save(<%= instanceName %>);
 
 						numImportedRecords = numImportedRecords + 1;

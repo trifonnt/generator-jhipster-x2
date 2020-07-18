@@ -81,6 +81,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 <%_ } _%>
 
+import java.util.Map; //@Trifon
+import java.util.HashMap; //@Trifon
 <%_ if (dto === 'mapstruct' && (pagination === 'no' ||  fieldsContainNoOwnerOneToOne === true)) { _%>
 import java.util.LinkedList;
 <%_ } _%>
@@ -264,11 +266,32 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
     }
     <%_ } _%>
 
+	//@Trifon
+	public Map<String, String> columnsToNameValueMap(String[] columns) {
+		Map<String, String> result = new HashMap<>();
+
+		if (columns.length > 0) {
+			result.put("id", columns[0]);
+		}
+<%_ var index = 0;
+    for (idx in fields) {
+      const fieldName = fields[idx].fieldName;
+      index = index + 1;
+      _%>
+		if (columns.length > <%= index %>) {
+			result.put("<%= fieldName %>", columns[<%= index %>]);
+		}
+<%_	} _%>
+
+		return result;
+	}
+
 <%_ for (idx in fields) {
       const fieldType = fields[idx].fieldType;
       const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
       const fieldName = fields[idx].fieldName;
       const fieldInJavaBeanMethod = fields[idx].fieldInJavaBeanMethod;
+
       if (fields[idx].fieldValidate === true && fields[idx].fieldValidateRules.includes('unique')) { _%>
     //@Trifon
     /**
@@ -367,6 +390,90 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 		<%= fieldType2 %> <%= fieldName2 %> = null;
 		if (columns.length > <%= idx2 %>) {
 			<%= fieldName2 %> = <%= columnValue %>;
+		}
+<%_	} _%>
+
+		<%= instanceType %> <%= instanceName %> = null;
+		// +01) Search for existing <%= instanceName %> by <%= fieldName %>
+		Optional<<%= instanceType %>> optional<%= instanceType %> = findOneBy<%= fieldInJavaBeanMethod %>(<%= fieldName %>);
+		if (optional<%= instanceType %>.isPresent()) {
+			<%= instanceName %> = optional<%= instanceType %>.get();
+		} else {
+			<%= instanceName %> = new <%= instanceType %>();
+			<%= instanceName %>.set<%= fieldInJavaBeanMethod %>(<%= fieldName %>);
+			// +02) Set default values
+//			setDefaultValues(<%= instanceName %>);
+		}
+
+		// +03) Update <%= instanceName %>
+<%_ for (idx2 in fields) {
+      const fieldName2 = fields[idx2].fieldName;
+      const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
+      _%>
+		<%= instanceName %>.set<%= fieldInJavaBeanMethod2 %>(<%= fieldName2 %>);
+<%_	} _%>
+
+		return <%= instanceName %>;
+	}
+
+	//@Trifon
+	/**
+	 * Import one <%= entityInstance %> by <%= fieldName %>.
+	 *
+	 * @param columnsMap map of column name and value.
+	 * @return the entity.
+	 */
+	public <%= instanceType %> import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(Map<String, String> columnsMap) {
+		DateTimeFormatter FMT = new DateTimeFormatterBuilder()
+			.appendPattern("yyyy-MM-dd")
+			.parseDefaulting(ChronoField.NANO_OF_DAY, 0)
+			.toFormatter()
+			.withZone(ZoneId.systemDefault()); // ZoneId.of("Europe/Sofia")
+
+<%_ for (idx2 in fields) {
+      let fieldType2 = fields[idx2].fieldType;
+      const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
+      const fieldName2 = fields[idx2].fieldName;
+      const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
+
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'text') {
+        fieldType2 = "String";
+      }
+
+      let prefix = "";
+      let suffix = "";
+      if (fieldType2.toLowerCase() === 'integer') {
+        prefix = "Integer.parseInt(";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'long') {
+        prefix = "Long.parseLong(";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'float') {
+        prefix = "Float.parseFloat(";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'double') {
+        prefix = "Double.parseDouble(";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'bigdecimal') {
+        prefix = "parseBigDecimalColumn(columns, ";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'boolean') {
+        prefix = "Boolean.valueOf(";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'instant') {
+        prefix = "FMT.parse(";
+        suffix = "), Instant::from)";
+      }
+      _%>
+		<%= fieldType2 %> <%= fieldName2 %> = null;
+		if (columnsMap.containsKey("<%= fieldName2 %>")) {
+			<%= fieldName2 %> = <%= prefix %>columnsMap.get("<%= fieldName2 %>")<%= suffix %>;
 		}
 <%_	} _%>
 

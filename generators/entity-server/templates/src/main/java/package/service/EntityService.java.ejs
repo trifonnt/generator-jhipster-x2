@@ -44,6 +44,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 <%_ } _%>
 
+import java.util.Map; //@Trifon
 <%_ if (pagination === 'no' || fieldsContainNoOwnerOneToOne === true) { _%>
 import java.util.List;
 <%_ } _%>
@@ -143,6 +144,9 @@ public interface <%= entityClass %>Service {
      */
     <% if (pagination !== 'no') { %><%= pageOrFlux %><<%= instanceType %><% } else { %><%= listOrFlux %><<%= instanceType %><% } %>> search(String query<% if (pagination !== 'no') { %>, Pageable pageable<% } %>);<% } %>
 
+	//@Trifon
+	public Map<String, String> columnsToNameValueMap(String[] columns);
+
 <%_ for (idx in fields) {
       const fieldType = fields[idx].fieldType;
       const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
@@ -174,7 +178,14 @@ public interface <%= entityClass %>Service {
      * @return the entity
      */
     <%= instanceType %> import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(String[] columns);
-
+	//@Trifon
+	/**
+	 * Import one <%= entityInstance %> by <%= fieldName %>.
+	 *
+	 * @param columns Map of column name and value
+	 * @return the entity
+	 */
+	<%= instanceType %> import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(Map<String, String> columnsMap);
     <%_ }
     } _%>
 }
