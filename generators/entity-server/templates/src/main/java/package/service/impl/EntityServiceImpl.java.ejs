@@ -340,6 +340,18 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 		}
 		return result;
 	}
+	//@Trifon
+	private BigDecimal parseBigDecimalColumn(String str) {
+		BigDecimal result = null;
+		if (str != null && !str.isEmpty()) {
+			String contents = str.replaceAll(" ", "");
+			contents = contents.replaceAll("\t", "");
+			if (!contents.isEmpty()) {
+				result = new BigDecimal(contents);
+			}
+		}
+		return result;
+	}
 
 	//@Trifon
 	/**
@@ -425,8 +437,8 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 	 */
 	public <%= instanceType %> import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(Map<String, String> columnsMap) {
 		DateTimeFormatter FMT = new DateTimeFormatterBuilder()
-			.appendPattern("yyyy-MM-dd")
-			.parseDefaulting(ChronoField.NANO_OF_DAY, 0)
+			.appendPattern("yyyy-MM-dd'T'HH:mm:ss") //@Trifon; old: "yyyy-MM-dd"
+//			.parseDefaulting(ChronoField.NANO_OF_DAY, 0) // @Trifon
 			.toFormatter()
 			.withZone(ZoneId.systemDefault()); // ZoneId.of("Europe/Sofia")
 
@@ -459,7 +471,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
         suffix = ")";
 
       } else if (fieldType2.toLowerCase() === 'bigdecimal') {
-        prefix = "parseBigDecimalColumn(columns, ";
+        prefix = "parseBigDecimalColumn(";
         suffix = ")";
 
       } else if (fieldType2.toLowerCase() === 'boolean') {
@@ -468,7 +480,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 
       } else if (fieldType2.toLowerCase() === 'instant') {
         prefix = "FMT.parse(";
-        suffix = "), Instant::from)";
+        suffix = ", Instant::from)";
       }
       _%>
 		<%= fieldType2 %> <%= fieldName2 %> = null;

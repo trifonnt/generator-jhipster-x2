@@ -19,8 +19,8 @@ import io.github.jhipster.service.filter.BigDecimalFilter;
 <%_ if (fieldsContainDuration === true) { _%>
 import io.github.jhipster.service.filter.DurationFilter;
 <%_ } _%>
-<%_ if (fieldsContainInstant === true) { _%>
-import io.github.jhipster.service.filter.InstantFilter;
+<%_ if (true === true) { _%>
+import io.github.jhipster.service.filter.InstantFilter; //@Trifon
 <%_ } _%>
 <%_ if (fieldsContainLocalDate === true) { _%>
 import io.github.jhipster.service.filter.LocalDateFilter;
@@ -104,6 +104,14 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
 
     private <%- filterVariable.filterType %> <%= filterVariable.name %>;
 <%_ }); _%>
+    //@Trifon
+    private StringFilter createdBy;
+    //@Trifon
+    private StringFilter lastModifiedBy;
+    //@Trifon
+    private InstantFilter createdDate;
+    //@Trifon
+    private InstantFilter lastModifiedDate;
 
     public <%= entityClass %>Criteria() {
     }
@@ -112,6 +120,10 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
 <%_ filterVariables.forEach((filterVariable) => { _%>
         this.<%= filterVariable.name %> = other.<%= filterVariable.name %> == null ? null : other.<%= filterVariable.name %>.copy();
 <%_ }); _%>
+        this.createdBy = other.createdBy == null ? null : other.createdBy.copy();
+        this.lastModifiedBy = other.lastModifiedBy == null ? null : other.lastModifiedBy.copy();
+        this.createdDate = other.createdDate == null ? null : other.createdDate.copy();
+        this.lastModifiedDate = other.lastModifiedDate == null ? null : other.lastModifiedDate.copy();
     }
 
     @Override
@@ -129,6 +141,34 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
     }
 
 <%_ }); _%>
+    //@Trifon
+    public StringFilter getCreatedBy() {
+		return createdBy;
+	}
+	public void setCreatedBy(StringFilter createdBy) {
+		this.createdBy = createdBy;
+	}
+	//@Trifon
+	public StringFilter getLastModifiedBy() {
+		return lastModifiedBy;
+	}
+	public void setLastModifiedBy(StringFilter lastModifiedBy) {
+		this.lastModifiedBy = lastModifiedBy;
+	}
+	//@Trifon
+	public InstantFilter getCreatedDate() {
+		return createdDate;
+	}
+	public void setCreatedDate(InstantFilter createdDate) {
+		this.createdDate = createdDate;
+	}
+	//@Trifon
+	public InstantFilter getLastModifiedDate() {
+		return lastModifiedDate;
+	}
+	public void setLastModifiedDate(InstantFilter lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
+	}
 
     @Override
     public boolean equals(Object o) {
@@ -142,7 +182,12 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
         return
 <%_ filterVariables.forEach((filterVariable, index) => { _%>
     <%_ if (filterVariables.length === index + 1) { _%>
-            Objects.equals(<%= filterVariable.name %>, that.<%= filterVariable.name %>);
+            Objects.equals(<%= filterVariable.name %>, that.<%= filterVariable.name %>)
+           && Objects.equals(createdBy, that.createdBy) && //@Trifon
+            Objects.equals(lastModifiedBy, that.lastModifiedBy) && //@Trifon
+            Objects.equals(createdDate, that.createdDate) && //@Trifon
+            Objects.equals(lastModifiedDate, that.lastModifiedDate) //@Trifon
+            ;
     <%_ } else { _%>
             Objects.equals(<%= filterVariable.name %>, that.<%= filterVariable.name %>) &&
     <%_ } _%>
@@ -155,6 +200,10 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
 <%_ filterVariables.forEach((filterVariable, index) => { _%>
     <%_ if (filterVariables.length === (index + 1)) { _%>
         <%= filterVariable.name %>
+		, createdBy // @Trifon
+		, lastModifiedBy //@Trifon
+		, createdDate //@Trifon
+		, lastModifiedDate //@Trifon
     <%_ } else { _%>
         <%= filterVariable.name %>,
     <%_ } _%>
@@ -169,6 +218,10 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
 <%_ filterVariables.forEach((field) => { _%>
                 (<%= field.name %> != null ? "<%= field.name %>=" + <%= field.name %> + ", " : "") +
 <%_ }); _%>
+            (createdBy != null ? "createdBy=" + createdBy + ", " : "") +
+            (lastModifiedBy != null ? "lastModifiedBy=" + lastModifiedBy + ", " : "") +
+            (createdDate != null ? "createdDate=" + createdDate + ", " : "") +
+            (lastModifiedDate != null ? "lastModifiedDate=" + lastModifiedDate + ", " : "") +
             "}";
     }
 

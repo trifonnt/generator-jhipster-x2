@@ -141,6 +141,19 @@ public class <%= serviceClassName %> extends QueryService<<%= asEntity(entityCla
             }
             <%_ }); // forEach
         _%>
+			//@Trifon - EntityAudit
+			if (criteria.getCreatedBy() != null) {
+				specification = specification.and(buildStringSpecification(criteria.getCreatedBy(), <%= asEntity(entityClass) %>_.createdBy));
+			}
+			if (criteria.getCreatedDate() != null) {
+				specification = specification.and(buildRangeSpecification(criteria.getCreatedDate(), <%= asEntity(entityClass) %>_.createdDate));
+			}
+			if (criteria.getLastModifiedBy()!= null) {
+				specification = specification.and(buildStringSpecification(criteria.getLastModifiedBy(), <%= asEntity(entityClass) %>_.lastModifiedBy));
+			}
+			if (criteria.getLastModifiedDate() != null) {
+				specification = specification.and(buildRangeSpecification(criteria.getLastModifiedDate(), <%= asEntity(entityClass) %>_.lastModifiedDate));
+			}
         }
         return specification;
     }
