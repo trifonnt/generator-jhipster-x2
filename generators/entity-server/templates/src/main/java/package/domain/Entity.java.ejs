@@ -349,8 +349,8 @@ public class <%= asEntity(entityClass) %> implements Serializable {
         if (relationshipType === 'many-to-one') {
             if (databaseType === 'sql') { _%>
 		if (<%= relationshipName %> != null) {
-			System.err.println("TRIFON - PreRemove -- <%= entityClass %>");
-			<%= relationshipName %>.remove<%= entityClass %>(this);
+//			System.err.println("TRIFON - PreRemove -- <%= entityClass %>");
+//			<%= relationshipName %>.remove<%= entityClass %>(this);
 		}
     <%_ } } } _%>
 	}

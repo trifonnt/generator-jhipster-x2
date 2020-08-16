@@ -19,12 +19,15 @@
 package <%= packageName %>.service.dto;
 
 <%_
-let { importApiModelProperty, importJsonIgnore, importJsonIgnoreProperties, importSet, uniqueEnums } = _processJavaEntityImports(fields, relationships);
+let { importApiModelProperty, importJsonIgnore, importJsonIgnoreProperties, importSet, uniqueEnums } = _processJavaEntityImportsTrifon(fields, relationships);
 _%>
 <%_ if (typeof javadoc != 'undefined') { _%>
 import io.swagger.annotations.ApiModel;
 <%_ } if (importApiModelProperty === true) { _%>
 import io.swagger.annotations.ApiModelProperty;
+<%_ } _%>
+<%_ if (importJsonIgnoreProperties) { _%>
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties; //@Trifon
 <%_ } _%>
 <%_ if (fieldsContainInstant) { _%>
 import java.time.Instant;
@@ -48,7 +51,7 @@ import java.math.BigDecimal;
 <%_ if (fieldsContainBlob && databaseType === 'cassandra') { _%>
 import java.nio.ByteBuffer;
 <%_ } _%>
-<%_ if (fieldsContainOwnerManyToMany || fieldsContainEmbedded) { _%>
+<%_ if (fieldsContainOwnerManyToMany || fieldsContainEmbedded || importSet) { _%>
 import java.util.HashSet;
 import java.util.Set;
 <%_ } _%>
@@ -147,12 +150,17 @@ public class <%= asDto(entityClass) %> implements Serializable {
         const otherEntityFieldCapitalized = relationships[idx].otherEntityFieldCapitalized;
         const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
         const ownerSide = relationships[idx].ownerSide;
+        const includeAsObjectInDTO = relationships[idx].includeAsObjectInDTO; //@Trifon
         if (typeof relationships[idx].javadoc != 'undefined') { _%>
 <%- formatAsFieldJavadoc(relationships[idx].javadoc) %>
     @ApiModelProperty(value = "<%- formatAsApiDescription(relationships[idx].javadoc) %>")
     <%_ }
         if ((relationshipType === 'many-to-many' && ownerSide === true)
+            || (relationshipType === 'one-to-many' && includeAsObjectInDTO) //@Trifon
             || (relationshipType === 'one-to-many' && otherEntityIsEmbedded)) { _%>
+    <%_ if (relationshipType === 'one-to-many' && includeAsObjectInDTO) { _%>
+    @JsonIgnoreProperties(value = {"???"}) // @Trifon - semi-manual
+    <%_ } _%>
     private Set<<%= asDto(otherEntityNameCapitalized) %>> <%= relationshipFieldNamePlural %> = new HashSet<>();
     <%_ } else if (relationshipType === 'one-to-one' && ownerSide === true && otherEntityIsEmbedded) { _%>
     private <%= asDto(otherEntityNameCapitalized) %> <%= relationshipFieldName %>;
@@ -208,9 +216,9 @@ public class <%= asDto(entityClass) %> implements Serializable {
         return <%= fieldName %>FileName;
     }
 
-    public boolean is<%= fieldInJavaBeanMethod %>Multiple() {
-        return false;
-    }
+//    public boolean is<%= fieldInJavaBeanMethod %>Multiple() {
+//        return false;
+//    }
 
     public void set<%= fieldInJavaBeanMethod %>FileName(String <%= fieldName %>FileName) {
         this.<%= fieldName %>FileName = <%= fieldName %>FileName;
@@ -238,7 +246,9 @@ public class <%= asDto(entityClass) %> implements Serializable {
         const relationshipNameCapitalized = relationships[idx].relationshipNameCapitalized;
         const relationshipNameCapitalizedPlural = relationships[idx].relationshipNameCapitalizedPlural;
         const ownerSide = relationships[idx].ownerSide;
+        const includeAsObjectInDTO = relationships[idx].includeAsObjectInDTO; //@Trifon
         if ((relationshipType === 'many-to-many' && ownerSide === true)
+                || (relationshipType === 'one-to-many' && includeAsObjectInDTO) //@Trifon
                 || (relationshipType === 'one-to-many' && otherEntityIsEmbedded)) { _%>
 
     public Set<<%= asDto(otherEntityNameCapitalized) %>> get<%= relationshipNameCapitalizedPlural %>() {
@@ -330,8 +340,10 @@ public class <%= asDto(entityClass) %> implements Serializable {
                 const otherEntityFieldCapitalized = relationships[idx].otherEntityFieldCapitalized;
                 const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
                 const otherEntityPrimaryKeyType = relationships[idx].otherEntityPrimaryKeyType;
-                const ownerSide = relationships[idx].ownerSide; _%>
+                const ownerSide = relationships[idx].ownerSide;
+                const includeAsObjectInDTO = relationships[idx].includeAsObjectInDTO; //@Trifon _%>
                 <%_ if ((relationshipType === 'many-to-many' && ownerSide === true)
+                        || (relationshipType === 'one-to-many' && includeAsObjectInDTO) //@Trifon
                         || (relationshipType === 'one-to-many' && otherEntityIsEmbedded)) { _%>
             ", <%= relationshipFieldNamePlural %>='" + get<%= relationshipNameCapitalizedPlural %>() + "'" +
                 <%_ } else if (relationshipType === 'one-to-one' && ownerSide === true && otherEntityIsEmbedded) { _%>

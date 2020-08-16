@@ -292,6 +292,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
                     context.fields = [];
                     context.haveFieldWithJavadoc = false;
                     context.relationships = [];
+                    context.multiUniqueConstraints = []; //@Trifon
                     context.pagination = 'no';
                     context.validation = false;
                     context.dto = 'no';
@@ -360,6 +361,10 @@ class EntityGenerator extends BaseBlueprintGenerator {
             askForFieldsToRemove: prompts.askForFieldsToRemove,
             askForRelationships: prompts.askForRelationships,
             askForRelationsToRemove: prompts.askForRelationsToRemove,
+
+            askForMultiUniqueConstraints: prompts.askForMultiUniqueConstraints, //@Trifon
+            askForMultiUniqueConstraintsToRemove: prompts.askForMultiUniqueConstraintsToRemove, //@Trifon
+
             askForTableName: prompts.askForTableName,
             askForService: prompts.askForService,
             askForDTO: prompts.askForDTO,
@@ -570,6 +575,23 @@ class EntityGenerator extends BaseBlueprintGenerator {
                         relationship.otherEntityField = 'id';
                     }
 
+                    // @Trifon
+                    if (
+                        _.isUndefined(relationship.includeAsObjectInDTO) &&
+                        (
+                            (relationship.relationshipType === 'one-to-many')
+                        )
+                    ) {
+                        this.warning(
+                            `includeAsObjectInDTO is missing in .jhipster/${entityName}.json for relationship ${JSON.stringify(
+                                relationship,
+                                null,
+                                4
+                            )}, using FALSE as fallback`
+                        );
+                        relationship.includeAsObjectInDTO = false;
+                    }
+                    
                     if (_.isUndefined(relationship.relationshipType)) {
                         this.error(
                             chalk.red(
@@ -644,6 +666,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 storageData.clientRootFolder = context.clientRootFolder;
                 storageData.relationships = context.relationships;
                 storageData.fields = context.fields;
+                storageData.multiUniqueConstraints = context.multiUniqueConstraints; //@Trifon
                 storageData.changelogDate = context.changelogDate;
                 storageData.dto = context.dto;
                 storageData.searchEngine = context.searchEngine;
@@ -737,6 +760,10 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 context.differentTypes = [context.entityClass];
                 if (!context.relationships) {
                     context.relationships = [];
+                }
+                //@Trifon
+                if (!context.multiUniqueConstraints) {
+                    context.multiUniqueConstraints = [];
                 }
                 context.differentRelationships = {};
                 context.i18nToLoad = [context.entityInstance];

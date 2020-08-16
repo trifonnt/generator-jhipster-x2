@@ -28,7 +28,7 @@ const path = require('path');
 const { normalizeBlueprintName, packageNameToNamespace, loadYoRc, loadBlueprintsFromConfiguration } = require('../generators/utils');
 
 const CLI_NAME = 'jhipster';
-const GENERATOR_NAME = 'generator-jhipster-x2'; //@Trifon
+const GENERATOR_NAME = 'generator-jhipster'; //@Trifon
 
 const SUCCESS_MESSAGE = 'Congratulations, JHipster execution is complete!';
 
@@ -224,6 +224,7 @@ const createYeomanEnv = packagePatterns => {
     // Register jhipster generators.
     const registeredGenerators = env.lookup({ packagePaths: [path.join(__dirname, '..')] });
     registeredGenerators.forEach(generator => {
+    	logger.info('TRIFON - '+`${CLI_NAME}:`+'; generator.namespace = ' + chalk.green.bold(generator.namespace));
         assert(
             generator.namespace.startsWith(`${CLI_NAME}:`),
             `Error on the registered namespace ${generator.namespace}, make sure your folder is called generator-jhipster.`

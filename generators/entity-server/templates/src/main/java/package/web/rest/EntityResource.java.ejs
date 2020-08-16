@@ -460,7 +460,7 @@ public class <%= entityClass %>Resource {
     //   Delete multiple records using REST
     // - https://stackoverflow.com/questions/21863326/delete-multiple-records-using-rest
     @DeleteMapping("/<%= entityApiUrl %>")
-    public ResponseEntity<Void> delete<%= entityClassPlural %>(@Valid @RequestBody IdArrayDTO idArrayDTO) {
+    public ResponseEntity<Void> deleteMultiple<%= entityClassPlural %>(@Valid @RequestBody IdArrayDTO idArrayDTO) {
         log.debug("REST request to delete MULTIPLE <%= entityClassPlural %> : {}", idArrayDTO);
         for (Long id : idArrayDTO.getIds()) {
     <%- include('../../common/delete_template', {viaService: viaService}); -%>

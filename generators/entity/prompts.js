@@ -33,6 +33,10 @@ module.exports = {
     askForFieldsToRemove,
     askForRelationships,
     askForRelationsToRemove,
+
+    askForMultiUniqueConstraints, //@Trifon - multi-unique constraints
+    askForMultiUniqueConstraintsToRemove, //@Trifon - multi-unique constraints
+
     askForTableName,
     askForDTO,
     askForService,
@@ -125,6 +129,16 @@ function askForUpdate() {
                     value: 'remove',
                     name: 'Yes, remove fields and relationships',
                 },
+                //@Trifon - TODO - Add Multi-Unique constraint
+                {
+                    value: 'addMultiUniqueConstraint',
+                    name: 'Yes, add multi-unique constraint',
+                },
+                {
+                    value: 'removeMultiUniqueConstraint',
+                    name: 'Yes, remove multi-unique constraint',
+                },
+
                 {
                     value: 'none',
                     name: 'No, exit',
@@ -250,6 +264,66 @@ function askForRelationsToRemove() {
         done();
     });
 }
+
+//@Trifon-begin - multi-unique constraints
+function askForMultiUniqueConstraints() {
+    const context = this.context;
+
+//    this.log(`TRIFON - askForMultiUniqueConstraints - updateEntity = ${context.updateEntity}.\n`);
+    
+    // don't prompt if data is imported from a file
+    if (context.useConfigurationFile && context.updateEntity !== 'addMultiUniqueConstraint') {
+        return;
+    }
+    if (context.databaseType === 'cassandra') {
+        return;
+    }
+
+    const done = this.async();
+
+    askForMultiUniqueConstraint.call(this, done);
+}
+function askForMultiUniqueConstraintsToRemove() {
+    const context = this.context;
+    // prompt only if data is imported from a file
+    if (!context.useConfigurationFile || context.updateEntity !== 'removeMultiUniqueConstraint' || context.multiUniqueConstraintChoices.length === 0) {
+        return;
+    }
+    if (context.databaseType === 'cassandra') {
+        return;
+    }
+
+    const done = this.async();
+
+    const prompts = [
+        {
+            type: 'checkbox',
+            name: 'mUniquesToRemove',
+            message: 'Please choose the multi-unique constraints you want to remove',
+            choices: context.multiUniqueConstraintChoices,
+        },
+        {
+            when: response => response.mUniquesToRemove.length !== 0,
+            type: 'confirm',
+            name: 'confirmRemove',
+            message: 'Are you sure to remove these multi-unique constraints?',
+            default: true,
+        },
+    ];
+    this.prompt(prompts).then(props => {
+        if (props.confirmRemove) {
+            this.log(chalk.red(`\nRemoving multi-unique relationships: ${props.mUniquesToRemove}\n`));
+            for (let i = context.multiUniqueConstraints.length - 1; i >= 0; i -= 1) {
+                const mUnique = context.multiUniqueConstraints[i];
+                if (props.mUniquesToRemove.filter(val => val === `${mUnique.constraintName}`).length > 0) {
+                    context.multiUniqueConstraints.splice(i, 1);
+                }
+            }
+        }
+        done();
+    });
+}
+//@Trifon-end - multi-unique constraints
 
 function askForTableName() {
     const context = this.context;
@@ -505,6 +579,36 @@ function askForField(done) {
             },
             message: 'What is the name of your field?',
         },
+        //@Trifon-begin
+        {
+            when: response => response.fieldAdd === true,
+            type: 'input',
+            name: 'visibleForRole',
+            message: 'What roles is this field visible for? String with commas, no spaces',
+            default: "ROLE_USER,ROLE_ADMIN"
+        },
+        {
+            when: response => response.fieldAdd === true,
+            type: 'confirm',
+            name: 'visibleInTableMode',
+            message: "Do you want this field to be visible in the entity's table",
+            default: true,
+        },
+        {
+            when: response => response.fieldAdd === true,
+            type: 'input',
+            name: 'readOnlyForRole',
+            message: 'What roles is this field read only for? String with commas, no spaces',
+            default: false,
+        },
+        {
+            when: response => response.fieldAdd === true,
+            type: 'input',
+            name: 'defaultValueConstant',
+            message: 'Default value of your field if any? Boolean.TRUE/Boolean.FALSE/Integer.MAX_VALUE/new Integer("0")/java.util.UUID.randomUUID().toString()',
+            default: false,
+        },
+        //@Trifon-end
         {
             when: response => response.fieldAdd === true && (skipServer || ['sql', 'mongodb', 'neo4j', 'couchbase'].includes(databaseType)),
             type: 'list',
@@ -716,6 +820,22 @@ function askForField(done) {
             ],
             default: 0,
         },
+        //@Trifon-begin
+        {
+            when: response => response.fieldAdd === true && response.fieldTypeBlobContent === 'image',
+            type: 'input',
+            name: 'maxFileSize',
+            message: 'What is the max file size?',
+            default: 10,
+        },
+        {
+            when: response => response.fieldAdd === true && response.fieldTypeBlobContent === 'image',
+            type: 'input',
+            name: 'contentType',
+            message: 'What files should be accepted, please separate them with a comma, no space?',
+            default: "image/*,.pdf",
+        },
+        //@Trifon-end
         {
             when: response => response.fieldAdd === true && response.fieldType === 'ByteBuffer',
             type: 'list',
@@ -877,7 +997,11 @@ function askForField(done) {
 
             const field = {
                 fieldName: props.fieldName,
+                visibleForRole: props.visibleForRole, //@Trifon
+                readOnlyForRole: props.readOnlyForRole, //@Trifon
+                defaultValueConstant: props.defaultValueConstant, //@Trifon
                 fieldType: props.fieldType,
+                visibleInTableMode: props.visibleInTableMode, //@Trifon
                 fieldTypeBlobContent: props.fieldTypeBlobContent,
                 fieldValues: props.fieldValues,
                 fieldValidateRules: props.fieldValidateRules,
@@ -888,6 +1012,8 @@ function askForField(done) {
                 fieldValidateRulesMax: props.fieldValidateRulesMax,
                 fieldValidateRulesMinbytes: props.fieldValidateRulesMinbytes,
                 fieldValidateRulesMaxbytes: props.fieldValidateRulesMaxbytes,
+                maxFileSize: props.maxFiles, //@Trifon
+                contentType: props.contentType, //@Trifon
             };
 
             fieldNamesUnderscored.push(_.snakeCase(props.fieldName));
@@ -917,6 +1043,22 @@ function askForRelationship(done) {
             message: 'Do you want to add a relationship to another entity?',
             default: true,
         },
+        //@Trifon-begin
+        {
+            when: response => response.relationshipAdd === true,
+            type: 'input',
+            name: 'visibleForRole',
+            message: 'What roles is this field visible for? String with commas, no spaces',
+            default: "ROLE_USER,ROLE_ADMIN",
+        },
+        {
+            when: response => response.relationshipAdd === true,
+            type: 'input',
+            name: 'readOnlyForRole',
+            message: 'What roles is this field read only for? String with commas, no spaces',
+            default: false,
+        },
+        //@Trifon-end
         {
             when: response => response.relationshipAdd === true,
             type: 'input',
@@ -1037,6 +1179,33 @@ function askForRelationship(done) {
                 `When you display this relationship on client-side, which field from '${response.otherEntityName}' do you want to use? This field will be displayed as a String, so it cannot be a Blob`,
             default: 'id',
         },
+        //@Trifon
+        {
+            when: response =>
+                response.relationshipAdd === true &&
+                (response.relationshipType === 'many-to-one' || response.relationshipType === 'one-to-many' ||
+                    (response.relationshipType === 'many-to-many' && response.ownerSide === true) ||
+                    (response.relationshipType === 'one-to-one' && response.ownerSide === true)),
+            type: 'input',
+            name: 'otherEntityField2',
+            message: response =>
+                `When you display this relationship on client-side, which SECOND field from '${
+                    response.otherEntityName
+                }' do you want to use? This field will be displayed as a String, so it cannot be a Blob`,
+            default: '',
+        },
+        {
+            when: response =>
+                response.relationshipAdd === true &&
+                (
+                    (response.relationshipType === 'one-to-many')
+                ),
+            type: 'confirm',
+            name: 'includeAsObjectInDTO',
+            message: response =>
+                `Do you want to include this relationship as Object in DTO?`,
+            default: false
+        },
         {
             when: response =>
                 response.relationshipAdd === true &&
@@ -1069,10 +1238,15 @@ function askForRelationship(done) {
         if (props.relationshipAdd) {
             const relationship = {
                 relationshipName: props.relationshipName,
+                visibleInTableMode: props.visibleInTableMode, //@Trifon
+                visibleForRole: props.visibleForRole, //@Trifon
+                readOnlyForRole: props.readOnlyForRole, //@Trifon
                 otherEntityName: _.lowerFirst(props.otherEntityName),
                 relationshipType: props.relationshipType,
                 relationshipValidateRules: props.relationshipValidateRules,
                 otherEntityField: props.otherEntityField,
+                otherEntityField2: props.otherEntityField2, //@Trifon
+                includeAsObjectInDTO: props.includeAsObjectInDTO, //@Trifon
                 ownerSide: props.ownerSide,
                 useJPADerivedIdentifier: props.useJPADerivedIdentifier,
                 otherEntityRelationshipName: props.otherEntityRelationshipName,
@@ -1081,6 +1255,8 @@ function askForRelationship(done) {
             if (props.otherEntityName.toLowerCase() === 'user') {
                 relationship.ownerSide = true;
                 relationship.otherEntityField = 'login';
+                relationship.otherEntityField2 = '';  //@Trifon
+                relationship.includeAsObjectInDTO = false; //@Trifon
                 relationship.otherEntityRelationshipName = _.lowerFirst(name);
             }
 
@@ -1097,6 +1273,85 @@ function askForRelationship(done) {
     });
 }
 
+//@Trifon - multi-unique
+function askForMultiUniqueConstraint(done) {
+    const context = this.context;
+    const name = context.name;
+    this.log(chalk.green('\nGenerating Multi-unique constraint\n'));
+    const fieldNamesUnderscored = context.fieldNamesUnderscored;
+
+    const prompts = [
+        {
+            type: 'confirm',
+            name: 'multiUniqueConstraintAdd', //old: relationshipAdd
+            message: 'Do you want to add a multi-unique constraint?',
+            default: true,
+        },
+        {
+            when: response => response.multiUniqueConstraintAdd === true,
+            type: 'input',
+            name: 'multiUniqueConstraintName', //old: relationshipName
+            validate: input => {
+                if (!/^([a-zA-Z0-9_]*)$/.test(input)) {
+                    return 'Your multi-unique constraint name cannot contain special characters';
+                }
+                if (input === '') {
+                    return 'Your multi-unique constraint cannot be empty';
+                }
+                if (input.charAt(0) === input.charAt(0).toUpperCase()) {
+                    return 'Your multi-unique constraint cannot start with an upper case letter';
+                }
+//                if (!(input === 'id' || fieldNamesUnderscored.includes(_.snakeCase(input)))) {
+//                    return 'Your multi-unique constraint must use an already existing field name';
+//                }
+                if (jhiCore.isReservedKeyword(input, 'JAVA')) {
+                    return 'Your multi-unique constraint cannot contain a Java reserved keyword';
+                }
+                return true;
+            },
+            message: 'What is the name of the multi-unique constraint?',
+//            default: response => _.lowerFirst(response.otherEntityName),
+        },
+        {
+            when: response => response.multiUniqueConstraintAdd === true,
+        	type: 'checkbox',
+            name: 'fieldNames',
+            message: 'Please choose the fields which will be part of multi-unique constraint',
+            choices: context.fieldNamesUnderscored,
+        },
+        {
+            when: response => response.multiUniqueConstraintAdd === true,
+        	type: 'checkbox',
+            name: 'relationshipNames',
+            message: 'Please choose the relationships which will be part of multi-unique constraint',
+            choices: context.relNameChoices,
+        },
+    ];
+    this.prompt(prompts).then(props => {
+        if (props.multiUniqueConstraintAdd) {
+            const multiUniqueConstraint = {
+                constraintName: props.multiUniqueConstraintName,
+                fields: props.relationshipNames.concat(props.fieldNames), //_.lowerFirst(props.otherEntityName),
+            };
+
+//            fieldNamesUnderscored.push(_.snakeCase(props.fieldName));
+              // Below is read from .json/entity file in generator-base.js - loadEntityJson()
+//            if (!context.multiUniqueConstraints) {
+//            	context.multiUniqueConstraints = [];
+//            }
+            context.multiUniqueConstraints.push(multiUniqueConstraint); //old: relationships
+        }
+//        logMultiUniqueConstraints.call(this); //old: logFieldsAndRelationships.call(this);
+
+        if (props.multiUniqueConstraintAdd) {
+            askForMultiUniqueConstraint.call(this, done);
+        } else {
+            this.log('\n');
+            done();
+        }
+    });
+}
+//@Trifon-end - multi-unique constraints
 /**
  * Show the entity and it's fields and relationships in console
  */

@@ -37,7 +37,7 @@ const NeedleApi = require('./needle-api');
 
 const JHIPSTER_CONFIG_DIR = '.jhipster';
 const MODULES_HOOK_FILE = `${JHIPSTER_CONFIG_DIR}/modules/jhi-hooks.json`;
-const GENERATOR_JHIPSTER = 'generator-jhipster-x2'; //@Trifon
+const GENERATOR_JHIPSTER = 'generator-jhipster'; //@Trifon
 
 const SERVER_MAIN_RES_DIR = constants.SERVER_MAIN_RES_DIR;
 const ANGULAR = constants.SUPPORTED_CLIENT_FRAMEWORKS.ANGULAR;
@@ -1268,6 +1268,11 @@ module.exports = class extends PrivateBase {
         }
         context.relationships = context.fileData.relationships || [];
         context.fields = context.fileData.fields || [];
+        context.multiUniqueConstraints = context.fileData.multiUniqueConstraints || []; //@Trifon
+        context.multiUniqueConstraints.forEach(multiUnique => {
+            context.multiUniqueConstraintChoices.push({ name: multiUnique.constraintName, value: multiUnique.constraintName });
+        });
+
         context.haveFieldWithJavadoc = false;
         context.fields.forEach(field => {
             if (field.javadoc) {
@@ -2173,6 +2178,7 @@ module.exports = class extends PrivateBase {
         // these variable hold field and relationship names for question options during update
         dest.fieldNameChoices = [];
         dest.relNameChoices = [];
+        dest.multiUniqueConstraintChoices = []; //@Trifon
     }
 
     /**

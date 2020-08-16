@@ -58,7 +58,7 @@ for (idx in relationships) {
                && (relationships[idx].useJPADerivedIdentifier == null || relationships[idx].useJPADerivedIdentifier === false))
         ) && (relationships[idx].relationshipValidate === true && relationships[idx].relationshipRequired)
     ) {
-        header2.push(getColumnName(relationships[idx].relationshipName) + "_value");
+        header2.push(relationships[idx].relationshipName + "_id");
     }
 }
 table.push(header2);

@@ -126,7 +126,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
     @Override
     <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %><%= instanceType %><% if (reactive) { %>><% } %> save(<%= instanceType %> <%= instanceName %>) {
-        log.debug("Request to save <%= entityClass %> : {}", <%= instanceName %>);
+        log.debug("Request to save <%= instanceType %> : {}", <%= instanceName %>); //@Trifon
 <%- include('../../common/nullify-file-name_template', {useDTO: true}); -%>
         <%_ if (!reactive) { _%>
 <%- include('../../common/save_template', {asEntity, asDto, viaService: false, returnDirectly: true, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: false}); -%>
@@ -281,7 +281,35 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 		if (columns.length > <%= index %>) {
 			result.put("<%= fieldName %>", columns[<%= index %>]);
 		}
-<%_	} _%>
+<%_	}
+
+	// @Trifon - iterate relationships
+    index = index + 1;
+    for (idx in relationships) {
+        columnValue = 'Long.parseLong(columns['+ index +'])';
+    
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(entityTableName, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+        const isUsingMapsId = relationships[idx].useJPADerivedIdentifier;
+        if (otherEntityRelationshipName) {
+            mappedBy = otherEntityRelationshipName.charAt(0).toLowerCase() + otherEntityRelationshipName.slice(1)
+        }
+        if (relationshipType === 'many-to-one' && relationshipRequired) {
+            if (databaseType === 'sql') { _%>
+		if (columns.length > <%= index %>) {
+			result.put("<%= relationshipName %>_id", columns[<%= index %>]);
+		}
+    <%_         index = index + 1; } } } _%>
 
 		return result;
 	}
@@ -367,7 +395,8 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 			.toFormatter()
 			.withZone(ZoneId.systemDefault()); // ZoneId.of("Europe/Sofia")
 
-<%_ for (idx2 in fields) {
+<%_ let numFields = 0;
+    for (idx2 in fields) {
       let fieldType2 = fields[idx2].fieldType;
       const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
       const fieldName2 = fields[idx2].fieldName;
@@ -376,7 +405,12 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
       if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'text') {
         fieldType2 = "String";
       }
+      // SKIP IMAGE
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'image') {
+        continue;
+      }
 
+      numFields = numFields + 1;
       let columnValue = 'columns['+ idx2 + ']';
       if (fieldType2.toLowerCase() === 'integer') {
         columnValue = 'Integer.parseInt(columns['+ idx2 +'])';
@@ -403,7 +437,36 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 		if (columns.length > <%= idx2 %>) {
 			<%= fieldName2 %> = <%= columnValue %>;
 		}
-<%_	} _%>
+<%_	}
+
+	// @Trifon - iterate relationships
+//	numFields = numFields + 1;
+    for (idx in relationships) {
+        columnValue = 'Long.parseLong(columns['+ numFields +'])';
+    
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(entityTableName, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+        const isUsingMapsId = relationships[idx].useJPADerivedIdentifier;
+        if (otherEntityRelationshipName) {
+            mappedBy = otherEntityRelationshipName.charAt(0).toLowerCase() + otherEntityRelationshipName.slice(1)
+        }
+        if (relationshipType === 'many-to-one' && relationshipRequired) {
+            if (databaseType === 'sql') { _%>
+		Long <%= relationshipName %>Id = null;
+		if (columns.length > <%= numFields %>) {
+			<%= relationshipName %>Id = <%= columnValue %>;
+		}
+    <%_         numFields = numFields + 1; } } } _%>
 
 		<%= instanceType %> <%= instanceName %> = null;
 		// +01) Search for existing <%= instanceName %> by <%= fieldName %>
@@ -419,11 +482,41 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 
 		// +03) Update <%= instanceName %>
 <%_ for (idx2 in fields) {
+      let fieldType2 = fields[idx2].fieldType;
+      const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
       const fieldName2 = fields[idx2].fieldName;
       const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
+      // SKIP IMAGE
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'image') {
+        continue;
+      }
       _%>
 		<%= instanceName %>.set<%= fieldInJavaBeanMethod2 %>(<%= fieldName2 %>);
-<%_	} _%>
+<%_	}
+
+	// @Trifon - iterate relationships
+    for (idx in relationships) {
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipNameCapitalized = relationships[idx].relationshipNameCapitalized;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(entityTableName, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+        const isUsingMapsId = relationships[idx].useJPADerivedIdentifier;
+        if (otherEntityRelationshipName) {
+            mappedBy = otherEntityRelationshipName.charAt(0).toLowerCase() + otherEntityRelationshipName.slice(1)
+        }
+        if (relationshipType === 'many-to-one' && relationshipRequired) {
+            if (databaseType === 'sql') { _%>
+		<%= instanceName %>.set<%= relationshipNameCapitalized %>Id(<%= relationshipName %>Id);
+    <%_ } } } _%>
 
 		return <%= instanceName %>;
 	}
@@ -450,6 +543,10 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 
       if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'text') {
         fieldType2 = "String";
+      }
+      // SKIP IMAGE
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'image') {
+        continue;
       }
 
       let prefix = "";
@@ -487,7 +584,36 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 		if (columnsMap.containsKey("<%= fieldName2 %>")) {
 			<%= fieldName2 %> = <%= prefix %>columnsMap.get("<%= fieldName2 %>")<%= suffix %>;
 		}
-<%_	} _%>
+<%_	}
+
+	// @Trifon - iterate relationships
+    for (idx in relationships) {
+        let prefix = "Long.parseLong(";
+        let suffix = ")";
+    
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(entityTableName, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+        const isUsingMapsId = relationships[idx].useJPADerivedIdentifier;
+        if (otherEntityRelationshipName) {
+            mappedBy = otherEntityRelationshipName.charAt(0).toLowerCase() + otherEntityRelationshipName.slice(1)
+        }
+        if (relationshipType === 'many-to-one' && relationshipRequired) {
+            if (databaseType === 'sql') { _%>
+		Long <%= relationshipName %>Id = null;
+		if (columnsMap.containsKey("<%= relationshipName %>_id")) {
+			<%= relationshipName %>Id = <%= prefix %>columnsMap.get("<%= relationshipName %>_id")<%= suffix %>;
+		}
+    <%_ } } } _%>
 
 		<%= instanceType %> <%= instanceName %> = null;
 		// +01) Search for existing <%= instanceName %> by <%= fieldName %>
@@ -503,11 +629,44 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 
 		// +03) Update <%= instanceName %>
 <%_ for (idx2 in fields) {
+      let fieldType2 = fields[idx2].fieldType;
+      const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
       const fieldName2 = fields[idx2].fieldName;
       const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
+      // SKIP IMAGE
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'image') {
+        continue;
+      }
       _%>
 		<%= instanceName %>.set<%= fieldInJavaBeanMethod2 %>(<%= fieldName2 %>);
-<%_	} _%>
+<%_	}
+
+	// @Trifon - iterate relationships
+    for (idx in relationships) {
+        let prefix = "Long.parseLong(";
+        let suffix = ")";
+    
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipNameCapitalized = relationships[idx].relationshipNameCapitalized;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(entityTableName, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+        const isUsingMapsId = relationships[idx].useJPADerivedIdentifier;
+        if (otherEntityRelationshipName) {
+            mappedBy = otherEntityRelationshipName.charAt(0).toLowerCase() + otherEntityRelationshipName.slice(1)
+        }
+        if (relationshipType === 'many-to-one' && relationshipRequired) {
+            if (databaseType === 'sql') { _%>
+		<%= instanceName %>.set<%= relationshipNameCapitalized %>Id(<%= relationshipName %>Id);
+    <%_ } } } _%>
 
 		return <%= instanceName %>;
 	}

@@ -176,6 +176,29 @@
         <addPrimaryKey columnNames="<%= getColumnName(name) %>_id, <%= getColumnName(relationshipName) %>_id" tableName="<%= joinTableName %>"/>
         <% } %><% } %>
     </changeSet>
+
+    <!-- @Trifon - multi-unique constraints -->
+    <changeSet id="<%= changelogDate %>-1-multi-unique" author="trifon">
+        <%_ for (idx in multiUniqueConstraints) {
+            const mUniqueConstraintName = multiUniqueConstraints[idx].constraintName;
+
+            const rels = multiUniqueConstraints[idx].fields;
+            const mUniqueColumns = [];
+            var uIdx;
+            for (uIdx = rels.length - 1; uIdx >= 0; --uIdx) {
+              if (rels[uIdx].includes(":")) {
+                mUniqueColumns[uIdx] = rels[uIdx].split(":")[0] + "_id";
+              } else {
+                mUniqueColumns[uIdx] = rels[uIdx];
+              }
+            }
+          _%>
+      <addUniqueConstraint
+        columnNames="<%= mUniqueColumns %>"
+        constraintName="<%= mUniqueConstraintName %>"
+        tableName="<%= entityTableName %>" />
+        <% } %>
+    </changeSet>
     <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
     <%_ if (!skipFakeData) { _%>
 

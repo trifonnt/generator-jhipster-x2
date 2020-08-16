@@ -50,7 +50,7 @@ function requireCLI(preferLocal) {
     if (preferLocal) {
         try {
         	//@Trifon
-            const localCLI = require.resolve(path.join(process.cwd(), 'node_modules', 'generator-jhipster-x2', 'cli', 'cli.js'));
+            const localCLI = require.resolve(path.join(process.cwd(), 'node_modules', 'generator-jhipster', 'cli', 'cli.js'));
             if (__dirname !== path.dirname(localCLI)) {
                 // load local version
                 /* eslint-disable import/no-dynamic-require */
