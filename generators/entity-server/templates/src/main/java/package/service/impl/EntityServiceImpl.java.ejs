@@ -146,19 +146,21 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
       index = index + 1;
       if (fieldSequence && fieldSequence !== '') {
       _%>
-			String <%= fieldName %>SequenceName = SequenceUtil.evaluateSequenceName(<%= entityInstance %>, "<%= fieldSequenceName %>"); //"order.documentType:#{documentType.id};documentNo");
-			log.debug("<%= fieldName %>SequenceName = " + <%= fieldName %>SequenceName);
+			if (<%= entityInstance %>.get<%= firstToUpper(fieldName) %>() == null || "<GENERATED>".equalsIgnoreCase(<%= entityInstance %>.get<%= firstToUpper(fieldName) %>())) {
+				String <%= fieldName %>SequenceName = SequenceUtil.evaluateSequenceName(<%= entityInstance %>, "<%= fieldSequenceName %>"); //"order.documentType:#{documentType.id};documentNo");
+				log.debug("<%= fieldName %>SequenceName = " + <%= fieldName %>SequenceName);
 
-			Optional<IdentifierDTO> <%= fieldName %>SequenceOpt = identifierService.findOneBySequenceName(<%= fieldName %>SequenceName);
-			IdentifierDTO <%= fieldName %>Sequence = null;
-			if (<%= fieldName %>SequenceOpt.isPresent()) {
-				<%= fieldName %>Sequence = <%= fieldName %>SequenceOpt.get();
-			} else {
-				<%= fieldName %>Sequence = identifierMapper.toDto( new Identifier().sequenceName(<%= fieldName %>SequenceName).nextValue(<%= fieldSequenceNextValue %>L).incrementValue(<%= fieldSequenceIncrementValue %>L).prefix("<%= fieldSequencePrefix %>").suffix("<%= fieldSequenceSuffix %>"));
+				Optional<IdentifierDTO> <%= fieldName %>SequenceOpt = identifierService.findOneBySequenceName(<%= fieldName %>SequenceName);
+				IdentifierDTO <%= fieldName %>Sequence = null;
+				if (<%= fieldName %>SequenceOpt.isPresent()) {
+					<%= fieldName %>Sequence = <%= fieldName %>SequenceOpt.get();
+				} else {
+					<%= fieldName %>Sequence = identifierMapper.toDto( new Identifier().sequenceName(<%= fieldName %>SequenceName).nextValue(<%= fieldSequenceNextValue %>L).incrementValue(<%= fieldSequenceIncrementValue %>L).prefix("<%= fieldSequencePrefix %>").suffix("<%= fieldSequenceSuffix %>"));
+				}
+				<%= entityInstance %>.set<%= firstToUpper(fieldName) %>(<%= fieldName %>Sequence.getPrefix() + <%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getSuffix());
+				<%= fieldName %>Sequence.setNextValue(<%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getIncrementValue());
+				identifierService.save(<%= fieldName %>Sequence);
 			}
-			<%= entityInstance %>.set<%= firstToUpper(fieldName) %>(<%= fieldName %>Sequence.getPrefix() + <%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getSuffix());
-			<%= fieldName %>Sequence.setNextValue(<%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getIncrementValue());
-			identifierService.save(<%= fieldName %>Sequence);
 
 <%_ } } _%>
 		}
