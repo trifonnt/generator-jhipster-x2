@@ -156,7 +156,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 			} else {
 				<%= fieldName %>Sequence = identifierMapper.toDto( new Identifier().sequenceName(<%= fieldName %>SequenceName).nextValue(<%= fieldSequenceNextValue %>L).incrementValue(<%= fieldSequenceIncrementValue %>L).prefix("<%= fieldSequencePrefix %>").suffix("<%= fieldSequenceSuffix %>"));
 			}
-			<%= entityInstance %>.setDocumentNo(<%= fieldName %>Sequence.getPrefix() + <%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getSuffix());
+			<%= entityInstance %>.set<%= firstToUpper(fieldName) %>(<%= fieldName %>Sequence.getPrefix() + <%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getSuffix());
 			<%= fieldName %>Sequence.setNextValue(<%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getIncrementValue());
 			identifierService.save(<%= fieldName %>Sequence);
 
