@@ -44,6 +44,8 @@ _%>
 <%_ if (service === 'serviceImpl') { _%>
 import <%= packageName %>.service.<%= entityClass %>Service;
 <%_ } _%>
+import <%= packageName %>.service.IdentifierService; //@Trifon-sequence
+import <%= packageName %>.domain.Identifier; //@Trifon-sequence
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
 import <%= packageName %>.domain.<%= entityClass %>Builder; //@Trifon
 import <%= packageName %>.repository.<%= entityClass %>Repository;
@@ -54,9 +56,13 @@ import <%= packageName %>.repository.<%= mapsIdAssoc.otherEntityNameCapitalized 
 import <%= packageName %>.repository.search.<%= entityClass %>SearchRepository;
 <%_ } _%>
 <%_ if (dto === 'mapstruct') { _%>
+import <%= packageName %>.service.dto.IdentifierDTO; //@Trifon-sequence
 import <%= packageName %>.service.dto.<%= asDto(entityClass) %>;
+import <%= packageName %>.service.mapper.IdentifierMapper; //@Trifon-sequence
 import <%= packageName %>.service.mapper.<%= entityClass %>Mapper;
 <%_ } _%>
+import <%= packageName %>.service.util.SequenceUtil; //@Trifon-sequence
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.math.BigDecimal; //@Trifon
@@ -66,6 +72,7 @@ import java.time.format.DateTimeFormatter; //@Trifon
 import java.time.format.DateTimeFormatterBuilder; //@Trifon
 import java.time.temporal.ChronoField; //@Trifon
 
+import org.springframework.beans.factory.annotation.Autowired; //@Trifon-sequence
 <%_ if (pagination !== 'no' || fieldsContainOwnerManyToMany === true) { _%>
     <%_ if (!reactive) { _%>
 import org.springframework.data.domain.Page;
@@ -114,7 +121,48 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> implements <%= entityClass %>Service<% } %> {
 
     private final Logger log = LoggerFactory.getLogger(<%= serviceClassName %>.class);
+
+	//@Trifon - sequence
+	@Autowired
+	private IdentifierService identifierService;
+	@Autowired
+	private IdentifierMapper identifierMapper;
 <%- include('../../common/inject_template', {asEntity, asDto, viaService: false, constructorName: serviceClassName, queryService: false, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: false}); -%>
+
+	//@Trifon - sequence
+	public void setSequenceValue(<%= entityClass %> <%= entityInstance %>) {
+		// @Trifon - set SequenceNumber if id is null!
+		if (<%= entityInstance %>.getId() == null) {
+<%_ var index = 0;
+    for (idx in fields) {
+      const fieldName = fields[idx].fieldName;
+      const fieldSequence = fields[idx].fieldSequence;
+      const fieldSequenceName = fieldSequence.name;
+      const fieldSequencePrefix = fieldSequence.prefix;
+      const fieldSequenceSuffix = fieldSequence.suffix;
+      const fieldSequenceNextValue = fieldSequence.nextValue;
+      const fieldSequenceIncrementValue = fieldSequence.incrementValue;
+
+      index = index + 1;
+      if (fieldSequence && fieldSequence !== '') {
+      _%>
+			String <%= fieldName %>SequenceName = SequenceUtil.evaluateSequenceName(<%= entityInstance %>, "<%= fieldSequenceName %>"); //"order.documentType:#{documentType.id};documentNo");
+			log.debug("<%= fieldName %>SequenceName = " + <%= fieldName %>SequenceName);
+
+			Optional<IdentifierDTO> <%= fieldName %>SequenceOpt = identifierService.findOneBySequenceName(<%= fieldName %>SequenceName);
+			IdentifierDTO <%= fieldName %>Sequence = null;
+			if (<%= fieldName %>SequenceOpt.isPresent()) {
+				<%= fieldName %>Sequence = <%= fieldName %>SequenceOpt.get();
+			} else {
+				<%= fieldName %>Sequence = identifierMapper.toDto( new Identifier().sequenceName(<%= fieldName %>SequenceName).nextValue(<%= fieldSequenceNextValue %>L).incrementValue(<%= fieldSequenceIncrementValue %>L).prefix("<%= fieldSequencePrefix %>").suffix("<%= fieldSequenceSuffix %>"));
+			}
+			<%= entityInstance %>.setDocumentNo(<%= fieldName %>Sequence.getPrefix() + <%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getSuffix());
+			<%= fieldName %>Sequence.setNextValue(<%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getIncrementValue());
+			identifierService.save(<%= fieldName %>Sequence);
+
+<%_ } } _%>
+		}
+	}
 
     /**
      * Save a <%= entityInstance %>.
@@ -148,6 +196,8 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 	public <%= entityClass %> save(<%= entityClass %> <%= entityInstance %>) {
 		log.debug("Request to save <%= entityClass %> : {}", <%= entityInstance %>);
 <%- include('../../common/nullify-file-name_template', {useDTO: false}); -%>
+
+		setSequenceValue(<%= asEntity(entityInstance) %>); //@Trifon - sequence
 
 		<%= entityInstance %> = <%= entityInstance %>Repository.save(<%= entityInstance %>);
 		<%_ if (searchEngine === 'elasticsearch') { _%>
@@ -623,6 +673,351 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 		} else {
 			<%= instanceName %> = new <%= instanceType %>();
 			<%= instanceName %>.set<%= fieldInJavaBeanMethod %>(<%= fieldName %>);
+			// +02) Set default values
+//			setDefaultValues(<%= instanceName %>);
+		}
+
+		// +03) Update <%= instanceName %>
+<%_ for (idx2 in fields) {
+      let fieldType2 = fields[idx2].fieldType;
+      const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
+      const fieldName2 = fields[idx2].fieldName;
+      const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
+      // SKIP IMAGE
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'image') {
+        continue;
+      }
+      _%>
+		<%= instanceName %>.set<%= fieldInJavaBeanMethod2 %>(<%= fieldName2 %>);
+<%_	}
+
+	// @Trifon - iterate relationships
+    for (idx in relationships) {
+        let prefix = "Long.parseLong(";
+        let suffix = ")";
+    
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipNameCapitalized = relationships[idx].relationshipNameCapitalized;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(entityTableName, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+        const isUsingMapsId = relationships[idx].useJPADerivedIdentifier;
+        if (otherEntityRelationshipName) {
+            mappedBy = otherEntityRelationshipName.charAt(0).toLowerCase() + otherEntityRelationshipName.slice(1)
+        }
+        if (relationshipType === 'many-to-one' && relationshipRequired) {
+            if (databaseType === 'sql') { _%>
+		<%= instanceName %>.set<%= relationshipNameCapitalized %>Id(<%= relationshipName %>Id);
+    <%_ } } } _%>
+
+		return <%= instanceName %>;
+	}
+    <%_ }
+    }
+    _%>
+
+	//@Trifon - multi-unique
+	<%_ 
+if (hasMultiUniqueConstraints(multiUniqueConstraints)) {
+	for (idx in multiUniqueConstraints) {
+		let findByNames = multiUniqueFindByNames(multiUniqueConstraints[idx]);
+		let findByParameters = multiUniqueFindByParameters(multiUniqueConstraints[idx]);
+		let findByParameterNamesOnly = multiUniqueFindByParameterNamesOnly(multiUniqueConstraints[idx]);
+		let findByParameterNamesOnlyForLog = multiUniqueFindByParameterNamesOnlyForLog(multiUniqueConstraints[idx]);
+		let findByOtherEntity = multiUniqueFindByOtherEntity(multiUniqueConstraints[idx], entityClass);
+_%>
+    //@Trifon - multi-unique
+    <%_ if (service === 'serviceImpl') { _%>
+    @Override
+    <%_ } _%>
+    <%_ if (databaseType === 'sql') { _%>
+    @Transactional(readOnly = true)
+    <%_ } _%>
+    public Optional<<%= instanceType %>> findOneBy<%= findByNames %>(<%= findByParameters %>) {
+      log.debug("Request to get <%= entityClass %> by <%= findByParameterNamesOnlyForLog %>", <%= findByParameterNamesOnly %>);<%- include('../../common/get_by_unique_template', {viaService: false, returnDirectly: true, fieldName: findByParameterNamesOnly, fieldInJavaBeanMethod: findByNames}); -%>
+    }
+
+	//@Trifon - multi-unique
+	/**
+	 * Get or Create <%= entityInstance %> by <%= findByNames %>.
+	 *
+	 * @return the entity.
+	 */
+	public <%= entityClass %> getOrCreate<%= entityClass %>By<%= findByNames %>(<%= entityClass %> param<%= entityClass %>) {
+		<%= entityClass %> <%= entityInstance %> = <%= entityInstance %>Repository.findOneBy<%= findByNames %>(<%= findByOtherEntity %>)
+				.orElse(null);
+		if (<%= entityInstance %> == null) {
+			<%= entityInstance %> = save(param<%= entityClass %>);
+		}
+		log.debug("Trifon - <%= entityClass %>.Id = " + <%= entityInstance %>.getId());
+
+		return <%= entityInstance %>;
+	}
+
+	//@Trifon - multi-unique
+	private BigDecimal parseBigDecimalColumn(String[] columns, int indx) {
+		BigDecimal result = null;
+		if (columns.length > indx && columns[indx] != null && !columns[indx].isEmpty()) {
+			String contents = columns[indx];
+			contents = contents.replaceAll(" ", "");
+			contents = contents.replaceAll("\t", "");
+			if (!contents.isEmpty()) {
+				result = new BigDecimal(contents);
+			}
+		}
+		return result;
+	}
+	//@Trifon - multi-unique
+	private BigDecimal parseBigDecimalColumn(String str) {
+		BigDecimal result = null;
+		if (str != null && !str.isEmpty()) {
+			String contents = str.replaceAll(" ", "");
+			contents = contents.replaceAll("\t", "");
+			if (!contents.isEmpty()) {
+				result = new BigDecimal(contents);
+			}
+		}
+		return result;
+	}
+
+	//@Trifon - multi-unique
+	public <%= instanceType %> import<%= entityClass %>By<%= findByNames %>(String[] columns) {
+		DateTimeFormatter FMT = new DateTimeFormatterBuilder()
+			.appendPattern("yyyy-MM-dd")
+			.parseDefaulting(ChronoField.NANO_OF_DAY, 0)
+			.toFormatter()
+			.withZone(ZoneId.systemDefault()); // ZoneId.of("Europe/Sofia")
+
+<%_ let numFields = 0;
+    for (idx2 in fields) {
+      let fieldType2 = fields[idx2].fieldType;
+      const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
+      const fieldName2 = fields[idx2].fieldName;
+      const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
+
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'text') {
+        fieldType2 = "String";
+      }
+      // SKIP IMAGE
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'image') {
+        continue;
+      }
+
+      numFields = numFields + 1;
+      let columnValue = 'columns['+ idx2 + ']';
+      if (fieldType2.toLowerCase() === 'integer') {
+        columnValue = 'Integer.parseInt(columns['+ idx2 +'])';
+
+      } else if (fieldType2.toLowerCase() === 'long') {
+        columnValue = 'Long.parseLong(columns['+ idx2 +'])';
+
+      } else if (fieldType2.toLowerCase() === 'float') {
+        columnValue = 'Float.parseFloat(columns['+ idx2 +'])';
+
+      } else if (fieldType2.toLowerCase() === 'double') {
+        columnValue = 'Double.parseDouble(columns['+ idx2 +'])';
+
+      } else if (fieldType2.toLowerCase() === 'bigdecimal') {
+        columnValue = 'parseBigDecimalColumn(columns, '+ idx2 +')';
+
+      } else if (fieldType2.toLowerCase() === 'boolean') {
+        columnValue = 'Boolean.valueOf(columns['+ idx2 +'])';
+      } else if (fieldType2.toLowerCase() === 'instant') {
+        columnValue = 'FMT.parse(columns['+ idx2 +'], Instant::from)';
+      }
+      _%>
+		<%= fieldType2 %> <%= fieldName2 %> = null;
+		if (columns.length > <%= idx2 %>) {
+			<%= fieldName2 %> = <%= columnValue %>;
+		}
+<%_	}
+
+	// @Trifon - iterate relationships
+//	numFields = numFields + 1;
+    for (idx in relationships) {
+        columnValue = 'Long.parseLong(columns['+ numFields +'])';
+    
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(entityTableName, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+        const isUsingMapsId = relationships[idx].useJPADerivedIdentifier;
+        if (otherEntityRelationshipName) {
+            mappedBy = otherEntityRelationshipName.charAt(0).toLowerCase() + otherEntityRelationshipName.slice(1)
+        }
+        if (relationshipType === 'many-to-one' && relationshipRequired) {
+            if (databaseType === 'sql') { _%>
+		Long <%= relationshipName %>Id = null;
+		if (columns.length > <%= numFields %>) {
+			<%= relationshipName %>Id = <%= columnValue %>;
+		}
+    <%_         numFields = numFields + 1; } } } _%>
+
+		<%= instanceType %> <%= instanceName %> = null;
+		// +01) Search for existing <%= instanceName %> by <%= findByNames %>
+		Optional<<%= instanceType %>> optional<%= instanceType %> = findOneBy<%= findByNames %>(<%= findByParameterNamesOnly %>);
+		if (optional<%= instanceType %>.isPresent()) {
+			<%= instanceName %> = optional<%= instanceType %>.get();
+		} else {
+			<%= instanceName %> = new <%= instanceType %>();
+//			<%= instanceName %>.set<%= findByNames %>(<%= findByNames %>);
+			// +02) Set default values
+//			setDefaultValues(<%= instanceName %>);
+		}
+
+		// +03) Update <%= instanceName %>
+<%_ for (idx2 in fields) {
+      let fieldType2 = fields[idx2].fieldType;
+      const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
+      const fieldName2 = fields[idx2].fieldName;
+      const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
+      // SKIP IMAGE
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'image') {
+        continue;
+      }
+      _%>
+		<%= instanceName %>.set<%= fieldInJavaBeanMethod2 %>(<%= fieldName2 %>);
+<%_	}
+
+	// @Trifon - iterate relationships
+    for (idx in relationships) {
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipNameCapitalized = relationships[idx].relationshipNameCapitalized;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(entityTableName, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+        const isUsingMapsId = relationships[idx].useJPADerivedIdentifier;
+        if (otherEntityRelationshipName) {
+            mappedBy = otherEntityRelationshipName.charAt(0).toLowerCase() + otherEntityRelationshipName.slice(1)
+        }
+        if (relationshipType === 'many-to-one' && relationshipRequired) {
+            if (databaseType === 'sql') { _%>
+		<%= instanceName %>.set<%= relationshipNameCapitalized %>Id(<%= relationshipName %>Id);
+    <%_ } } } _%>
+
+		return <%= instanceName %>;
+	}
+
+	//@Trifon - multi-unique
+	public <%= instanceType %> import<%= entityClass %>By<%= findByNames %>(Map<String, String> columnsMap) {
+		DateTimeFormatter FMT = new DateTimeFormatterBuilder()
+			.appendPattern("yyyy-MM-dd'T'HH:mm:ss") //@Trifon; old: "yyyy-MM-dd"
+//			.parseDefaulting(ChronoField.NANO_OF_DAY, 0) // @Trifon
+			.toFormatter()
+			.withZone(ZoneId.systemDefault()); // ZoneId.of("Europe/Sofia")
+
+<%_ for (idx2 in fields) {
+      let fieldType2 = fields[idx2].fieldType;
+      const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
+      const fieldName2 = fields[idx2].fieldName;
+      const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
+
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'text') {
+        fieldType2 = "String";
+      }
+      // SKIP IMAGE
+      if ((fieldType2 === 'byte[]' || fieldType2 === 'ByteBuffer') && fieldTypeBlobContent2 === 'image') {
+        continue;
+      }
+
+      let prefix = "";
+      let suffix = "";
+      if (fieldType2.toLowerCase() === 'integer') {
+        prefix = "Integer.parseInt(";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'long') {
+        prefix = "Long.parseLong(";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'float') {
+        prefix = "Float.parseFloat(";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'double') {
+        prefix = "Double.parseDouble(";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'bigdecimal') {
+        prefix = "parseBigDecimalColumn(";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'boolean') {
+        prefix = "Boolean.valueOf(";
+        suffix = ")";
+
+      } else if (fieldType2.toLowerCase() === 'instant') {
+        prefix = "FMT.parse(";
+        suffix = ", Instant::from)";
+      }
+      _%>
+		<%= fieldType2 %> <%= fieldName2 %> = null;
+		if (columnsMap.containsKey("<%= fieldName2 %>")) {
+			<%= fieldName2 %> = <%= prefix %>columnsMap.get("<%= fieldName2 %>")<%= suffix %>;
+		}
+<%_	}
+
+	// @Trifon - iterate relationships
+    for (idx in relationships) {
+        let prefix = "Long.parseLong(";
+        let suffix = ")";
+    
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(entityTableName, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+        const isUsingMapsId = relationships[idx].useJPADerivedIdentifier;
+        if (otherEntityRelationshipName) {
+            mappedBy = otherEntityRelationshipName.charAt(0).toLowerCase() + otherEntityRelationshipName.slice(1)
+        }
+        if (relationshipType === 'many-to-one' && relationshipRequired) {
+            if (databaseType === 'sql') { _%>
+		Long <%= relationshipName %>Id = null;
+		if (columnsMap.containsKey("<%= relationshipName %>_id")) {
+			<%= relationshipName %>Id = <%= prefix %>columnsMap.get("<%= relationshipName %>_id")<%= suffix %>;
+		}
+    <%_ } } } _%>
+
+		<%= instanceType %> <%= instanceName %> = null;
+		// +01) Search for existing <%= instanceName %> by <%= findByNames %>
+		Optional<<%= instanceType %>> optional<%= instanceType %> = findOneBy<%= findByNames %>(<%= findByParameterNamesOnly %>);
+		if (optional<%= instanceType %>.isPresent()) {
+			<%= instanceName %> = optional<%= instanceType %>.get();
+		} else {
+			<%= instanceName %> = new <%= instanceType %>();
+//			<%= instanceName %>.set<%= findByNames %>(<%= findByNames %>);
 			// +02) Set default values
 //			setDefaultValues(<%= instanceName %>);
 		}

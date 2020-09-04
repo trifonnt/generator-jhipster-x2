@@ -77,7 +77,7 @@ public class <%= asDto(entityClass) %> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 <% include('../../common/functions', {capitalLetter: false});
-    if (hasUniqueField(fields) == false) {
+    if (hasUniqueField(fields) == false && hasMultiUniqueConstraints(multiUniqueConstraints) == false) {
 %>//	private RecordSource recordSource;
 
 	private String code;

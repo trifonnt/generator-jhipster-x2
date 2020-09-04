@@ -187,5 +187,28 @@ public interface <%= entityClass %>Service {
 	 */
 	<%= instanceType %> import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(Map<String, String> columnsMap);
     <%_ }
-    } _%>
+    }
+
+    // multi-unique
+if (hasMultiUniqueConstraints(multiUniqueConstraints)) {
+	for (idx in multiUniqueConstraints) {
+		let findByNames = multiUniqueFindByNames(multiUniqueConstraints[idx]);
+		let findByParameters = multiUniqueFindByParameters(multiUniqueConstraints[idx]);
+_%>
+	//@Trifon
+	Optional<<%= instanceType %>> findOneBy<%= findByNames %>(<%= findByParameters %>);
+
+	//@Trifon
+	<%= entityClass %> getOrCreate<%= entityClass %>By<%= findByNames %>(<%= entityClass %> param<%= entityClass %>);
+
+	//@Trifon
+	<%= instanceType %> import<%= entityClass %>By<%= findByNames %>(String[] columns);
+
+	//@Trifon
+	<%= instanceType %> import<%= entityClass %>By<%= findByNames %>(Map<String, String> columnsMap);
+
+    <%_ 
+	}
+}
+     _%>
 }

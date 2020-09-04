@@ -608,6 +608,13 @@ function askForField(done) {
             message: 'Default value of your field if any? Boolean.TRUE/Boolean.FALSE/Integer.MAX_VALUE/new Integer("0")/java.util.UUID.randomUUID().toString()',
             default: false,
         },
+        {
+            when: response => response.fieldAdd === true,
+            type: 'input',
+            name: 'fieldSequence',
+            message: 'Field Sequence?',
+            default: false,
+        },
         //@Trifon-end
         {
             when: response => response.fieldAdd === true && (skipServer || ['sql', 'mongodb', 'neo4j', 'couchbase'].includes(databaseType)),
@@ -1000,6 +1007,7 @@ function askForField(done) {
                 visibleForRole: props.visibleForRole, //@Trifon
                 readOnlyForRole: props.readOnlyForRole, //@Trifon
                 defaultValueConstant: props.defaultValueConstant, //@Trifon
+                fieldSequence: props.fieldSequence, //@Trifon
                 fieldType: props.fieldType,
                 visibleInTableMode: props.visibleInTableMode, //@Trifon
                 fieldTypeBlobContent: props.fieldTypeBlobContent,

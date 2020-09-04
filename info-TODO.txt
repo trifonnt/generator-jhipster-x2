@@ -1,0 +1,15 @@
+@Trifon
+
+-01.1) Create method which finds "field" by fieldName
+
+-01.2) Set proper field type
+   findByParameters = findByParameters.concat("String ").concat(firstToLower(columnNameToJavaFieldName(mUniqueColumnName)));
+ - /generator-jhipster/generators/entity-server/templates/src/main/java/package/repository/EntityRepository.java.ejs
+
+
++02) Implement sequence for some fields.
+ + Order.documentNo
+   Spring Expression Language Guide
+ + https://www.baeldung.com/spring-expression-language
+Expression expression = expressionParser.parseExpression("yearOfProduction > 2005");
+boolean result = expression.getValue(car, Boolean.class);

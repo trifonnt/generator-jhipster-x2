@@ -833,6 +833,13 @@ class EntityGenerator extends BaseBlueprintGenerator {
                         field.fieldNameHumanized = _.startCase(field.fieldName);
                     }
 
+                    //@Trifon - fieldSequence
+                    if (_.isUndefined(field.fieldSequence)) {
+                        field.fieldSequence = false;
+                        //@Trifon - TODO
+                        //field.fieldSequence.push(relationship);
+                    }
+
                     if (_.isUndefined(field.fieldInJavaBeanMethod)) {
                         // Handle the specific case when the second letter is capitalized
                         // See http://stackoverflow.com/questions/2948083/naming-convention-for-getters-setters-in-java

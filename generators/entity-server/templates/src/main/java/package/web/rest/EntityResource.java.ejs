@@ -59,6 +59,24 @@ import <%=packageName%>.web.rest.errors.EntityNotFoundException; //@Trifon
 import <%=packageName%>.web.rest.common.JsonPatcher; //@Trifon
 import <%=packageName%>.web.rest.common.RestMediaType; //@Trifon
 import <%=packageName%>.service.dto.IdArrayDTO; //@Trifon
+<%_ for (idx in relationships) {
+        // @Trifon - relationship with Image entity
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipNamePlural = relationships[idx].relationshipNamePlural;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(name, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityName = relationships[idx].otherEntityName;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+    if (relationshipType === 'one-to-many' && otherEntityName === 'image') { _%>
+import <%=packageName%>.service.ImageService; //@Trifon
+<%_ } } _%>
 import com.github.fge.jsonpatch.JsonPatchException; //@Trifon
 import io.swagger.annotations.Api; //@Trifon
 <%_ if (dto === 'mapstruct') { _%>
@@ -166,6 +184,25 @@ public class <%= entityClass %>Resource {
     //@Trifon
     @Autowired
     private JsonPatcher jsonPatcher;
+<%_ for (idx in relationships) {
+        // @Trifon - relationship with Image entity
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipNamePlural = relationships[idx].relationshipNamePlural;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(name, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityName = relationships[idx].otherEntityName;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+    if (relationshipType === 'one-to-many' && otherEntityName === 'image') { _%>
+    @Autowired
+    private ImageService imageService; //@Trifon
+<%_ } } _%>
 <%_ if (!readOnly) { _%>
 
     <%_ let entityName = entityInstance;
@@ -216,6 +253,29 @@ public class <%= entityClass %>Resource {
         <%_ } _%>
         <%_ if (!reactive) { _%>
 <%- include('../../common/save_template', {asEntity, asDto, viaService: viaService, returnDirectly: false, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: true}); -%>
+<%_ for (idx in relationships) {
+        // @Trifon - relationship with Image entity
+        const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
+        const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
+        const relationshipName = relationships[idx].relationshipName;
+        const relationshipNamePlural = relationships[idx].relationshipNamePlural;
+        const relationshipFieldName = relationships[idx].relationshipFieldName;
+        const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
+        const joinTableName = getJoinTableName(name, relationshipName, prodDatabaseType);
+        const relationshipType = relationships[idx].relationshipType;
+        const relationshipValidate = relationships[idx].relationshipValidate;
+        const relationshipRequired = relationships[idx].relationshipRequired;
+        const otherEntityName = relationships[idx].otherEntityName;
+        const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
+        const ownerSide = relationships[idx].ownerSide;
+    if (relationshipType === 'one-to-many' && otherEntityName === 'image') { _%>
+        // @Trifon - Iterate all images and create them
+        for (ImageDTO image : <%= instanceName %>.get<%= firstToUpper(relationshipFieldNamePlural) %>()) {
+        	image.set<%= firstToUpper(otherEntityRelationshipName) %>Id(result.getId());
+        	ImageDTO savedImage = imageService.save(image);
+        	result.get<%= firstToUpper(relationshipFieldNamePlural) %>().add(savedImage);
+        }
+<%_ } } _%>
         return ResponseEntity.created(new URI("/api/<%= entityApiUrl %>/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, <%= enableTranslation %>, ENTITY_NAME, result.getId()<% if (primaryKeyType !== 'String') { %>.toString()<% } %>))
             .body(result);
@@ -501,7 +561,7 @@ public class <%= entityClass %>Resource {
 	 * @return
 	 * @throws URISyntaxException, IOException
 	 */
-	@PostMapping("/<%= entityApiUrl %>/import-by-<%= fieldName %>.csv")
+	@PostMapping("/<%= entityApiUrl %>/import/by-<%= fieldName %>.csv")
 	public ResponseEntity<String> import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(@RequestParam("file") MultipartFile file) throws URISyntaxException, IOException {
 		if (!file.isEmpty()) {
 			log.debug("REST request to import <%= entityClass %> by <%= fieldName %> with file: {}", file);
@@ -548,5 +608,67 @@ public class <%= entityClass %>Resource {
 
 <%_ }
 }
+	//@Trifon - multi-unique
+if (hasMultiUniqueConstraints(multiUniqueConstraints)) {
+	for (idx in multiUniqueConstraints) {
+		let findByNames = multiUniqueFindByNames(multiUniqueConstraints[idx]);
+		let findByParameters = multiUniqueFindByParameters(multiUniqueConstraints[idx]);
+		let findByParameterNamesOnly = multiUniqueFindByParameterNamesOnly(multiUniqueConstraints[idx]);
+		let findByParameterNamesOnlyForLog = multiUniqueFindByParameterNamesOnlyForLog(multiUniqueConstraints[idx]);
+		let findByOtherEntity = multiUniqueFindByOtherEntity(multiUniqueConstraints[idx], entityClass);
+		let resourceUrlName = toResourceUrlName(multiUniqueConstraints[idx]);
 _%>
+	/**
+	 * Import <%= entityInstance %> by <%= findByNames %> from .csv file
+	 * 
+	 * @param file
+	 * @return
+	 * @throws URISyntaxException, IOException
+	 */
+	@PostMapping("/<%= entityApiUrl %>/import/by-<%= resourceUrlName %>.csv")
+	public ResponseEntity<String> import<%= entityClass %>By<%= findByNames %>(@RequestParam("file") MultipartFile file) throws URISyntaxException, IOException {
+		if (!file.isEmpty()) {
+			log.debug("REST request to import <%= entityClass %> by <%= findByNames %> with file: {}", file);
+			BufferedReader buffReader = null;
+			try {
+				// Open the file
+				buffReader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+
+				int numImportedRecords = 0;
+				boolean isFirstLine = true;
+				boolean useMapMethodForImport = false;
+				String strLine;
+				// Read file line by line
+				while ((strLine = buffReader.readLine()) != null) {
+					if (isFirstLine) {  // TODO - Add it as parameter of REST request.
+						isFirstLine = false;
+					} else if (strLine.startsWith("#")) {
+						useMapMethodForImport = true;
+					} else {
+						String[] columns = strLine.split(";"); // TODO - Add separator as parameter of REST request.
+						<%= instanceType %> <%= instanceName %> = null;
+						
+						if (useMapMethodForImport) {
+							Map<String, String> columnNameValueMap = <%= entityInstance %>Service.columnsToNameValueMap(columns);
+							<%= instanceName %> = <%= entityInstance %>Service.import<%= entityClass %>By<%= findByNames %>(columnNameValueMap);
+						} else {
+							<%= instanceName %> = <%= entityInstance %>Service.import<%= entityClass %>By<%= findByNames %>(columns);
+						}
+						<%= instanceName %> = <%= entityInstance %>Service.save(<%= instanceName %>);
+
+						numImportedRecords = numImportedRecords + 1;
+					}
+				}
+				return ResponseEntity.ok().body(String.format("Imported #%s records from file %s", numImportedRecords, file.getOriginalFilename()));
+			} finally {
+				if (buffReader != null) {
+					buffReader.close();
+				}
+			}
+		} else {
+			return ResponseEntity.ok().body("File is empty, no records were imported.");
+		}
+	}
+
+<%_ } } _%>
 }

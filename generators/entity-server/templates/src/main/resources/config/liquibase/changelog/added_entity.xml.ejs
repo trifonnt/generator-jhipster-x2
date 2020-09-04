@@ -15,7 +15,7 @@
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
--%>
+-%><%- include('../../../../java/package/common/functions.ejs') -%>
 <?xml version="1.0" encoding="utf-8"?>
 <databaseChangeLog
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -187,9 +187,9 @@
             var uIdx;
             for (uIdx = rels.length - 1; uIdx >= 0; --uIdx) {
               if (rels[uIdx].includes(":")) {
-                mUniqueColumns[uIdx] = rels[uIdx].split(":")[0] + "_id";
+                mUniqueColumns[uIdx] = javaFieldNameToColumnName(rels[uIdx].split(":")[0]) + "_id";
               } else {
-                mUniqueColumns[uIdx] = rels[uIdx];
+                mUniqueColumns[uIdx] = javaFieldNameToColumnName(rels[uIdx]);
               }
             }
           _%>

@@ -42,6 +42,9 @@ if (!viaService) {
     if (dto === 'mapstruct') {
         resultEntity = asEntity(entityInstance); _%>
         <%= asEntity(entityClass) %> <%= asEntity(entityInstance) %> = <%= dtoToEntity %>(<%= instanceName %>);
+
+        setSequenceValue(<%= asEntity(entityInstance) %>); //@Trifon - sequence
+
         <%_ if (isUsingMapsId === true) { _%>
         <%= mapsIdAssoc.otherEntityPrimaryKeyType %> <%= otherEntityName %>Id = <%= instanceName %>.get<%= mapsIdAssoc.relationshipNameCapitalized %>Id();
         <%= mapsIdRepoInstance %>.findById(<%= otherEntityName %>Id).ifPresent(<%= asEntity(entityInstance) %>::<%_ if (fluentMethods === false) { _%>set<%= mapsIdAssoc.relationshipNameCapitalized %> <%_ } else { _%><%= mapsIdAssoc.relationshipName %><%_ } _%>);
@@ -49,6 +52,9 @@ if (!viaService) {
         <%= asEntity(entityInstance) %> = <%= entityInstance %>Repository.save(<%= asEntity(entityInstance) %>);
         <%= returnPrefix %> <%= entityToDto %>(<%= asEntity(entityInstance) %>);
     <%_ } else { resultEntity = 'result'; _%>
+
+        setSequenceValue(<%= asEntity(entityInstance) %>); //@Trifon - sequence
+
         <%_ if (isUsingMapsId === true) { _%>
         <%= mapsIdAssoc.otherEntityPrimaryKeyType %> <%= otherEntityName %>Id = <%= instanceName %>.get<%= mapsIdAssoc.relationshipNameCapitalized %>().getId();
         <%= mapsIdRepoInstance %>.findById(<%= otherEntityName %>Id).ifPresent(<%= instanceName %>::<%_ if (fluentMethods === false) { _%>set<%= mapsIdAssoc.relationshipNameCapitalized %> <%_ } else { _%><%= otherEntityName %><%_ } _%>);

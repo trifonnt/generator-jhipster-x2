@@ -16,6 +16,182 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%><%
+	//@Trifon - multi-unique
+	multiUniqueFindByNames = function(multiUniqueConstraint) {
+		const rels = multiUniqueConstraint.fields;
+		let findByNames = "";
+		let findByParameters = "";
+		let uIdx = 0;
+		for (uIdx = 0; uIdx <= rels.length - 1; ++uIdx) {
+			let mUniqueColumnName = "";
+			if (rels[uIdx].includes(":")) {
+				mUniqueColumnName = rels[uIdx].split(":")[0] + "Id";
+				findByParameters = findByParameters.concat("Long ").concat(mUniqueColumnName);
+				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
+			} else {
+				mUniqueColumnName = rels[uIdx];
+				findByParameters = findByParameters.concat("String ").concat(firstToLower(columnNameToJavaFieldName(mUniqueColumnName)));
+				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
+			}
+			findByNames = findByNames.concat( columnNameToJavaFieldName(mUniqueColumnName) );
+			if (uIdx != rels.length - 1) { findByNames = findByNames.concat("And"); }
+		}
+		return findByNames;
+	}
+	//@Trifon - multi-unique
+	multiUniqueFindByParameters = function(multiUniqueConstraint) {
+		const rels = multiUniqueConstraint.fields;
+		let findByNames = "";
+		let findByParameters = "";
+		let uIdx = 0;
+		for (uIdx = 0; uIdx <= rels.length - 1; ++uIdx) {
+			let mUniqueColumnName = "";
+			if (rels[uIdx].includes(":")) {
+				mUniqueColumnName = rels[uIdx].split(":")[0] + "Id";
+				findByParameters = findByParameters.concat("Long ").concat(mUniqueColumnName);
+				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
+			} else {
+				mUniqueColumnName = rels[uIdx];
+				findByParameters = findByParameters.concat("String ").concat(firstToLower(columnNameToJavaFieldName(mUniqueColumnName)));
+				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
+			}
+			findByNames = findByNames.concat( columnNameToJavaFieldName(mUniqueColumnName) );
+			if (uIdx != rels.length - 1) { findByNames = findByNames.concat("And"); }
+		}
+		return findByParameters;
+	}
+	//@Trifon - multi-unique
+	multiUniqueFindByParameterNamesOnly = function(multiUniqueConstraint) {
+		const rels = multiUniqueConstraint.fields;
+		let findByParameters = "";
+		let uIdx = 0;
+		for (uIdx = 0; uIdx <= rels.length - 1; ++uIdx) {
+			let mUniqueColumnName = "";
+			if (rels[uIdx].includes(":")) {
+				mUniqueColumnName = rels[uIdx].split(":")[0] + "Id";
+				findByParameters = findByParameters.concat(mUniqueColumnName);
+				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
+			} else {
+				mUniqueColumnName = rels[uIdx];
+				findByParameters = findByParameters.concat(firstToLower(columnNameToJavaFieldName(mUniqueColumnName)));
+				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
+			}
+		}
+		return findByParameters;
+	}
+	//@Trifon - multi-unique
+	multiUniqueFindByParameterNamesOnlyForLog = function(multiUniqueConstraint) {
+		const rels = multiUniqueConstraint.fields;
+		let findByParameters = "";
+		let uIdx = 0;
+		for (uIdx = 0; uIdx <= rels.length - 1; ++uIdx) {
+			let mUniqueColumnName = "";
+			if (rels[uIdx].includes(":")) {
+				mUniqueColumnName = rels[uIdx].split(":")[0] + "Id";
+				findByParameters = findByParameters.concat(mUniqueColumnName).concat(": {}");
+				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
+			} else {
+				mUniqueColumnName = rels[uIdx];
+				findByParameters = findByParameters.concat(firstToLower(columnNameToJavaFieldName(mUniqueColumnName))).concat(": {}");
+				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
+			}
+		}
+		return findByParameters;
+	}
+	//@Trifon - multi-unique
+	multiUniqueFindByOtherEntity = function(multiUniqueConstraint, entityClass) {
+		const rels = multiUniqueConstraint.fields;
+		let findByParameters = "";
+		let uIdx = 0;
+		for (uIdx = 0; uIdx <= rels.length - 1; ++uIdx) {
+			let mUniqueColumnName = "";
+			if (rels[uIdx].includes(":")) {
+				mUniqueColumnName = rels[uIdx].split(":")[0] + "";
+				findByParameters = findByParameters.concat("param").concat(entityClass).concat(".get").concat(firstToUpper(mUniqueColumnName)).concat("().getId()");
+				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
+			} else {
+				mUniqueColumnName = rels[uIdx];
+				findByParameters = findByParameters.concat("param").concat(entityClass).concat(".get").concat(columnNameToJavaFieldName(mUniqueColumnName)).concat("()");
+				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
+			}
+		}
+		return findByParameters;
+	}
+
+	//@Trifon
+	javaFieldNameToColumnName = function(fieldName) {
+		let result = "";
+		result = _.snakeCase(fieldName);
+		return result;
+	}
+
+	//@Trifon
+	columnNameToJavaFieldName = function(columnName) {
+		let result = "";
+		// Handle the specific case when the second letter is capitalized
+		// See http://stackoverflow.com/questions/2948083/naming-convention-for-getters-setters-in-java
+		if (columnName.length > 1) {
+			const firstLetter = columnName.charAt(0);
+			const secondLetter = columnName.charAt(1);
+			if (firstLetter === firstLetter.toLowerCase() && secondLetter === secondLetter.toUpperCase()) {
+				result = firstLetter.toLowerCase() + columnName.slice(1);
+			} else {
+				result = _.upperFirst(columnName);
+			}
+		} else {
+			result = _.upperFirst(columnName);
+		}
+		
+		// Convert _x to Upper case
+		result = humanize(result);
+		return result;
+	}
+	function humanize(str) {
+		var i, frags = str.split('_');
+		for (i=0; i<frags.length; i++) {
+			frags[i] = frags[i].charAt(0).toUpperCase() + frags[i].slice(1);
+		}
+		return frags.join('');
+	}
+	//@Trifon
+	toResourceUrlName = function(multiUniqueConstraint) {
+//		var i; //, frags = str.split('_');
+//		let result = "";
+//		for (i=0; i<str.length; i++) {
+//			if (str.charAt(i) === str.charAt(i).toUpperCase()) {
+//				result = result.concat("-").concat(str.charAt(i).toLowerCase())
+//			} else {
+//				result = result.concat(str.charAt(i));
+//			}
+//		}
+//		return result;
+
+		const rels = multiUniqueConstraint.fields;
+		let findByNames = "";
+		let uIdx = 0;
+		for (uIdx = 0; uIdx <= rels.length - 1; ++uIdx) {
+			let mUniqueColumnName = "";
+			if (rels[uIdx].includes(":")) {
+				mUniqueColumnName = rels[uIdx].split(":")[0] + "Id";
+			} else {
+				mUniqueColumnName = rels[uIdx];
+			}
+			findByNames = findByNames.concat( firstToLower(columnNameToJavaFieldName(mUniqueColumnName)) );
+			if (uIdx != rels.length - 1) { findByNames = findByNames.concat("-and-"); }
+		}
+		return findByNames;
+	}
+
+	//@Trifon - multi-unique
+	// Returns true if entity contains multi-unique combination
+	hasMultiUniqueConstraints = function(multiUniqueConstraints) {
+		let hasMultiUnique = false;
+		if (multiUniqueConstraints.length > 0) {
+			hasMultiUnique = true;
+		}
+		return hasMultiUnique;
+	}
+
 	// Returns true if entity contains unique field.
 	hasUniqueField = function(fields) {
 

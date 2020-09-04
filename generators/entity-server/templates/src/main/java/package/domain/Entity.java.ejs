@@ -142,9 +142,30 @@ import static org.springframework.data.couchbase.core.mapping.id.GenerationStrat
 @ApiModel(description = "<%- formatAsApiDescription(javadoc) %>")
     <%_ } _%>
 <%_ } _%>
-<%_ if (databaseType === 'sql') { _%>
+<%_ 
+	//@Trifon - multi-unique
+include('../common/functions', {capitalLetter: false});
+	let multiUniqueAnnotation = "";
+	if (databaseType === 'sql') {
+		const mUniqueColumns = [];
+		let mUniqueColumnsConcat = ``;
+		for (idx in multiUniqueConstraints) {
+			const rels = multiUniqueConstraints[idx].fields;
+			let uIdx = 0;
+			for (uIdx = 0; uIdx < rels.length; ++uIdx) {
+				if (rels[uIdx].includes(":")) {
+					mUniqueColumns[uIdx] = javaFieldNameToColumnName(rels[uIdx].split(":")[0]) + "_id";
+				} else {
+					mUniqueColumns[uIdx] = javaFieldNameToColumnName(rels[uIdx]);
+				}
+				if (uIdx != 0) { mUniqueColumnsConcat = mUniqueColumnsConcat.concat(`, `); }
+				mUniqueColumnsConcat = mUniqueColumnsConcat.concat(`"`).concat(mUniqueColumns[uIdx]).concat(`"`);
+			}
+		}
+		multiUniqueAnnotation = `, uniqueConstraints = {@UniqueConstraint(columnNames={`+ mUniqueColumnsConcat +`})}`;
+_%>
 @Entity
-@Table(name = "<%= entityTableName %>")
+@Table(name = "<%= entityTableName %>"<%= multiUniqueAnnotation %>)
 <%_     if (enableHibernateCache) { _%>
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 <%_     }
@@ -195,8 +216,8 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     <%_ } _%>
     private <%= primaryKeyType %> id;
 
-<% include('../common/functions', {capitalLetter: false});
-    if (hasUniqueField(fields) == false) {
+<%
+    if (hasUniqueField(fields) == false && hasMultiUniqueConstraints(multiUniqueConstraints) == false) {
 %>//	private RecordSource recordSource; //@Trifon
 
 	private String code;
