@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 <%_ } _%>
 <%_ if (databaseType === 'sql') { _%>
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param; //@Trifon - childSequence
     <%_ if (fieldsContainOwnerManyToMany) { _%>
 import org.springframework.data.repository.query.Param;
     <%_ } _%>
@@ -94,6 +95,25 @@ _%>
     <%_ 
 	}
 }
+
+// @Trifon - childSequence
+    for (idx in fields) {
+      const fieldName = fields[idx].fieldName;
+      const fieldSequence = fields[idx].fieldSequence;
+      const childSequence = fields[idx].childSequence;
+
+      if (childSequence && childSequence !== '') {
+	      const childSequenceName = childSequence.name;
+	      const childSequenceParent = childSequence.parent;
+	      const childSequencePrefix = childSequence.prefix;
+	      const childSequenceSuffix = childSequence.suffix;
+	      const childSequenceNextValue = childSequence.nextValue;
+	      const childSequenceIncrementValue = childSequence.incrementValue;
+      _%>
+
+	@Query("SELECT MAX(<%= firstToLower(entityClass) %>.<%= fieldName %>) FROM <%= entityClass %> <%= firstToLower(entityClass) %> WHERE <%= firstToLower(entityClass) %>.<%= firstToLower(childSequenceParent) %>.id = :<%= firstToLower(childSequenceParent) %>Id")
+	Optional<Long> findCurrent<%= firstToUpper(fieldName) %>(@Param("<%= firstToLower(childSequenceParent) %>Id") Long <%= firstToLower(childSequenceParent) %>Id);
+<%_ } }
 
 for (idx in fields) {
     let required = false;
