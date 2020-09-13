@@ -62,6 +62,7 @@ import <%= packageName %>.service.mapper.IdentifierMapper; //@Trifon-sequence
 import <%= packageName %>.service.mapper.<%= entityClass %>Mapper;
 <%_ } _%>
 import <%= packageName %>.service.util.SequenceUtil; //@Trifon-sequence
+import <%= packageName %>.service.util.ParseUtil; //@Trifon-import
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -435,32 +436,6 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 	}
 
 	//@Trifon
-	private BigDecimal parseBigDecimalColumn(String[] columns, int indx) {
-		BigDecimal result = null;
-		if (columns.length > indx && columns[indx] != null && !columns[indx].isEmpty()) {
-			String contents = columns[indx];
-			contents = contents.replaceAll(" ", "");
-			contents = contents.replaceAll("\t", "");
-			if (!contents.isEmpty()) {
-				result = new BigDecimal(contents);
-			}
-		}
-		return result;
-	}
-	//@Trifon
-	private BigDecimal parseBigDecimalColumn(String str) {
-		BigDecimal result = null;
-		if (str != null && !str.isEmpty()) {
-			String contents = str.replaceAll(" ", "");
-			contents = contents.replaceAll("\t", "");
-			if (!contents.isEmpty()) {
-				result = new BigDecimal(contents);
-			}
-		}
-		return result;
-	}
-
-	//@Trifon
 	/**
 	 * Import one <%= entityInstance %> by <%= fieldName %>.
 	 *
@@ -504,7 +479,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
         columnValue = 'Double.parseDouble(columns['+ idx2 +'])';
 
       } else if (fieldType2.toLowerCase() === 'bigdecimal') {
-        columnValue = 'parseBigDecimalColumn(columns, '+ idx2 +')';
+        columnValue = 'ParseUtil.parseBigDecimalColumn(columns, '+ idx2 +')';
 
       } else if (fieldType2.toLowerCase() === 'boolean') {
         columnValue = 'Boolean.valueOf(columns['+ idx2 +'])';
@@ -647,7 +622,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
         suffix = ")";
 
       } else if (fieldType2.toLowerCase() === 'bigdecimal') {
-        prefix = "parseBigDecimalColumn(";
+        prefix = "ParseUtil.parseBigDecimalColumn(";
         suffix = ")";
 
       } else if (fieldType2.toLowerCase() === 'boolean') {
@@ -792,32 +767,6 @@ _%>
 	}
 
 	//@Trifon - multi-unique
-	private BigDecimal parseBigDecimalColumn(String[] columns, int indx) {
-		BigDecimal result = null;
-		if (columns.length > indx && columns[indx] != null && !columns[indx].isEmpty()) {
-			String contents = columns[indx];
-			contents = contents.replaceAll(" ", "");
-			contents = contents.replaceAll("\t", "");
-			if (!contents.isEmpty()) {
-				result = new BigDecimal(contents);
-			}
-		}
-		return result;
-	}
-	//@Trifon - multi-unique
-	private BigDecimal parseBigDecimalColumn(String str) {
-		BigDecimal result = null;
-		if (str != null && !str.isEmpty()) {
-			String contents = str.replaceAll(" ", "");
-			contents = contents.replaceAll("\t", "");
-			if (!contents.isEmpty()) {
-				result = new BigDecimal(contents);
-			}
-		}
-		return result;
-	}
-
-	//@Trifon - multi-unique
 	public <%= instanceType %> import<%= entityClass %>By<%= findByNames %>(String[] columns) {
 		DateTimeFormatter FMT = new DateTimeFormatterBuilder()
 			.appendPattern("yyyy-MM-dd")
@@ -855,7 +804,7 @@ _%>
         columnValue = 'Double.parseDouble(columns['+ idx2 +'])';
 
       } else if (fieldType2.toLowerCase() === 'bigdecimal') {
-        columnValue = 'parseBigDecimalColumn(columns, '+ idx2 +')';
+        columnValue = 'ParseUtil.parseBigDecimalColumn(columns, '+ idx2 +')';
 
       } else if (fieldType2.toLowerCase() === 'boolean') {
         columnValue = 'Boolean.valueOf(columns['+ idx2 +'])';
@@ -992,7 +941,7 @@ _%>
         suffix = ")";
 
       } else if (fieldType2.toLowerCase() === 'bigdecimal') {
-        prefix = "parseBigDecimalColumn(";
+        prefix = "ParseUtil.parseBigDecimalColumn(";
         suffix = ")";
 
       } else if (fieldType2.toLowerCase() === 'boolean') {

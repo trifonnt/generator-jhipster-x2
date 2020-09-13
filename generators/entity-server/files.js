@@ -212,6 +212,14 @@ const serverFiles = {
                     file: 'package/service/impl/EntityServiceImpl.java',
                     renameTo: generator => `${generator.packageFolder}/service/impl/${generator.entityClass}ServiceImpl.java`,
                 },
+                {
+                    file: 'package/service/util/SequenceUtil.java',
+                    renameTo: generator => `${generator.packageFolder}/service/util/SequenceUtil.java`,
+                },
+                {
+                    file: 'package/service/util/ParseUtil.java',
+                    renameTo: generator => `${generator.packageFolder}/service/util/ParseUtil.java`,
+                },
             ],
         },
         {
@@ -221,6 +229,14 @@ const serverFiles = {
                 {
                     file: 'package/service/impl/EntityServiceImpl.java',
                     renameTo: generator => `${generator.packageFolder}/service/${generator.entityClass}Service.java`,
+                },
+                {
+                    file: 'package/service/util/SequenceUtil.java',
+                    renameTo: generator => `${generator.packageFolder}/service/util/SequenceUtil.java`,
+                },
+                {
+                    file: 'package/service/util/ParseUtil.java',
+                    renameTo: generator => `${generator.packageFolder}/service/util/ParseUtil.java`,
                 },
             ],
         },
