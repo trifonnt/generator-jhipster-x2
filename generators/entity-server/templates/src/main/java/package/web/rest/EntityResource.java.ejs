@@ -436,7 +436,7 @@ public class <%= entityClass %>Resource {
      */
     @GetMapping("/<%= entityApiUrl %>/template")
     public ResponseEntity<<%= instanceType %>> getTemplate<%= entityClass %>() {
-        log.debug("REST request to get Template for <%= entityClass %>");        
+        log.debug("REST request to get Template for <%= entityClass %>");
 
         <%= instanceType %> <%= instanceName %> = new <%= instanceType %>();
         // Populate all automatically populated fields!
