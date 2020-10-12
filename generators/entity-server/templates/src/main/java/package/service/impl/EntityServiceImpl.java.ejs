@@ -132,8 +132,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 
 	//@Trifon - sequence
 	public void setSequenceValue(<%= entityClass %> <%= entityInstance %>) {
-		// @Trifon - set SequenceNumber if id is null!
-		if (<%= entityInstance %>.getId() == null) {
+		// @Trifon - set SequenceNumber if id is null or field contains <GENERATED>
 <%_
     for (idx in fields) {
       const fieldName = fields[idx].fieldName;
@@ -147,21 +146,23 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 	      const fieldSequenceNextValue = fieldSequence.nextValue;
 	      const fieldSequenceIncrementValue = fieldSequence.incrementValue;
       _%>
-			if (<%= entityInstance %>.get<%= firstToUpper(fieldName) %>() == null || "<GENERATED>".equalsIgnoreCase(<%= entityInstance %>.get<%= firstToUpper(fieldName) %>())) {
-				String <%= fieldName %>SequenceName = SequenceUtil.evaluateSequenceName(<%= entityInstance %>, "<%= fieldSequenceName %>"); //"order.documentType:#{documentType.id};documentNo");
-				log.debug("<%= fieldName %>SequenceName = " + <%= fieldName %>SequenceName);
+		if ((<%= entityInstance %>.getId() == null && (<%= entityInstance %>.get<%= firstToUpper(fieldName) %>() == null || "<GENERATED>".equalsIgnoreCase(<%= entityInstance %>.get<%= firstToUpper(fieldName) %>())) ) 
+			|| (<%= entityInstance %>.getId() != null && "<GENERATED>".equalsIgnoreCase(<%= entityInstance %>.get<%= firstToUpper(fieldName) %>()) )
+		) {
+			String <%= fieldName %>SequenceName = SequenceUtil.evaluateSequenceName(<%= entityInstance %>, "<%= fieldSequenceName %>"); //"order.documentType:#{documentType.id};documentNo");
+			log.debug("<%= fieldName %>SequenceName = " + <%= fieldName %>SequenceName);
 
-				Optional<IdentifierDTO> <%= fieldName %>SequenceOpt = identifierService.findOneBySequenceName(<%= fieldName %>SequenceName);
-				IdentifierDTO <%= fieldName %>Sequence;
-				if (<%= fieldName %>SequenceOpt.isPresent()) {
-					<%= fieldName %>Sequence = <%= fieldName %>SequenceOpt.get();
-				} else {
-					<%= fieldName %>Sequence = identifierMapper.toDto( new Identifier().sequenceName(<%= fieldName %>SequenceName).nextValue(<%= fieldSequenceNextValue %>L).incrementValue(<%= fieldSequenceIncrementValue %>L).prefix("<%= fieldSequencePrefix %>").suffix("<%= fieldSequenceSuffix %>"));
-				}
-				<%= entityInstance %>.set<%= firstToUpper(fieldName) %>(<%= fieldName %>Sequence.getPrefix() + <%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getSuffix());
-				<%= fieldName %>Sequence.setNextValue(<%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getIncrementValue());
-				identifierService.save(<%= fieldName %>Sequence);
+			Optional<IdentifierDTO> <%= fieldName %>SequenceOpt = identifierService.findOneBySequenceName(<%= fieldName %>SequenceName);
+			IdentifierDTO <%= fieldName %>Sequence;
+			if (<%= fieldName %>SequenceOpt.isPresent()) {
+				<%= fieldName %>Sequence = <%= fieldName %>SequenceOpt.get();
+			} else {
+				<%= fieldName %>Sequence = identifierMapper.toDto( new Identifier().sequenceName(<%= fieldName %>SequenceName).nextValue(<%= fieldSequenceNextValue %>L).incrementValue(<%= fieldSequenceIncrementValue %>L).prefix("<%= fieldSequencePrefix %>").suffix("<%= fieldSequenceSuffix %>"));
 			}
+			<%= entityInstance %>.set<%= firstToUpper(fieldName) %>(<%= fieldName %>Sequence.getPrefix() + <%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getSuffix());
+			<%= fieldName %>Sequence.setNextValue(<%= fieldName %>Sequence.getNextValue() + <%= fieldName %>Sequence.getIncrementValue());
+			identifierService.save(<%= fieldName %>Sequence);
+		}
 
 <%_   }
       if (childSequence && childSequence !== '') {
@@ -172,26 +173,27 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 	      const childSequenceNextValue = childSequence.nextValue;
 	      const childSequenceIncrementValue = childSequence.incrementValue;
       _%>
-			if (<%= entityInstance %>.get<%= firstToUpper(fieldName) %>() == null || "<GENERATED>".equalsIgnoreCase(<%= entityInstance %>.get<%= firstToUpper(fieldName) %>())) {
-				String <%= fieldName %>SequenceName = SequenceUtil.evaluateSequenceName(<%= entityInstance %>, "<%= childSequenceName %>");
-				log.debug("<%= fieldName %>SequenceName = " + <%= fieldName %>SequenceName);
+		if ((<%= entityInstance %>.getId() == null && (<%= entityInstance %>.get<%= firstToUpper(fieldName) %>() == null || "<GENERATED>".equalsIgnoreCase(<%= entityInstance %>.get<%= firstToUpper(fieldName) %>()))  ) 
+			|| (<%= entityInstance %>.getId() != null && "<GENERATED>".equalsIgnoreCase(<%= entityInstance %>.get<%= firstToUpper(fieldName) %>()) )
+		) {
+			String <%= fieldName %>SequenceName = SequenceUtil.evaluateSequenceName(<%= entityInstance %>, "<%= childSequenceName %>");
+			log.debug("<%= fieldName %>SequenceName = " + <%= fieldName %>SequenceName);
 
-				Optional<IdentifierDTO> <%= fieldName %>SequenceOpt = identifierService.findOneBySequenceName(<%= fieldName %>SequenceName);
-				IdentifierDTO <%= fieldName %>Sequence;
-				if (<%= fieldName %>SequenceOpt.isPresent()) {
-					<%= fieldName %>Sequence = <%= fieldName %>SequenceOpt.get();
-				} else {
-					<%= fieldName %>Sequence = identifierMapper.toDto( new Identifier().sequenceName(<%= fieldName %>SequenceName).nextValue(<%= childSequenceNextValue %>L).incrementValue(<%= childSequenceIncrementValue %>L).prefix("<%= childSequencePrefix %>").suffix("<%= childSequenceSuffix %>"));
-					identifierService.save(<%= fieldName %>Sequence);
-				}
-				Long nextValue = <%= entityInstance %>Repository.findCurrentLineNo(<%= entityInstance %>.get<%= childSequenceParent %>().getId())
-						.orElseGet( () -> lineNoSequence.getNextValue() );
-				nextValue = nextValue + <%= fieldName %>Sequence.getIncrementValue();
-				<%= entityInstance %>.set<%= firstToUpper(fieldName) %>(<%= fieldName %>Sequence.getPrefix() + nextValue + <%= fieldName %>Sequence.getSuffix());
+			Optional<IdentifierDTO> <%= fieldName %>SequenceOpt = identifierService.findOneBySequenceName(<%= fieldName %>SequenceName);
+			IdentifierDTO <%= fieldName %>Sequence;
+			if (<%= fieldName %>SequenceOpt.isPresent()) {
+				<%= fieldName %>Sequence = <%= fieldName %>SequenceOpt.get();
+			} else {
+				<%= fieldName %>Sequence = identifierMapper.toDto( new Identifier().sequenceName(<%= fieldName %>SequenceName).nextValue(<%= childSequenceNextValue %>L).incrementValue(<%= childSequenceIncrementValue %>L).prefix("<%= childSequencePrefix %>").suffix("<%= childSequenceSuffix %>"));
+				identifierService.save(<%= fieldName %>Sequence);
 			}
+			Long nextValue = <%= entityInstance %>Repository.findCurrentLineNo(<%= entityInstance %>.get<%= childSequenceParent %>().getId())
+					.orElseGet( () -> lineNoSequence.getNextValue() );
+			nextValue = nextValue + <%= fieldName %>Sequence.getIncrementValue();
+			<%= entityInstance %>.set<%= firstToUpper(fieldName) %>(<%= fieldName %>Sequence.getPrefix() + nextValue + <%= fieldName %>Sequence.getSuffix());
+		}
 
 <%_ } } _%>
-		}
 	}
 
     /**
