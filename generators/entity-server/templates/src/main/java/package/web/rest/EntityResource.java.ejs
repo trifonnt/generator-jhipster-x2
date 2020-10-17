@@ -612,10 +612,10 @@ public class <%= entityClass %>Resource {
 if (hasMultiUniqueConstraints(multiUniqueConstraints)) {
 	for (idx in multiUniqueConstraints) {
 		let findByNames = multiUniqueFindByNames(multiUniqueConstraints[idx]);
-		let findByParameters = multiUniqueFindByParameters(multiUniqueConstraints[idx]);
+//		let findByParameters = multiUniqueFindByParameters(multiUniqueConstraints[idx], fields);
 		let findByParameterNamesOnly = multiUniqueFindByParameterNamesOnly(multiUniqueConstraints[idx]);
 		let findByParameterNamesOnlyForLog = multiUniqueFindByParameterNamesOnlyForLog(multiUniqueConstraints[idx]);
-		let findByOtherEntity = multiUniqueFindByOtherEntity(multiUniqueConstraints[idx], entityClass);
+//		let findByOtherEntity = multiUniqueFindByOtherEntity(multiUniqueConstraints[idx], entityClass, fields);
 		let resourceUrlName = toResourceUrlName(multiUniqueConstraints[idx]);
 _%>
 	/**

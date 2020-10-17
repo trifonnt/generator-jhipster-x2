@@ -193,7 +193,7 @@ public interface <%= entityClass %>Service {
 if (hasMultiUniqueConstraints(multiUniqueConstraints)) {
 	for (idx in multiUniqueConstraints) {
 		let findByNames = multiUniqueFindByNames(multiUniqueConstraints[idx]);
-		let findByParameters = multiUniqueFindByParameters(multiUniqueConstraints[idx]);
+		let findByParameters = multiUniqueFindByParameters(multiUniqueConstraints[idx], fields);
 _%>
 	//@Trifon
 	Optional<<%= instanceType %>> findOneBy<%= findByNames %>(<%= findByParameters %>);

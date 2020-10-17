@@ -15,7 +15,7 @@
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
--%>
+-%><%- include('../../common/functions.ejs') -%>
 package <%= packageName %>.service<% if (service === 'serviceImpl') { %>.impl<% } %>;
 
 <%_
@@ -733,12 +733,13 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 	//@Trifon - multi-unique
 	<%_ 
 if (hasMultiUniqueConstraints(multiUniqueConstraints)) {
-	for (idx in multiUniqueConstraints) {
-		let findByNames = multiUniqueFindByNames(multiUniqueConstraints[idx]);
-		let findByParameters = multiUniqueFindByParameters(multiUniqueConstraints[idx]);
-		let findByParameterNamesOnly = multiUniqueFindByParameterNamesOnly(multiUniqueConstraints[idx]);
-		let findByParameterNamesOnlyForLog = multiUniqueFindByParameterNamesOnlyForLog(multiUniqueConstraints[idx]);
-		let findByOtherEntity = multiUniqueFindByOtherEntity(multiUniqueConstraints[idx], entityClass);
+	for (idx3=0; idx3 < multiUniqueConstraints.length; idx3++) {
+		let findByNames = multiUniqueFindByNames(multiUniqueConstraints[idx3]);
+		let findByParameters = multiUniqueFindByParameters(multiUniqueConstraints[idx3], fields);
+//console.info('TRIFON::PRE-LAST-11 - findByParameters: ' +`${findByParameters}; `);
+		let findByParameterNamesOnly = multiUniqueFindByParameterNamesOnly(multiUniqueConstraints[idx3]);
+		let findByParameterNamesOnlyForLog = multiUniqueFindByParameterNamesOnlyForLog(multiUniqueConstraints[idx3]);
+		let findByOtherEntity = multiUniqueFindByOtherEntity(multiUniqueConstraints[idx3], entityClass, fields);
 _%>
     //@Trifon - multi-unique
     <%_ if (service === 'serviceImpl') { _%>

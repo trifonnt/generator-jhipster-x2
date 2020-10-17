@@ -17,6 +17,19 @@
  limitations under the License.
 -%><%
 	//@Trifon - multi-unique
+	// Find Field by field name.
+	findFieldByName = function(fieldNameToFind, fields) {
+	  for (idx in fields) {
+	    const field = fields[idx];
+	    const fieldName = field.fieldName;
+		if (fieldNameToFind === fieldName) {
+	      return field;
+		}
+	  }
+	  return null;
+	}
+
+	//@Trifon - multi-unique
 	multiUniqueFindByNames = function(multiUniqueConstraint) {
 		const rels = multiUniqueConstraint.fields;
 		let findByNames = "";
@@ -39,7 +52,7 @@
 		return findByNames;
 	}
 	//@Trifon - multi-unique
-	multiUniqueFindByParameters = function(multiUniqueConstraint) {
+	multiUniqueFindByParameters = function(multiUniqueConstraint, fields) {
 		const rels = multiUniqueConstraint.fields;
 		let findByNames = "";
 		let findByParameters = "";
@@ -52,16 +65,22 @@
 				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
 			} else {
 				mUniqueColumnName = rels[uIdx];
-				findByParameters = findByParameters.concat("String ").concat(firstToLower(columnNameToJavaFieldName(mUniqueColumnName)));
+				const fieldName = firstToLower(columnNameToJavaFieldName(mUniqueColumnName));
+				const field = findFieldByName(fieldName, fields);
+				const fieldType = field.fieldType;
+//				console.info('TRIFON - multiUniqueFindByParameters - ' +`field: ${field}; fieldName: ${fieldName}; fieldType: ${fieldType}`+ ';');
+				findByParameters = findByParameters.concat(fieldType).concat(" ").concat(fieldName);
 				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
 			}
 			findByNames = findByNames.concat( columnNameToJavaFieldName(mUniqueColumnName) );
 			if (uIdx != rels.length - 1) { findByNames = findByNames.concat("And"); }
 		}
+//		console.info('TRIFON - multiUniqueFindByParameters - ' +`return findByParameters: ${findByParameters}`+ ';');
 		return findByParameters;
 	}
 	//@Trifon - multi-unique
 	multiUniqueFindByParameterNamesOnly = function(multiUniqueConstraint) {
+//		console.info('TRIFON - multiUniqueFindByParameterNamesOnly - ' +` multiUniqueConstraint: ${multiUniqueConstraint}`+ ';');
 		const rels = multiUniqueConstraint.fields;
 		let findByParameters = "";
 		let uIdx = 0;
@@ -99,7 +118,7 @@
 		return findByParameters;
 	}
 	//@Trifon - multi-unique
-	multiUniqueFindByOtherEntity = function(multiUniqueConstraint, entityClass) {
+	multiUniqueFindByOtherEntity = function(multiUniqueConstraint, entityClass, fields) {
 		const rels = multiUniqueConstraint.fields;
 		let findByParameters = "";
 		let uIdx = 0;
@@ -111,7 +130,15 @@
 				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
 			} else {
 				mUniqueColumnName = rels[uIdx];
-				findByParameters = findByParameters.concat("param").concat(entityClass).concat(".get").concat(columnNameToJavaFieldName(mUniqueColumnName)).concat("()");
+				
+				const fieldName = firstToLower(columnNameToJavaFieldName(mUniqueColumnName));
+				const field = findFieldByName(fieldName, fields);
+				const fieldType = field.fieldType;
+				let getMethod = ".get";
+				if (fieldType === "Boolean") {
+					getMethod = ".is";
+				}
+				findByParameters = findByParameters.concat("param").concat(entityClass).concat(getMethod).concat(columnNameToJavaFieldName(mUniqueColumnName)).concat("()");
 				if (uIdx != rels.length - 1) { findByParameters = findByParameters.concat(", "); }
 			}
 		}

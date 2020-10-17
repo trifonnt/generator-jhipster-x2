@@ -88,7 +88,7 @@ public interface <%= entityClass %>Repository extends <% if (databaseType === 's
 if (hasMultiUniqueConstraints(multiUniqueConstraints)) {
 	for (idx in multiUniqueConstraints) {
 		let findByNames = multiUniqueFindByNames(multiUniqueConstraints[idx]);
-		let findByParameters = multiUniqueFindByParameters(multiUniqueConstraints[idx]);
+		let findByParameters = multiUniqueFindByParameters(multiUniqueConstraints[idx], fields);
 _%>
 
     Optional<<%= entityClass %>> findOneBy<%= findByNames %>(<%= findByParameters %>);
