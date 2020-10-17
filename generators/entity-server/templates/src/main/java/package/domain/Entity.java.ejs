@@ -293,7 +293,11 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     @Property("<%=fieldNameUnderscored %>")
     <%_ } _%>
     <%_ if (fields[idx].defaultValueConstant && fields[idx].defaultValueConstant !== '') {
-        defaultValueConstant = ' = ' + fields[idx].defaultValueConstant + ';'
+    	if (fields[idx].fieldType === "String") {
+        	defaultValueConstant = ` = "` + fields[idx].defaultValueConstant + `";`
+        } else {
+        	defaultValueConstant = ' = ' + fields[idx].defaultValueConstant + ';'
+        }
       } _%>
     <%_ if (fieldTypeBlobContent !== 'text') { _%>
     private <%= fieldType %> <%= fieldName %><%= defaultValueConstant %> //@Trifon

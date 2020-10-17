@@ -127,7 +127,11 @@ public class <%= asDto(entityClass) %> implements Serializable {
     <%_ if (fieldTypeBlobContent !== 'text') {
     let defaultValueConstant = ';';
     if (fields[idx].defaultValueConstant && fields[idx].defaultValueConstant !== '') {
-      defaultValueConstant = ' = ' + fields[idx].defaultValueConstant + ';'
+      if (fields[idx].fieldType === "String") {
+      	defaultValueConstant = ` = "` + fields[idx].defaultValueConstant + `";`
+      } else {
+       	defaultValueConstant = ' = ' + fields[idx].defaultValueConstant + ';'
+      }
     }
     _%>
     private <%= fieldType %> <%= fieldName %><%- defaultValueConstant %> //@Trifon

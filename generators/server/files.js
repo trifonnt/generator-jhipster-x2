@@ -1242,6 +1242,10 @@ const serverFiles = {
                     file: 'package/web/rest/errors/FieldErrorVM.java',
                     renameTo: generator => `${generator.javaDir}web/rest/errors/FieldErrorVM.java`,
                 },
+                {
+                    file: 'package/web/rest/errors/EntityNotFoundException.java',
+                    renameTo: generator => `${generator.javaDir}web/rest/errors/EntityNotFoundException.java`,
+                }, /* Trifon */
             ],
         },
         {
@@ -1275,6 +1279,18 @@ const serverFiles = {
                     file: 'package/web/rest/package-info.java',
                     renameTo: generator => `${generator.javaDir}web/rest/package-info.java`,
                 },
+                {
+                    file: 'package/web/rest/common/JsonPatcher.java',
+                    renameTo: generator => `${generator.javaDir}web/rest/common/JsonPatcher.java`,
+                }, /* Trifon */
+                {
+                    file: 'package/web/rest/common/JsonMergePatcher.java',
+                    renameTo: generator => `${generator.javaDir}web/rest/common/JsonMergePatcher.java`,
+                }, /* Trifon */
+                {
+                    file: 'package/web/rest/common/RestMediaType.java',
+                    renameTo: generator => `${generator.javaDir}web/rest/common/RestMediaType.java`,
+                }, /* Trifon */
             ],
         },
         {
