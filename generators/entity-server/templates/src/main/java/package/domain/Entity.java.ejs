@@ -198,7 +198,16 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     <%_ if (databaseType === 'sql' && isUsingMapsId === false) { _%>
         <%_ if (prodDatabaseType === 'mysql' || prodDatabaseType === 'mariadb') { _%>
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-        <%_ }  else { _%>
+        <%_ }  else { 
+            if (idGenerationStrategy === 'sequence') { _%>
+//@Trifon
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+    @SequenceGenerator(name = "sequenceGenerator")
+//    @GeneratedValue(strategy = GenerationType.TABLE, generator = "<%= entityTableName %>_id_generator")
+//    @TableGenerator(name = "<%= entityTableName %>_id_generator"
+//    	, table = "identifier", pkColumnName = "sequence_name"
+//    	, valueColumnName = "next_value", pkColumnValue = "<%= entityTableName %>_ids", allocationSize = 1)
+        <%_ } else if (idGenerationStrategy === 'table') { _%>
 //@Trifon
 //    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
 //    @SequenceGenerator(name = "sequenceGenerator")
@@ -206,7 +215,7 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     @TableGenerator(name = "<%= entityTableName %>_id_generator"
     	, table = "identifier", pkColumnName = "sequence_name"
     	, valueColumnName = "next_value", pkColumnValue = "<%= entityTableName %>_ids", allocationSize = 1)
-        <%_ } _%>
+        <%_ } } _%>
     <%_ } _%>
     <%_ if (databaseType === 'couchbase' && !embedded) { _%>
     @GeneratedValue(strategy = UNIQUE, delimiter = ID_DELIMITER)

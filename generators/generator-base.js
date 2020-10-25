@@ -1269,6 +1269,7 @@ module.exports = class extends PrivateBase {
         context.relationships = context.fileData.relationships || [];
         context.fields = context.fileData.fields || [];
         context.multiUniqueConstraints = context.fileData.multiUniqueConstraints || []; //@Trifon
+        context.idGenerationStrategy = context.fileData.idGenerationStrategy; //@Trifon - MAYBE  || 'sequence'
         context.multiUniqueConstraints.forEach(multiUnique => {
             context.multiUniqueConstraintChoices.push({ name: multiUnique.constraintName, value: multiUnique.constraintName });
         });

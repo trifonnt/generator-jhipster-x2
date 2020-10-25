@@ -293,6 +293,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
                     context.haveFieldWithJavadoc = false;
                     context.relationships = [];
                     context.multiUniqueConstraints = []; //@Trifon
+                    context.idGenerationStrategy = 'sequence'; //@Trifon
                     context.pagination = 'no';
                     context.validation = false;
                     context.dto = 'no';
@@ -667,6 +668,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 storageData.relationships = context.relationships;
                 storageData.fields = context.fields;
                 storageData.multiUniqueConstraints = context.multiUniqueConstraints; //@Trifon
+                storageData.idGenerationStrategy = context.idGenerationStrategy; //@Trifon
                 storageData.changelogDate = context.changelogDate;
                 storageData.dto = context.dto;
                 storageData.searchEngine = context.searchEngine;
@@ -760,6 +762,10 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 context.differentTypes = [context.entityClass];
                 if (!context.relationships) {
                     context.relationships = [];
+                }
+                //@Trifon
+                if (!context.idGenerationStrategy) {
+                    context.idGenerationStrategy = 'sequence';
                 }
                 //@Trifon
                 if (!context.multiUniqueConstraints) {

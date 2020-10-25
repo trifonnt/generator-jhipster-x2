@@ -1,4 +1,17 @@
-= Steps when installing generator-x2
+= Steps when installing generator-jhipster
+$ cd /workspace
+$ mkdir marketplace
+$ cd marketplace
+$ npm link generator-jhipster
+
+$ npm link generator-jhipster-entity-audit
+$ sudo npm install -g generator-jhipster-entity-audit
+
+# Start JHipster generator
+$ jhipster
+
+
+= Steps when installing generator-jhipster-x2
 $ sudo npm install -g generator-jhipster-x2
 ## Show which version is installed
 $ jhipster-x2 --version
@@ -32,3 +45,11 @@ $ npm link generator-vue
 $ yo vue:masterSlave Dokumenti EDocument DocumentComment 1253
    URL
  - http://localhost:8888/entities/masterslave/Dokumenti/new/1253
+
+
+= When we want to have server context path
+ -- application.properties
+server:
+  servlet:
+#    contextPath: /v1  # @Trifon - if we want to have different path
+ 
