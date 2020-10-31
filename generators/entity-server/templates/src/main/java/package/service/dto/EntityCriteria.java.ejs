@@ -104,6 +104,7 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
 
     private <%- filterVariable.filterType %> <%= filterVariable.name %>;
 <%_ }); _%>
+<%_ if (enableEntityAudit) { _%>
     //@Trifon
     private StringFilter createdBy;
     //@Trifon
@@ -112,6 +113,7 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
     private InstantFilter createdDate;
     //@Trifon
     private InstantFilter lastModifiedDate;
+<%_ } _%>
 
     public <%= entityClass %>Criteria() {
     }
@@ -120,10 +122,13 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
 <%_ filterVariables.forEach((filterVariable) => { _%>
         this.<%= filterVariable.name %> = other.<%= filterVariable.name %> == null ? null : other.<%= filterVariable.name %>.copy();
 <%_ }); _%>
+<%_ if (enableEntityAudit) { _%>
+		//@Trifon - entity Audit
         this.createdBy = other.createdBy == null ? null : other.createdBy.copy();
         this.lastModifiedBy = other.lastModifiedBy == null ? null : other.lastModifiedBy.copy();
         this.createdDate = other.createdDate == null ? null : other.createdDate.copy();
         this.lastModifiedDate = other.lastModifiedDate == null ? null : other.lastModifiedDate.copy();
+<%_ } _%>
     }
 
     @Override
@@ -141,7 +146,8 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
     }
 
 <%_ }); _%>
-    //@Trifon
+<%_ if (enableEntityAudit) { _%>
+    //@Trifon - entity audit
     public StringFilter getCreatedBy() {
 		return createdBy;
 	}
@@ -169,6 +175,7 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
 	public void setLastModifiedDate(InstantFilter lastModifiedDate) {
 		this.lastModifiedDate = lastModifiedDate;
 	}
+<%_ } _%>
 
     @Override
     public boolean equals(Object o) {
@@ -183,10 +190,11 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
 <%_ filterVariables.forEach((filterVariable, index) => { _%>
     <%_ if (filterVariables.length === index + 1) { _%>
             Objects.equals(<%= filterVariable.name %>, that.<%= filterVariable.name %>)
+<%_ if (enableEntityAudit) { _%>
            && Objects.equals(createdBy, that.createdBy) && //@Trifon
             Objects.equals(lastModifiedBy, that.lastModifiedBy) && //@Trifon
             Objects.equals(createdDate, that.createdDate) && //@Trifon
-            Objects.equals(lastModifiedDate, that.lastModifiedDate) //@Trifon
+            Objects.equals(lastModifiedDate, that.lastModifiedDate) //@Trifon <%_ } _%>
             ;
     <%_ } else { _%>
             Objects.equals(<%= filterVariable.name %>, that.<%= filterVariable.name %>) &&
@@ -200,10 +208,11 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
 <%_ filterVariables.forEach((filterVariable, index) => { _%>
     <%_ if (filterVariables.length === (index + 1)) { _%>
         <%= filterVariable.name %>
+<%_ if (enableEntityAudit) { _%>
 		, createdBy // @Trifon
 		, lastModifiedBy //@Trifon
 		, createdDate //@Trifon
-		, lastModifiedDate //@Trifon
+		, lastModifiedDate //@Trifon <%_ } _%>
     <%_ } else { _%>
         <%= filterVariable.name %>,
     <%_ } _%>
@@ -218,10 +227,12 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
 <%_ filterVariables.forEach((field) => { _%>
                 (<%= field.name %> != null ? "<%= field.name %>=" + <%= field.name %> + ", " : "") +
 <%_ }); _%>
+<%_ if (enableEntityAudit) { _%>
             (createdBy != null ? "createdBy=" + createdBy + ", " : "") +
             (lastModifiedBy != null ? "lastModifiedBy=" + lastModifiedBy + ", " : "") +
             (createdDate != null ? "createdDate=" + createdDate + ", " : "") +
             (lastModifiedDate != null ? "lastModifiedDate=" + lastModifiedDate + ", " : "") +
+<%_ } _%>
             "}";
     }
 

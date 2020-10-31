@@ -44,7 +44,7 @@ _%>
 <%_ if (service === 'serviceImpl') { _%>
 import <%= packageName %>.service.<%= entityClass %>Service;
 <%_ } _%>
-<%_ if (idGenerationStrategy === 'table') { _%>
+<%_ if (idGenerationStrategy === 'table' || hasFieldWithSequence) { _%>
 import <%= packageName %>.service.IdentifierService; //@Trifon-sequence
 import <%= packageName %>.domain.Identifier; //@Trifon-sequence
 <%_ } _%>
@@ -59,13 +59,13 @@ import <%= packageName %>.repository.search.<%= entityClass %>SearchRepository;
 <%_ } _%>
 <%_ if (dto === 'mapstruct') { _%>
 import <%= packageName %>.service.dto.<%= asDto(entityClass) %>;
-    <%_ if (idGenerationStrategy === 'table') { _%>
+    <%_ if (idGenerationStrategy === 'table' || hasFieldWithSequence) { _%>
 import <%= packageName %>.service.dto.IdentifierDTO; //@Trifon-sequence
 import <%= packageName %>.service.mapper.IdentifierMapper; //@Trifon-sequence
     <%_ } _%>
 import <%= packageName %>.service.mapper.<%= entityClass %>Mapper;
 <%_ } _%>
-<%_ if (idGenerationStrategy === 'table') { _%>
+<%_ if (idGenerationStrategy === 'table' || hasFieldWithSequence) { _%>
 import <%= packageName %>.service.util.SequenceUtil; //@Trifon-sequence
 <%_ } _%>
 import <%= packageName %>.service.util.ParseUtil; //@Trifon-import
@@ -79,7 +79,7 @@ import java.time.format.DateTimeFormatter; //@Trifon
 import java.time.format.DateTimeFormatterBuilder; //@Trifon
 import java.time.temporal.ChronoField; //@Trifon
 
-<%_ if (idGenerationStrategy === 'table') { _%>
+<%_ if (idGenerationStrategy === 'table' || hasFieldWithSequence) { _%>
 import org.springframework.beans.factory.annotation.Autowired; //@Trifon-sequence
 <%_ } _%>
 <%_ if (pagination !== 'no' || fieldsContainOwnerManyToMany === true) { _%>
@@ -132,7 +132,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
     private final Logger log = LoggerFactory.getLogger(<%= serviceClassName %>.class);
 
 	//@Trifon - sequence
-<%_ if (idGenerationStrategy === 'table') { _%>
+<%_ if ((idGenerationStrategy === 'table' || hasFieldWithSequence) && ('Identifier' !== asEntity(entityClass))) { _%>
 	@Autowired
 	private IdentifierService identifierService;
 	@Autowired
