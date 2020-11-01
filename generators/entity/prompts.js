@@ -691,7 +691,7 @@ function askForField(done) {
                 return false;
             },
             type: 'input',
-            name: 'fieldType',
+            name: 'enumType', //Trifon - Fix ENUM! Taken from version.6.10.4
             validate: input => {
                 if (input === '') {
                     return 'Your class name cannot be empty.';
@@ -1008,7 +1008,7 @@ function askForField(done) {
                 readOnlyForRole: props.readOnlyForRole, //@Trifon
                 defaultValueConstant: props.defaultValueConstant, //@Trifon
                 fieldSequence: props.fieldSequence, //@Trifon
-                fieldType: props.fieldType,
+                fieldType: props.enumType || props.fieldType, //@Trifon-taken from v6.10.4
                 visibleInTableMode: props.visibleInTableMode, //@Trifon
                 fieldTypeBlobContent: props.fieldTypeBlobContent,
                 fieldValues: props.fieldValues,
