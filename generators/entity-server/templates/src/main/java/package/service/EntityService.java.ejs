@@ -32,6 +32,13 @@ import <%= packageName %>.domain.<%= asEntity(entityClass) %>; //@Trifon
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>Builder; //@Trifon
 <%_ } _%>
+<%_ //@Trifon-ENUM
+for (idx in fields) {
+  const fieldType = fields[idx].fieldType;
+  const fieldValues = fields[idx].fieldValues;
+  if (typeof fieldValues !== 'undefined') { _%>
+import <%= packageName %>.domain.enumeration.<%= fieldType %>; //@Trifon
+<%_ } } _%>
 <%_ if (pagination !== 'no' || fieldsContainOwnerManyToMany === true) { _%>
 
     <%_ if (!reactive) { _%>

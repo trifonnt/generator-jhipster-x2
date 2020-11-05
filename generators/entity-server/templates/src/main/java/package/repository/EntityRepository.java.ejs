@@ -19,6 +19,13 @@
 package <%= packageName %>.repository;
 
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
+<%_ //@Trifon-ENUM
+for (idx in fields) {
+  const fieldType = fields[idx].fieldType;
+  const fieldValues = fields[idx].fieldValues;
+  if (typeof fieldValues !== 'undefined') { _%>
+import <%= packageName %>.domain.enumeration.<%= fieldType %>; //@Trifon
+<%_ } } _%>
 
 <%_ if (fieldsContainOwnerManyToMany) { _%>
 import org.springframework.data.domain.Page;

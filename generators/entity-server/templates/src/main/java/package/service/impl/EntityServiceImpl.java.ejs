@@ -50,6 +50,14 @@ import <%= packageName %>.domain.Identifier; //@Trifon-sequence
 <%_ } _%>
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
 import <%= packageName %>.domain.<%= entityClass %>Builder; //@Trifon
+<%_ //@Trifon-ENUM
+for (idx in fields) {
+  const fieldType = fields[idx].fieldType;
+  const fieldValues = fields[idx].fieldValues;
+  if (typeof fieldValues !== 'undefined') { _%>
+import <%= packageName %>.domain.enumeration.<%= fieldType %>; //@Trifon
+<%_ }
+} _%>
 import <%= packageName %>.repository.<%= entityClass %>Repository;
 <%_ if (isUsingMapsId === true) { _%>
 import <%= packageName %>.repository.<%= mapsIdAssoc.otherEntityNameCapitalized %>Repository;
@@ -464,11 +472,12 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 			.appendPattern("yyyy-MM-dd")
 			.parseDefaulting(ChronoField.NANO_OF_DAY, 0)
 			.toFormatter()
-			.withZone(ZoneId.systemDefault()); // ZoneId.of("Europe/Sofia")
+			.withZone(ZoneId.systemDefault()); // ZoneId.of("Europe/Sofia") --TRIFON
 
 <%_ let numFields = 0;
     for (idx2 in fields) {
       let fieldType2 = fields[idx2].fieldType;
+      const fieldValues = fields[idx2].fieldValues;
       const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
       const fieldName2 = fields[idx2].fieldName;
       const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
@@ -502,6 +511,10 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
         columnValue = 'Boolean.valueOf(columns['+ idx2 +'])';
       } else if (fieldType2.toLowerCase() === 'instant') {
         columnValue = 'FMT.parse(columns['+ idx2 +'], Instant::from)';
+      }
+      // Handle ENUM fields
+      if (typeof fieldValues !== 'undefined') {
+        columnValue = fieldType2 + '.valueOf(columns['+ idx2 + '])';
       }
       _%>
 		<%= fieldType2 %> <%= fieldName2 %> = null;
@@ -608,6 +621,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 
 <%_ for (idx2 in fields) {
       let fieldType2 = fields[idx2].fieldType;
+      const fieldValues = fields[idx2].fieldValues;
       const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
       const fieldName2 = fields[idx2].fieldName;
       const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
@@ -649,6 +663,11 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
       } else if (fieldType2.toLowerCase() === 'instant') {
         prefix = "FMT.parse(";
         suffix = ", Instant::from)";
+      }
+      // Handle ENUM fields
+      if (typeof fieldValues !== 'undefined') {
+        prefix = fieldType2 + ".valueOf(";
+        suffix = ")";
       }
       _%>
 		<%= fieldType2 %> <%= fieldName2 %> = null;
@@ -790,11 +809,12 @@ _%>
 			.appendPattern("yyyy-MM-dd")
 			.parseDefaulting(ChronoField.NANO_OF_DAY, 0)
 			.toFormatter()
-			.withZone(ZoneId.systemDefault()); // ZoneId.of("Europe/Sofia")
+			.withZone(ZoneId.systemDefault()); // ZoneId.of("Europe/Sofia")--Trifon
 
 <%_ let numFields = 0;
     for (idx2 in fields) {
       let fieldType2 = fields[idx2].fieldType;
+      const fieldValues = fields[idx2].fieldValues;
       const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
       const fieldName2 = fields[idx2].fieldName;
       const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
@@ -828,6 +848,10 @@ _%>
         columnValue = 'Boolean.valueOf(columns['+ idx2 +'])';
       } else if (fieldType2.toLowerCase() === 'instant') {
         columnValue = 'FMT.parse(columns['+ idx2 +'], Instant::from)';
+      }
+      // Handle ENUM fields
+      if (typeof fieldValues !== 'undefined') {
+        columnValue = fieldType2 + '.valueOf(columns['+ idx2 + '])';
       }
       _%>
 		<%= fieldType2 %> <%= fieldName2 %> = null;
@@ -928,6 +952,7 @@ _%>
 
 <%_ for (idx2 in fields) {
       let fieldType2 = fields[idx2].fieldType;
+      const fieldValues = fields[idx2].fieldValues;
       const fieldTypeBlobContent2 = fields[idx2].fieldTypeBlobContent;
       const fieldName2 = fields[idx2].fieldName;
       const fieldInJavaBeanMethod2 = fields[idx2].fieldInJavaBeanMethod;
@@ -969,6 +994,11 @@ _%>
       } else if (fieldType2.toLowerCase() === 'instant') {
         prefix = "FMT.parse(";
         suffix = ", Instant::from)";
+      }
+      // Handle ENUM fields
+      if (typeof fieldValues !== 'undefined') {
+        prefix = fieldType2 + ".valueOf(";
+        suffix = ")";
       }
       _%>
 		<%= fieldType2 %> <%= fieldName2 %> = null;
