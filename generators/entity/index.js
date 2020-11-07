@@ -764,7 +764,11 @@ class EntityGenerator extends BaseBlueprintGenerator {
                     context.relationships = [];
                 }
                 //@Trifon
-                context.enableEntityAudit = false;
+                if (_.isUndefined(context.enableEntityAudit)) {
+                	context.enableEntityAudit = false;
+                } else {
+                	context.enableEntityAudit = context.enableEntityAudit;
+                }
                 if (!context.idGenerationStrategy) {
                     context.idGenerationStrategy = 'sequence';
                 }

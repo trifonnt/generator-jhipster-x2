@@ -194,8 +194,9 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
            && Objects.equals(createdBy, that.createdBy) && //@Trifon
             Objects.equals(lastModifiedBy, that.lastModifiedBy) && //@Trifon
             Objects.equals(createdDate, that.createdDate) && //@Trifon
-            Objects.equals(lastModifiedDate, that.lastModifiedDate) //@Trifon <%_ } _%>
-            ;
+            Objects.equals(lastModifiedDate, that.lastModifiedDate) //@Trifon
+<%_       } _%>
+          ;
     <%_ } else { _%>
             Objects.equals(<%= filterVariable.name %>, that.<%= filterVariable.name %>) &&
     <%_ } _%>
@@ -212,7 +213,8 @@ public class <%= entityClass %>Criteria implements Serializable, Criteria {
 		, createdBy // @Trifon
 		, lastModifiedBy //@Trifon
 		, createdDate //@Trifon
-		, lastModifiedDate //@Trifon <%_ } _%>
+		, lastModifiedDate //@Trifon
+      <%_ } _%>
     <%_ } else { _%>
         <%= filterVariable.name %>,
     <%_ } _%>
