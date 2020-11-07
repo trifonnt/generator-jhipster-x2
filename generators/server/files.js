@@ -166,6 +166,14 @@ const serverFiles = {
         {
             templates: [{ file: 'checkstyle.xml', options: { interpolate: INTERPOLATE_REGEX } }],
         },
+        {//@Trifon - shell scripts
+            templates: [
+                { file: 'script-01-get_auth_token-DEV-admin.sh', method: 'copy', noEjs: true },
+                { file: 'script-01-get_auth_token-DEV-user.sh', method: 'copy', noEjs: true },
+                { file: 'script-02-import-all-initial-records.sh', method: 'copy', noEjs: true },
+                { file: 'script-03-import-all-fake-records.sh', method: 'copy', noEjs: true },
+            ],
+        },
         {
             condition: generator => generator.buildTool === 'gradle',
             templates: [

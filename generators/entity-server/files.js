@@ -90,7 +90,38 @@ const serverFiles = {
         },
     ],
     fakeData: [
-        {
+    	//@Trifon - shell scripts
+    	{
+            condition: generator => generator.databaseType === 'sql' && !generator.skipFakeData && !generator.skipDbChangelog,
+//            path: SERVER_MAIN_RES_DIR,
+            templates: [
+                {
+                    file: 'shell-scripts/fake/import-entity.sh',
+                    options: {
+                        interpolate: INTERPOLATE_REGEX,
+                        context: {
+                            getRecentForLiquibase: liquibaseUtils.getRecentDateForLiquibase,
+                            faker,
+                            randexp,
+                        },
+                    },
+                    renameTo: generator => `shell-scripts/fake/import-${generator.asEntity(generator.entityClass)}.sh`,
+                },
+                {
+                    file: 'shell-scripts/initial/import-entity.sh',
+                    options: {
+                        interpolate: INTERPOLATE_REGEX,
+                        context: {
+                            getRecentForLiquibase: liquibaseUtils.getRecentDateForLiquibase,
+                            faker,
+                            randexp,
+                        },
+                    },
+                    renameTo: generator => `shell-scripts/initial/import-${generator.asEntity(generator.entityClass)}.sh`,
+                },
+            ],
+        },
+    	{
             condition: generator => generator.databaseType === 'sql' && !generator.skipFakeData && !generator.skipDbChangelog,
             path: SERVER_MAIN_RES_DIR,
             templates: [
