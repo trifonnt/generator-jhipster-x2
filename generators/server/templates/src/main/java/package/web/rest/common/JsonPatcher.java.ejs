@@ -23,7 +23,7 @@ public class JsonPatcher {
 		this.mapper = mapper;
 	}
 
-	public <T> Optional patch(String json, @NotNull @Valid T target) {
+	public <T> Optional<?> patch(String json, @NotNull @Valid T target) {
 		JsonNode patchedNode = null;
 		try {
 			final JsonPatch patch = mapper.readValue(json, JsonPatch.class);

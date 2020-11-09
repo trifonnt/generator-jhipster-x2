@@ -23,7 +23,7 @@ public class JsonMergePatcher {
 		this.mapper = mapper;
 	}
 
-	public <T> Optional mergePatch(String json, @NotNull @Valid T target) {
+	public <T> Optional<?> mergePatch(String json, @NotNull @Valid T target) {
 		JsonNode patchedNode = null;
 		try {
 			final JsonMergePatch patch = mapper.readValue(json, JsonMergePatch.class);
