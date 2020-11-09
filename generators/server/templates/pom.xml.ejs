@@ -248,10 +248,21 @@
 
 		<!-- @Trifon -->
 		<!-- https://github.com/trifonnt/rest-patch-sample -->
-		<dependency>
+		<!--dependency>
 			<groupId>com.github.fge</groupId>
 			<artifactId>json-patch</artifactId>
 			<version>1.9</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency-->
+		<dependency>
+			<groupId>com.github.java-json-tools</groupId>
+			<artifactId>json-patch</artifactId>
+			<version>1.13</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
