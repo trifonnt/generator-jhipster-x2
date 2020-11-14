@@ -1,8 +1,8 @@
 @Trifon
 
--01.1) Create method which finds "field" by fieldName
++01.1) Create method which finds "field" by fieldName
 
--01.2) Set proper field type
++01.2) Set proper field type
    findByParameters = findByParameters.concat("String ").concat(firstToLower(columnNameToJavaFieldName(mUniqueColumnName)));
  - /generator-jhipster/generators/entity-server/templates/src/main/java/package/repository/EntityRepository.java.ejs
 

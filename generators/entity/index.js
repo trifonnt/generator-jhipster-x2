@@ -295,6 +295,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
                     context.multiUniqueConstraints = []; //@Trifon
                     context.idGenerationStrategy = 'sequence'; //@Trifon
                     context.numberOfFakeRows = 10; //@Trifon
+                    context.importByExpression = 'code'; //@Trifon
                     context.pagination = 'no';
                     context.validation = false;
                     context.dto = 'no';
@@ -671,6 +672,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 storageData.multiUniqueConstraints = context.multiUniqueConstraints; //@Trifon
                 storageData.idGenerationStrategy = context.idGenerationStrategy; //@Trifon
                 storageData.numberOfFakeRows = context.numberOfFakeRows; //@Trifon
+                storageData.importByExpression = context.importByExpression; //@Trifon
                 storageData.changelogDate = context.changelogDate;
                 storageData.dto = context.dto;
                 storageData.searchEngine = context.searchEngine;
@@ -784,6 +786,13 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 } else {
                 	context.numberOfFakeRows = context.numberOfFakeRows;
                 }
+                //@Trifon
+                if (_.isUndefined(context.importByExpression)) {
+                	context.importByExpression = 'code';
+                } else {
+                	context.importByExpression = context.importByExpression;
+                }
+
                 context.differentRelationships = {};
                 context.i18nToLoad = [context.entityInstance];
                 context.i18nKeyPrefix = `${context.angularAppName}.${context.entityTranslationKey}`;

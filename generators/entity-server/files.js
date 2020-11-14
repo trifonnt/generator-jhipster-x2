@@ -34,6 +34,11 @@ const SERVER_MAIN_RES_DIR = constants.SERVER_MAIN_RES_DIR;
 const TEST_DIR = constants.TEST_DIR;
 const SERVER_TEST_SRC_DIR = constants.SERVER_TEST_SRC_DIR;
 
+//@Trifon-helper function
+firstToLower = function firstToLower(str) {
+	return str.charAt(0).toLowerCase() + str.slice(1);
+}
+
 /**
  * The default is to use a file path string. It implies use of the template method.
  * For any other config an object { file:.., method:.., template:.. } can be used
@@ -105,7 +110,7 @@ const serverFiles = {
                             randexp,
                         },
                     },
-                    renameTo: generator => `shell-scripts/fake/import-${generator.asEntity(generator.entityClass)}.sh`,
+                    renameTo: generator => `shell-scripts/fake/import-${firstToLower(generator.asEntity(generator.entityClass))}.sh`,
                 },
                 {
                     file: 'shell-scripts/initial/import-entity.sh',
@@ -117,7 +122,7 @@ const serverFiles = {
                             randexp,
                         },
                     },
-                    renameTo: generator => `shell-scripts/initial/import-${generator.asEntity(generator.entityClass)}.sh`,
+                    renameTo: generator => `shell-scripts/initial/import-${firstToLower(generator.asEntity(generator.entityClass))}.sh`,
                 },
             ],
         },
