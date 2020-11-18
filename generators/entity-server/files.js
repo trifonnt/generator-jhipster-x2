@@ -248,6 +248,11 @@ const serverFiles = {
                     file: 'package/service/impl/EntityServiceImpl.java',
                     renameTo: generator => `${generator.packageFolder}/service/impl/${generator.entityClass}ServiceImpl.java`,
                 },
+                //@Trifon
+                {
+                    file: 'package/service/impl/EntityServiceHelper.java',
+                    renameTo: generator => `${generator.packageFolder}/service/impl/${generator.entityClass}ServiceHelper.java`,
+                },
                 {
                     file: 'package/service/util/SequenceUtil.java',
                     renameTo: generator => `${generator.packageFolder}/service/util/SequenceUtil.java`,
@@ -265,6 +270,11 @@ const serverFiles = {
                 {
                     file: 'package/service/impl/EntityServiceImpl.java',
                     renameTo: generator => `${generator.packageFolder}/service/${generator.entityClass}Service.java`,
+                },
+                //@Trifon
+                {
+                    file: 'package/service/impl/EntityServiceHelper.java',
+                    renameTo: generator => `${generator.packageFolder}/service/impl/${generator.entityClass}ServiceHelper.java`,
                 },
                 {
                     file: 'package/service/util/SequenceUtil.java',

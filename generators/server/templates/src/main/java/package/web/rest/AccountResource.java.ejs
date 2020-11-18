@@ -38,12 +38,14 @@ import javax.servlet.http.HttpServletRequest;
 <%_ } _%>
 
 import java.security.Principal;
+import io.swagger.annotations.Api; //@Trifon
 
 /**
  * REST controller for managing the current user's account.
  */
 @RestController
 @RequestMapping("/api")
+@Api(tags={"account"}) //@Trifon
 public class AccountResource {
 
     private static class AccountResourceException extends RuntimeException {

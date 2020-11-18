@@ -151,6 +151,9 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 //	@Autowired
 //	private IdentifierMapper identifierMapper;
 <%_ } _%>
+	//@Trifon
+	@Autowired
+	private <%= entityClass %>ServiceHelper <%= entityInstance %>ServiceHelper;
 <%- include('../../common/inject_template', {asEntity, asDto, viaService: false, constructorName: serviceClassName, queryService: false, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: false}); -%>
 
 	//@Trifon - sequence
@@ -254,10 +257,16 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
 
 		setSequenceValue(<%= asEntity(entityInstance) %>); //@Trifon - sequence
 
+		boolean isNew = <%= entityInstance %>.getId() == null; //@Trifon
+		// @Trifon - BEFORE save listeners
+		<%= entityInstance %>ServiceHelper.beforeSave(<%= entityInstance %>, isNew);
+
 		<%= entityInstance %> = <%= entityInstance %>Repository.save(<%= entityInstance %>);
 		<%_ if (searchEngine === 'elasticsearch') { _%>
 		<%= entityInstance %>SearchRepository.save(<%= entityInstance %>);
 		<%_ } _%>
+		// @Trifon - AFTER save listeners
+		<%= entityInstance %>ServiceHelper.afterSave(<%= entityInstance %>, isNew);
 		return <%= entityInstance %>;
 	}
 
@@ -343,7 +352,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
     <%_ } _%>
     public <%- reactive ? 'Mono<Void>' : 'void' %> delete(<%= primaryKeyType %> id) {
         log.debug("Request to delete <%= entityClass %> by Id: {}", id);
-<%- include('../../common/delete_template', {viaService: false, fromResource: false}); -%>
+<%- include('../../common/delete_template_trifon', {viaService: false, fromResource: false}); -%>
     }
     <%_ if (searchEngine !== false) { _%>
 

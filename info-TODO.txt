@@ -1,10 +1,11 @@
 @Trifon
 
-+01.1) Create method which finds "field" by fieldName
-
-+01.2) Set proper field type
-   findByParameters = findByParameters.concat("String ").concat(firstToLower(columnNameToJavaFieldName(mUniqueColumnName)));
- - /generator-jhipster/generators/entity-server/templates/src/main/java/package/repository/EntityRepository.java.ejs
+-03) ElasticSearch, disable indexing of some fields
+   Disable indexing fields for all fields in the document in Elasticsearch
+ - https://stackoverflow.com/questions/40613586/disable-indexing-fields-for-all-fields-in-the-document-in-elasticsearch
+    @Field(type = FieldType.Text, index = false) //@Trifon-manual
+    private String content; //@Trifon
+ + https://www.baeldung.com/elasticsearch-jest
 
 
 +02) Implement sequence for some fields.
@@ -13,3 +14,11 @@
  + https://www.baeldung.com/spring-expression-language
 Expression expression = expressionParser.parseExpression("yearOfProduction > 2005");
 boolean result = expression.getValue(car, Boolean.class);
+
+
++01.2) Set proper field type
+   findByParameters = findByParameters.concat("String ").concat(firstToLower(columnNameToJavaFieldName(mUniqueColumnName)));
+ - /generator-jhipster/generators/entity-server/templates/src/main/java/package/repository/EntityRepository.java.ejs
+
+
++01.1) Create method which finds "field" by fieldName in JavaScript

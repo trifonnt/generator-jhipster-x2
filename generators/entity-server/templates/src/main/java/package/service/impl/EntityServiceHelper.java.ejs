@@ -1,0 +1,27 @@
+<%- include('../../common/functions.ejs') -%>
+package <%= packageName %>.service<% if (service === 'serviceImpl') { %>.impl<% } %>;
+
+import org.springframework.stereotype.Service;
+
+import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
+
+@Service
+public class <%= entityClass %>ServiceHelper {
+
+	public void beforeSave(<%= entityClass %> <%= entityInstance %>, boolean isNew) {
+		// TODO Auto-generated method stub
+	}
+
+	public void afterSave(<%= entityClass %> <%= entityInstance %>, boolean isNew) {
+		// TODO Auto-generated method stub
+	}
+
+	public void beforeDelete(Long id) {
+		// TODO Auto-generated method stub
+	}
+
+	public void afterDelete(Long id) {
+		// TODO Auto-generated method stub
+	}
+
+}
