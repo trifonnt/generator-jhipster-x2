@@ -1,6 +1,8 @@
 <%- include('../../common/functions.ejs') -%>
 package <%= packageName %>.service<% if (service === 'serviceImpl') { %>.impl<% } %>;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
