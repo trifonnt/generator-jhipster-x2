@@ -449,6 +449,7 @@ public class <%= entityClass %>Resource {
         const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
         const relationshipName = relationships[idx].relationshipName;
         const relationshipNamePlural = relationships[idx].relationshipNamePlural;
+        const relationshipNamePluralizedAndSpinalCased = _.kebabCase(relationshipNamePlural);
         const relationshipFieldName = relationships[idx].relationshipFieldName;
         const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
         const joinTableName = getJoinTableName(name, relationshipName, prodDatabaseType);
@@ -460,7 +461,7 @@ public class <%= entityClass %>Resource {
         const ownerSide = relationships[idx].ownerSide;
         if (relationshipType === 'one-to-many') { _%>
 
-    @GetMapping("/<%= entityApiUrl %>/{id}/<%= relationshipNamePlural %>/template")
+    @GetMapping("/<%= entityApiUrl %>/{id}/<%= relationshipNamePluralizedAndSpinalCased %>/template")
     public ResponseEntity<<%= otherEntityNameCapitalized %>DTO> get<%= firstToUpper(relationshipName) %>Template(@PathVariable Long id) {
         log.debug("REST request to get Template for <%= firstToUpper(relationshipNamePlural) %> in <%= entityClass %> : {}", id);
 

@@ -8,6 +8,10 @@ import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
 @Service
 public class <%= entityClass %>ServiceHelper {
 
+	@SuppressWarnings("unused")
+	private final Logger log = LoggerFactory.getLogger(<%= entityClass %>ServiceHelper.class);
+
+
 	public void beforeSave(<%= entityClass %> <%= entityInstance %>, boolean isNew) {
 		// TODO Auto-generated method stub
 	}
