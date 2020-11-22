@@ -3,31 +3,36 @@ package <%= packageName %>.service<% if (service === 'serviceImpl') { %>.impl<% 
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
+import <%= packageName %>.repository.<%= asEntity(entityClass) %>Repository;
 
 @Service
 public class <%= entityClass %>ServiceHelper {
 
-	@SuppressWarnings("unused")
 	private final Logger log = LoggerFactory.getLogger(<%= entityClass %>ServiceHelper.class);
+
+	@SuppressWarnings("unused")
+	@Autowired
+	private <%= entityClass %>Repository <%= entityInstance %>Repository;
 
 
 	public void beforeSave(<%= entityClass %> <%= entityInstance %>, boolean isNew) {
-		// TODO Auto-generated method stub
+		log.debug("BEFORE save <%= entityClass %>.id: {}; isNew: {}", <%= entityInstance %>.getId(), isNew);
 	}
 
 	public void afterSave(<%= entityClass %> <%= entityInstance %>, boolean isNew) {
-		// TODO Auto-generated method stub
+		log.debug("AFTER save <%= entityClass %>.id: {}; isNew: {}", <%= entityInstance %>.getId(), isNew);
 	}
 
 	public void beforeDelete(Long id) {
-		// TODO Auto-generated method stub
+		log.debug("BEFORE delete <%= entityClass %>.id: {}", id);
 	}
 
 	public void afterDelete(Long id) {
-		// TODO Auto-generated method stub
+		log.debug("AFTER delete <%= entityClass %>.id: {}", id);
 	}
 
 }
