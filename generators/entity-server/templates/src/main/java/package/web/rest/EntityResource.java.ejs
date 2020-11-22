@@ -465,7 +465,7 @@ public class <%= entityClass %>Resource {
     public ResponseEntity<<%= otherEntityNameCapitalized %>DTO> get<%= firstToUpper(relationshipName) %>Template(@PathVariable Long id) {
         log.debug("REST request to get Template for <%= firstToUpper(relationshipNamePlural) %> in <%= entityClass %> : {}", id);
 
-        Optional<<%= instanceType %>> <%= instanceName %> = <%= entityInstance %>Service.findOne(id).orElseThrow(() -> new EntityNotFoundException());
+        <%= instanceType %> <%= instanceName %> = <%= entityInstance %>Service.findOne(id).orElseThrow(() -> new EntityNotFoundException());
 
         <%= otherEntityNameCapitalized %>DTO <%= otherEntityName %>DTO = new <%= otherEntityNameCapitalized %>DTO();
         <%= otherEntityName %>DTO.set<%= firstToUpper(otherEntityRelationshipName) %>Id(<%= instanceName %>.getId());
