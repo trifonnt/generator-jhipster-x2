@@ -312,6 +312,9 @@ public class <%= entityClass %>Resource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/<%= entityApiUrl %>")
+    <%_ if (requiredRoleForUpdate) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForUpdate %> + "\")")
+    <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> update<%= entityClass %>(<% if (validation) { %>@Valid <% } %>@RequestBody <%= instanceType %> <%= instanceName %>) throws URISyntaxException {
         log.debug("REST request to update <%= entityClass %> : {}", <%= instanceName %>);
         if (<%= instanceName %>.getId() == null) {
@@ -361,6 +364,9 @@ public class <%= entityClass %>Resource {
     @PatchMapping(value = "/<%= entityApiUrl %>/{id}", 
     	consumes = RestMediaType.APPLICATION_PATCH_JSON_VALUE,
 		produces = MediaType.APPLICATION_JSON_VALUE)
+    <%_ if (requiredRoleForUpdate) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForUpdate %> + "\")")
+    <%_ } _%>
     public ResponseEntity<<%= instanceType %>> partialUpdate<%= entityClass %>(@PathVariable Long id, @RequestBody String patchCommand) {
         log.debug("REST request to PATCH <%= entityClass %> : {}", id);
 
@@ -402,6 +408,9 @@ public class <%= entityClass %>Resource {
     <%_ if (databaseType === 'sql' && isUsingMapsId === true && !viaService) { _%>
     @Transactional(readOnly = true)
     <%_ } _%>
+    <%_ if (requiredRoleForRead) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForRead %> + "\")")
+    <%_ } _%>
 <%- include('../../common/get_all_template', {asEntity, asDto, viaService}); -%>
 
     <%_ if (reactiveRepositories && pagination === 'no') { _%>
@@ -412,6 +421,9 @@ public class <%= entityClass %>Resource {
     @GetMapping(value = "/<%= entityApiUrl %>", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
     <%_ if (databaseType === 'sql' && isUsingMapsId === true && !viaService) { _%>
     @Transactional(readOnly = true)
+    <%_ } _%>
+    <%_ if (requiredRoleForRead) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForRead %> + "\")") //@Trifon
     <%_ } _%>
     public Flux<<%= instanceType %>> getAll<%= entityClassPlural %>AsStream() {
         log.debug("REST request to get all <%= entityClassPlural %> as a stream");
@@ -433,6 +445,9 @@ public class <%= entityClass %>Resource {
     <%_ if (databaseType === 'sql' && isUsingMapsId === true && !viaService) { _%>
     @Transactional(readOnly = true)
     <%_ } _%>
+    <%_ if (requiredRoleForRead) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForRead %> + "\")") //@Trifon
+    <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> get<%= entityClass %>(@PathVariable <%= primaryKeyType %> id) {
         log.debug("REST request to get <%= entityClass %> : {}", id);<%- include('../../common/get_template', {asEntity, asDto, viaService, returnDirectly:false}); -%>
         return ResponseUtil.wrapOrNotFound(<%= instanceName %>);
@@ -444,6 +459,9 @@ public class <%= entityClass %>Resource {
      * @return the ResponseEntity with status 200 (OK) and with body the <%= instanceName %>, or with status 404 (Not Found)
      */
     @GetMapping("/<%= entityApiUrl %>/template")
+    <%_ if (requiredRoleForCreate) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForCreate %> + "\")") //@Trifon
+    <%_ } _%>
     public ResponseEntity<<%= instanceType %>> getTemplate<%= entityClass %>() {
         log.debug("REST request to get Template for <%= entityClass %>");
 
@@ -471,6 +489,9 @@ public class <%= entityClass %>Resource {
         if (relationshipType === 'one-to-many') { _%>
 
     @GetMapping("/<%= entityApiUrl %>/{id}/<%= relationshipNamePluralizedAndSpinalCased %>/template")
+    <%_ if (requiredRoleForRead) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForRead %> + "\")") //@Trifon
+    <%_ } _%>
     public ResponseEntity<<%= otherEntityNameCapitalized %>DTO> get<%= firstToUpper(relationshipName) %>Template(@PathVariable Long id) {
         log.debug("REST request to get Template for <%= firstToUpper(relationshipNamePlural) %> in <%= entityClass %> : {}", id);
 
@@ -500,6 +521,9 @@ public class <%= entityClass %>Resource {
     <%_ if (reactive) { _%>
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     <%_ } _%>
+    <%_ if (requiredRoleForDelete) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForDelete %> + "\")") //@Trifon
+    <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<Void><% if (reactive) { %>><% } %> delete<%= entityClass %>(@PathVariable <%= primaryKeyType %> id) {
         log.debug("REST request to delete <%= entityClass %> : {}", id);
 <%- include('../../common/delete_template', {viaService: viaService, fromResource: true}); -%>
@@ -528,6 +552,9 @@ public class <%= entityClass %>Resource {
     //   Delete multiple records using REST
     // - https://stackoverflow.com/questions/21863326/delete-multiple-records-using-rest
     @DeleteMapping("/<%= entityApiUrl %>")
+    <%_ if (requiredRoleForDelete) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForDelete %> + "\")") //@Trifon
+    <%_ } _%>
     public ResponseEntity<Void> deleteMultiple<%= entityClassPlural %>(@Valid @RequestBody IdArrayDTO idArrayDTO) {
         log.debug("REST request to delete MULTIPLE <%= entityClassPlural %> : {}", idArrayDTO);
         for (Long id : idArrayDTO.getIds()) {
@@ -552,6 +579,9 @@ public class <%= entityClass %>Resource {
     <%_ } _%>
      * @return the result of the search.
      */
+    <%_ if (requiredRoleForRead) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForRead %> + "\")") //@Trifon
+    <%_ } _%>
     @GetMapping("/_search/<%= entityApiUrl %>")<%- include('../../common/search_template', {asEntity, asDto, viaService}); -%>
 
 <%_ } _%>
@@ -570,6 +600,9 @@ public class <%= entityClass %>Resource {
 	 * @throws URISyntaxException, IOException
 	 */
 	@PostMapping("/<%= entityApiUrl %>/import/by-<%= fieldName %>.csv")
+    <%_ if (requiredRoleForCreate) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForCreate %> + "\")") //@Trifon
+    <%_ } _%>
 	public ResponseEntity<String> import<%= entityClass %>By<%= fieldInJavaBeanMethod %>(@RequestParam("file") MultipartFile file) throws URISyntaxException, IOException {
 		if (!file.isEmpty()) {
 			log.debug("REST request to import <%= entityClass %> by <%= fieldName %> with file: {}", file);
@@ -634,6 +667,9 @@ _%>
 	 * @throws URISyntaxException, IOException
 	 */
 	@PostMapping("/<%= entityApiUrl %>/import/by-<%= resourceUrlName %>.csv")
+    <%_ if (requiredRoleForCreate) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForCreate %> + "\")") //@Trifon
+    <%_ } _%>
 	public ResponseEntity<String> import<%= entityClass %>By<%= findByNames %>(@RequestParam("file") MultipartFile file) throws URISyntaxException, IOException {
 		if (!file.isEmpty()) {
 			log.debug("REST request to import <%= entityClass %> by <%= findByNames %> with file: {}", file);
