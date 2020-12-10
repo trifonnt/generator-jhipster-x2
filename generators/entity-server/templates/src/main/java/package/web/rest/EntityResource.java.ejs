@@ -90,6 +90,9 @@ import <%= packageName %>.service.mapper.<%= entityClass %>Mapper;
 import <%= packageName %>.service.dto.<%= entityClass %>Criteria;
 import <%= packageName %>.service.<%= entityClass %>QueryService;
 <%_ } _%>
+<%_ if (requiredRoleForCreate || requiredRoleForRead || requiredRoleForUpdate || requiredRoleForDelete) { _%>
+import <%= packageName %>.security.AuthoritiesConstants; //@Trifon
+<%_ } _%>
 
 import io.github.jhipster.web.util.HeaderUtil;
 <%_ if (pagination !== 'no') { _%>
@@ -124,6 +127,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MediaType; //@Trifon
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired; //@Trifon
+<%_ if (requiredRoleForCreate || requiredRoleForRead || requiredRoleForUpdate || requiredRoleForDelete) { _%>
+import org.springframework.security.access.prepost.PreAuthorize; //@Trifon
+<%_ } _%>
 import org.springframework.web.multipart.MultipartFile; //@Trifon
 <%_ if (!viaService && !saveUserSnapshot) { _%>
 import org.springframework.transaction.annotation.Transactional;
@@ -138,8 +144,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 <%_ } _%>
 
-<%_ if (validation) { _%>
-import javax.validation.Valid;
+<%_ if (validation || !validation) { _%>
+import javax.validation.Valid; //@Trifon
 <%_ } _%>
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -230,6 +236,9 @@ public class <%= entityClass %>Resource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/<%= entityApiUrl %>")
+    <%_ if (requiredRoleForCreate) { _%>
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForCreate %> + "\")")
+    <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> create<%= entityClass %>(<% if (validation) { %>@Valid <% } %>@RequestBody <%= instanceType %> <%= instanceName %>) throws URISyntaxException {
         log.debug("REST request to save <%= entityClass %> : {}", <%= instanceName %>);
         if (<%= instanceName %>.getId() != null) {

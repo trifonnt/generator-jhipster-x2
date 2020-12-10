@@ -1276,6 +1276,10 @@ module.exports = class extends PrivateBase {
         context.multiUniqueConstraints.forEach(multiUnique => {
             context.multiUniqueConstraintChoices.push({ name: multiUnique.constraintName, value: multiUnique.constraintName });
         });
+        context.requiredRoleForCreate = context.fileData.requiredRoleForCreate; //@Trifon
+        context.requiredRoleForRead = context.fileData.requiredRoleForRead; //@Trifon
+        context.requiredRoleForUpdate = context.fileData.requiredRoleForUpdate; //@Trifon
+        context.requiredRoleForDelete = context.fileData.requiredRoleForDelete; //@Trifon
 
         context.haveFieldWithJavadoc = false;
         context.fields.forEach(field => {

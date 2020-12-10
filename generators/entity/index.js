@@ -296,6 +296,10 @@ class EntityGenerator extends BaseBlueprintGenerator {
                     context.idGenerationStrategy = 'sequence'; //@Trifon
                     context.numberOfFakeRows = 10; //@Trifon
                     context.importByExpression = 'code'; //@Trifon
+                    context.requiredRoleForCreate = false; //@Trifon
+                    context.requiredRoleForRead = false; //@Trifon
+                    context.requiredRoleForUpdate = false; //@Trifon
+                    context.requiredRoleForDelete = false; //@Trifon
                     context.pagination = 'no';
                     context.validation = false;
                     context.dto = 'no';
@@ -673,6 +677,11 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 storageData.idGenerationStrategy = context.idGenerationStrategy; //@Trifon
                 storageData.numberOfFakeRows = context.numberOfFakeRows; //@Trifon
                 storageData.importByExpression = context.importByExpression; //@Trifon
+                storageData.requiredRoleForCreate = context.requiredRoleForCreate; //@Trifon
+                storageData.requiredRoleForRead = context.requiredRoleForRead; //@Trifon
+                storageData.requiredRoleForUpdate = context.requiredRoleForUpdate; //@Trifon
+                storageData.requiredRoleForDelete = context.requiredRoleForDelete; //@Trifon
+
                 storageData.changelogDate = context.changelogDate;
                 storageData.dto = context.dto;
                 storageData.searchEngine = context.searchEngine;
@@ -791,6 +800,30 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 	context.importByExpression = 'code';
                 } else {
                 	context.importByExpression = context.importByExpression;
+                }
+                //@Trifon
+                if (_.isUndefined(context.requiredRoleForCreate)) {
+                	context.requiredRoleForCreate = false;
+                } else {
+                	context.requiredRoleForCreate = context.requiredRoleForCreate;
+                }
+                //@Trifon
+                if (_.isUndefined(context.requiredRoleForRead)) {
+                	context.requiredRoleForRead = false;
+                } else {
+                	context.requiredRoleForRead = context.requiredRoleForRead;
+                }
+                //@Trifon
+                if (_.isUndefined(context.requiredRoleForUpdate)) {
+                	context.requiredRoleForUpdate = false;
+                } else {
+                	context.requiredRoleForUpdate = context.requiredRoleForUpdate;
+                }
+                //@Trifon
+                if (_.isUndefined(context.requiredRoleForDelete)) {
+                	context.requiredRoleForDelete = false;
+                } else {
+                	context.requiredRoleForDelete = context.requiredRoleForDelete;
                 }
 
                 context.differentRelationships = {};
