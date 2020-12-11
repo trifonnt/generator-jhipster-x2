@@ -300,6 +300,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
                     context.requiredRoleForRead = false; //@Trifon
                     context.requiredRoleForUpdate = false; //@Trifon
                     context.requiredRoleForDelete = false; //@Trifon
+                    context.templateFactory = false; //@Trifon
                     context.pagination = 'no';
                     context.validation = false;
                     context.dto = 'no';
@@ -681,7 +682,8 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 storageData.requiredRoleForRead = context.requiredRoleForRead; //@Trifon
                 storageData.requiredRoleForUpdate = context.requiredRoleForUpdate; //@Trifon
                 storageData.requiredRoleForDelete = context.requiredRoleForDelete; //@Trifon
-
+                storageData.templateFactory = context.templateFactory; //@Trifon
+                
                 storageData.changelogDate = context.changelogDate;
                 storageData.dto = context.dto;
                 storageData.searchEngine = context.searchEngine;
@@ -824,6 +826,12 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 	context.requiredRoleForDelete = false;
                 } else {
                 	context.requiredRoleForDelete = context.requiredRoleForDelete;
+                }
+                //@Trifon
+                if (_.isUndefined(context.templateFactory)) {
+                	context.templateFactory = false;
+                } else {
+                	context.templateFactory = context.templateFactory;
                 }
 
                 context.differentRelationships = {};

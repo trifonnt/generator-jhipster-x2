@@ -1,0 +1,44 @@
+package <%= packageName %>.service.mapper.tmpl;
+<%_
+let existingMappings = [];
+let uuidMapMethod = false;
+let byteMapMethod = false;
+for (idx in relationships) {
+    if ((relationships[idx].relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) || relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)
+     || (relationships[idx].relationshipType === 'one-to-many' && relationships[idx].includeAsObjectInDTO === true) //@Trifon
+    ) {
+        // if the entity is mapped twice, we should implement the mapping once
+        if (!existingMappings.includes(relationships[idx].otherEntityNameCapitalized) && asEntity(relationships[idx].otherEntityNameCapitalized) !== asEntity(entityClass)) {
+            existingMappings.push(relationships[idx].otherEntityNameCapitalized);
+        }
+        let otherEntity = getExistingEntities().find(e => e.name === relationships[idx].otherEntityNameCapitalized);
+        if (otherEntity) {
+            let otherEntityField = otherEntity.definition.fields.find(f => f.fieldName === relationships[idx].otherEntityField);
+            if (otherEntityField) {
+                if (otherEntityField.fieldType === 'UUID') {
+                    uuidMapMethod = true;
+                }
+                if (otherEntityField.fieldType === 'byte[]') {
+                    byteMapMethod = true;
+                }
+            }
+        }
+    }
+}
+_%>
+
+import <%= packageName %>.service.dto.<%= asDto(entityClass) %>;
+import <%= packageName %>.service.dto.<%= asEntity(entityClass) %>TemplateDTO;
+
+import org.mapstruct.*;
+
+/**
+ * Mapper for the entity {@link <%= asEntity(entityClass) %>TemplateDTO} and its DTO {@link <%= asEntity(entityClass) %>DTO}.
+ */
+@Mapper(componentModel = "spring", uses = {})
+public interface <%= entityClass %>TmplMapper extends TmplMapper<<%= entityClass %>TemplateDTO, <%= entityClass %>DTO> {
+
+//	@Mapping(target = "images", ignore = true)
+	<%= entityClass %>DTO toDto(<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO);
+
+}

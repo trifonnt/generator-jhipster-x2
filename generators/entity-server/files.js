@@ -302,6 +302,15 @@ const serverFiles = {
                     file: 'package/service/mapper/EntityMapper.java',
                     renameTo: generator => `${generator.packageFolder}/service/mapper/${generator.entityClass}Mapper.java`,
                 },
+                //@Trifon
+                {
+                    file: 'package/service/mapper/tmpl/BaseTmplMapper.java',
+                    renameTo: generator => `${generator.packageFolder}/service/mapper/tmpl/TmplMapper.java`,
+                },
+                {
+                    file: 'package/service/mapper/tmpl/EntityTmplMapper.java',
+                    renameTo: generator => `${generator.packageFolder}/service/mapper/tmpl/${generator.entityClass}TmplMapper.java`,
+                },
             ],
         },
     ],

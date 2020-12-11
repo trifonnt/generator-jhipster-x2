@@ -42,6 +42,12 @@ import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
 <%_ } _%>
 <%_ if (service !== 'no') { _%>
 import <%= packageName %>.service.<%= entityClass %>Service;
+	<%_ if (templateFactory) { _%>
+import <%= packageName %>.service.<%= entityClass %>TemplateService; //@Trifon
+import <%= packageName %>.service.mapper.tmpl.<%= entityClass %>TmplMapper; //@Trifon
+import <%= packageName %>.service.UserService; //@Trifon
+import <%= packageName %>.domain.User; //@Trifon
+	<%_ } _%>
 <%_ } else { _%>
 import <%= packageName %>.repository.<%= entityClass %>Repository;
     <%_ if (isUsingMapsId === true) { _%>
@@ -187,9 +193,16 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class <%= entityClass %>Resource {
 
     private final Logger log = LoggerFactory.getLogger(<%= entityClass %>Resource.class);
-    //@Trifon
-    @Autowired
-    private JsonPatcher jsonPatcher;
+
+	@Autowired
+	private UserService userService; //@Trifon
+	@Autowired
+	private <%= entityClass %>TemplateService <%= entityInstance %>TemplateService; //@Trifon
+	@Autowired
+	private <%= entityClass %>TmplMapper <%= entityInstance %>TmplMapper; //@Trifon
+	//@Trifon
+	@Autowired
+	private JsonPatcher jsonPatcher;
 <%_ for (idx in relationships) {
         // @Trifon - relationship with Image entity
         const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
@@ -206,8 +219,8 @@ public class <%= entityClass %>Resource {
         const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
         const ownerSide = relationships[idx].ownerSide;
     if (relationshipType === 'one-to-many' && otherEntityName === 'image') { _%>
-    @Autowired
-    private ImageService imageService; //@Trifon
+	@Autowired
+	private ImageService imageService; //@Trifon
 <%_ } } _%>
 <%_ if (!readOnly) { _%>
 
@@ -453,24 +466,44 @@ public class <%= entityClass %>Resource {
         return ResponseUtil.wrapOrNotFound(<%= instanceName %>);
     }
 
-    /**
-     * GET  /<%= entityApiUrl %>/template : get the Template JSON for <%= entityInstance %>.
-     *
-     * @return the ResponseEntity with status 200 (OK) and with body the <%= instanceName %>, or with status 404 (Not Found)
-     */
-    @GetMapping("/<%= entityApiUrl %>/template")
-    <%_ if (requiredRoleForCreate) { _%>
-    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForCreate %> + "\")") //@Trifon
-    <%_ } _%>
-    public ResponseEntity<<%= instanceType %>> getTemplate<%= entityClass %>() {
-        log.debug("REST request to get Template for <%= entityClass %>");
+	/**
+	 * GET  /<%= entityApiUrl %>/template : get the Template JSON for <%= entityInstance %>.
+	 *
+	 * @return the ResponseEntity with status 200 (OK) and with body the <%= instanceName %>, or with status 404 (Not Found)
+	 */
+	@GetMapping("/<%= entityApiUrl %>/template")
+	<%_ if (requiredRoleForCreate) { _%>
+	@PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForCreate %> + "\")") //@Trifon
+	<%_ } _%>
+	public ResponseEntity<<%= instanceType %>> getTemplate<%= entityClass %>() {
+		log.debug("REST request to get Template for <%= entityClass %>");
 
-        <%= instanceType %> <%= instanceName %> = new <%= instanceType %>();
-        // Populate all automatically populated fields!
-//        <%= instanceName %>.setCode();
-
-        return ResponseEntity.ok().body(<%= instanceName %>);
-    }
+		<%= instanceType %> <%= instanceName %> = new <%= instanceType %>();
+		// Populate all automatically populated fields!
+<%_ if (templateFactory) { _%>
+		// Search for <%= entityClass %>Template by:
+		// 1) Currently loggedIn User
+		// 2) null or SystemUser
+		Optional<User> loggedInUser = userService.getUserWithAuthorities();
+		Optional<<%= entityClass %>TemplateDTO> optional<%= entityClass %>TemplateDTO = Optional.empty();
+		if (loggedInUser.isPresent()) {
+			optional<%= entityClass %>TemplateDTO = <%= entityInstance %>TemplateService.findOneByUserId(loggedInUser.get().getId());
+		}
+		if (optional<%= entityClass %>TemplateDTO.isEmpty()) {
+			optional<%= entityClass %>TemplateDTO = <%= entityInstance %>TemplateService.findOneByUserId(null);
+		}
+		if (optional<%= entityClass %>TemplateDTO.isPresent()) {
+			<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = optional<%= entityClass %>TemplateDTO.get();
+			// Convert <%= entityClass %>TemplateDTO to <%= entityClass %>DTO!!!
+			<%= instanceName %> = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
+		}
+		// TODO - Fields which are sequence controlled should be with <GENERATED>
+		if (<%= instanceName %>.getValue() == null || <%= instanceName %>.getValue().isEmpty()) {
+			<%= instanceName %>.setValue("<GENERATED>");
+		}
+<%_ } _%>
+		return ResponseEntity.ok().body(<%= instanceName %>);
+	}
 <%_ for (idx in relationships) {
         const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
         const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;

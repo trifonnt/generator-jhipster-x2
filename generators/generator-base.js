@@ -1280,6 +1280,7 @@ module.exports = class extends PrivateBase {
         context.requiredRoleForRead = context.fileData.requiredRoleForRead; //@Trifon
         context.requiredRoleForUpdate = context.fileData.requiredRoleForUpdate; //@Trifon
         context.requiredRoleForDelete = context.fileData.requiredRoleForDelete; //@Trifon
+        context.templateFactory = context.fileData.templateFactory; //@Trifon
 
         context.haveFieldWithJavadoc = false;
         context.fields.forEach(field => {
