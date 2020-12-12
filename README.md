@@ -35,6 +35,16 @@ List of new features added to JHipster:
 
 [x] Implemented PATCH method. Added new REST endpoint /api/ENTITY/{id}
 
+[x] Implemented POST for template entities. Added new REST endpoint POST /api/ENTITY/template
+
+[x] Implemented GET for template entities. Added new REST endpoint GET /api/ENTITY/template
+
+[x] Implemented PUT for template entities. Added new REST endpoint PUT /api/ENTITY/template
+
+[x] Implemented PATCH for template entities. Added new REST endpoint PATCH /api/ENTITY/template
+
+[x] Implemented DELETE for template entities. Added new REST endpoint DELETE /api/ENTITY/template
+
 [x] Added HTML5 mode. https://www.jhipster.tech/tips/010_tip_configuring_html_5_mode.html
 
 [] Different DB Sequence for each entity.
