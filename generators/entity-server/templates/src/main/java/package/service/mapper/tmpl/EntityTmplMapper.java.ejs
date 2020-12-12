@@ -36,9 +36,10 @@ import org.mapstruct.*;
  * Mapper for the entity {@link <%= asEntity(entityClass) %>TemplateDTO} and its DTO {@link <%= asEntity(entityClass) %>DTO}.
  */
 @Mapper(componentModel = "spring", uses = {})
-public interface <%= entityClass %>TmplMapper extends TmplMapper<<%= entityClass %>TemplateDTO, <%= entityClass %>DTO> {
+public interface <%= entityClass %>TmplMapper extends TmplMapper<<%= entityClass %>DTO, <%= entityClass %>TemplateDTO> {
 
 //	@Mapping(target = "images", ignore = true)
 	<%= entityClass %>DTO toDto(<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO);
 
+	<%= entityClass %>TemplateDTO toTemplate(<%= entityClass %>DTO <%= entityInstance %>DTO);
 }

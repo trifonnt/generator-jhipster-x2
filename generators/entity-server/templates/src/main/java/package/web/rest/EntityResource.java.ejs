@@ -194,12 +194,14 @@ public class <%= entityClass %>Resource {
 
     private final Logger log = LoggerFactory.getLogger(<%= entityClass %>Resource.class);
 
+<%_ if (templateFactory) { _%>
 	@Autowired
 	private UserService userService; //@Trifon
 	@Autowired
 	private <%= entityClass %>TemplateService <%= entityInstance %>TemplateService; //@Trifon
 	@Autowired
 	private <%= entityClass %>TmplMapper <%= entityInstance %>TmplMapper; //@Trifon
+<%_ } _%>
 	//@Trifon
 	@Autowired
 	private JsonPatcher jsonPatcher;
@@ -504,6 +506,62 @@ public class <%= entityClass %>Resource {
 <%_ } _%>
 		return ResponseEntity.ok().body(<%= instanceName %>);
 	}
+<%_ if (templateFactory) { _%>
+
+	/**
+	 * POST  /<%= entityApiUrl %>/template : Create a new <%= entityClass %>Template.
+	 *
+	 * @return the ResponseEntity with status 200 (OK) and with body the <%= instanceName %>, or with status 404 (Not Found)
+	 */
+	@PostMapping("/<%= entityApiUrl %>/template")
+	<%_ if (requiredRoleForCreate) { _%>
+	@PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForCreate %> + "\")")
+	<%_ } _%>
+	public ResponseEntity<<%= instanceType %>> create<%= entityClass %>Template(@Valid @RequestBody <%= instanceType %> <%= instanceName %>) throws URISyntaxException {
+		log.debug("REST request to create <%= entityClass %>Template : {}", <%= instanceName %>);
+		if (<%= instanceName %>.getId() != null) {
+			throw new BadRequestAlertException("A new <%= entityClass %>Template cannot already have an ID", ENTITY_NAME, "idexists");
+		}
+		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException());
+
+		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = <%= entityInstance %>TmplMapper.toTemplate(<%= instanceName %>);
+		<%= entityInstance %>TemplateDTO.setUserId(loggedInUser.getId());
+
+		<%= entityInstance %>TemplateDTO = <%= entityInstance %>TemplateService.save(<%= entityInstance %>TemplateDTO);
+
+		<%= instanceType %> result = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
+		return ResponseEntity.ok().body(result);
+	}
+
+	/**
+	 * {@code PUT  /<%= entityApiUrl %>/template} : Updates an existing <%= entityClass %>Template.
+	 *
+	 * @param <%= instanceName %> the <%= instanceName %> to update.
+	 * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated <%= instanceName %>,
+	 * or with status {@code 400 (Bad Request)} if the <%= instanceName %> is not valid,
+	 * or with status {@code 500 (Internal Server Error)} if the <%= instanceName %> couldn't be updated.
+	 * @throws URISyntaxException if the Location URI syntax is incorrect.
+	 */
+	@PutMapping("/<%= entityApiUrl %>/template")
+	public ResponseEntity<<%= instanceType %>> update<%= entityClass %>Template(@Valid @RequestBody <%= instanceType %> <%= instanceName %>) throws URISyntaxException {
+		log.debug("REST request to update <%= entityClass %>Template : {}", <%= instanceName %>);
+
+		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException());
+		<%= entityClass %>TemplateDTO existing<%= entityClass %>TemplateDTO = <%= entityInstance %>TemplateService.findOneByUserId(loggedInUser.getId())
+				.orElseThrow(() -> new EntityNotFoundException());
+
+		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = <%= entityInstance %>TmplMapper.toTemplate(<%= instanceName %>);
+		<%= entityInstance %>TemplateDTO.setId(existing<%= entityClass %>TemplateDTO.getId());
+		<%= entityInstance %>TemplateDTO.setUserId(loggedInUser.getId());
+
+		<%= entityInstance %>TemplateDTO = <%= entityInstance %>TemplateService.save(<%= entityInstance %>TemplateDTO);
+
+		<%= instanceType %> result = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
+		return ResponseEntity.ok()
+				.headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, <%= entityClass %>TemplateResource.ENTITY_NAME, <%= entityInstance %>TemplateDTO.getId().toString()))
+				.body(result);
+	}
+<%_ } // end if - "templateFactory"_%>
 <%_ for (idx in relationships) {
         const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
         const otherEntityRelationshipNamePlural = relationships[idx].otherEntityRelationshipNamePlural;
