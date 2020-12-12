@@ -391,7 +391,7 @@ public class <%= entityClass %>Resource {
 			<%= instanceName %> = (<%= instanceType %>)jsonPatcher.patch(patchCommand, existing<%= instanceType %>).get();
 		} catch (RuntimeException ex) {
 			if (JsonPatchException.class.isAssignableFrom(ex.getCause().getClass())) {
-				ex.printStackTrace();
+				log.error(ex.getMessage());
 			}
 		}
 
@@ -551,6 +551,45 @@ public class <%= entityClass %>Resource {
 				.orElseThrow(() -> new EntityNotFoundException());
 
 		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = <%= entityInstance %>TmplMapper.toTemplate(<%= instanceName %>);
+		<%= entityInstance %>TemplateDTO.setId(existing<%= entityClass %>TemplateDTO.getId());
+		<%= entityInstance %>TemplateDTO.setUserId(loggedInUser.getId());
+
+		<%= entityInstance %>TemplateDTO = <%= entityInstance %>TemplateService.save(<%= entityInstance %>TemplateDTO);
+
+		<%= instanceType %> result = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
+		return ResponseEntity.ok()
+				.headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, <%= entityClass %>TemplateResource.ENTITY_NAME, <%= entityInstance %>TemplateDTO.getId().toString()))
+				.body(result);
+	}
+
+	// JSON PATCH - V3
+	// echo '[{ "op": "replace", "path": "/description", "value": "Patched Description" }]' | http PATCH :10000/api/<%= entityApiUrl %>/template Content-Type:application/json-patch+json
+	/**
+	 * PATCH  /<%= entityApiUrl %>/template : Patches an existing <%= entityClass %>Template.
+	 *
+	 * @param patchCommand the patchCommand to apply
+	 * @return the ResponseEntity with status 200 (OK) and with body the updated <%= instanceType %>,
+	 * or with status 400 (Bad Request) if the patchCommand is not valid,
+	 * or with status 500 (Internal Server Error) if patchCommand can't be applied
+	 * @throws URISyntaxException if the Location URI syntax is incorrect
+	 */
+	@PatchMapping(value = "/<%= entityApiUrl %>/template", 
+		consumes = RestMediaType.APPLICATION_PATCH_JSON_VALUE,
+		produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<<%= instanceType %>> partialUpdate<%= entityClass %>Template(@RequestBody String patchCommand) {
+		log.debug("REST request to PATCH <%= entityClass %>Template, patch command : {}", patchCommand);
+
+		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException());
+		<%= entityClass %>TemplateDTO existing<%= entityClass %>TemplateDTO = <%= entityInstance %>TemplateService.findOneByUserId(loggedInUser.getId())
+				.orElseThrow(() -> new EntityNotFoundException());
+		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = null;
+		try {
+			<%= entityInstance %>TemplateDTO = (<%= entityClass %>TemplateDTO)jsonPatcher.patch(patchCommand, existing<%= entityClass %>TemplateDTO).get();
+		} catch (RuntimeException ex) {
+			if (JsonPatchException.class.isAssignableFrom(ex.getCause().getClass())) {
+				log.error(ex.getMessage());
+			}
+		}
 		<%= entityInstance %>TemplateDTO.setId(existing<%= entityClass %>TemplateDTO.getId());
 		<%= entityInstance %>TemplateDTO.setUserId(loggedInUser.getId());
 
