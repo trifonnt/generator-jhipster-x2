@@ -600,6 +600,23 @@ public class <%= entityClass %>Resource {
 				.headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, <%= entityClass %>TemplateResource.ENTITY_NAME, <%= entityInstance %>TemplateDTO.getId().toString()))
 				.body(result);
 	}
+
+	/**
+	 * {@code DELETE  /<%= entityApiUrl %>/template} : delete the <%= entityClass %>Template.
+	 *
+	 * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
+	 */
+	@DeleteMapping("/<%= entityApiUrl %>/template")
+	public ResponseEntity<Void> delete<%= entityClass %>Template() {
+		log.debug("REST request to delete <%= entityClass %>Template.");
+
+		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException());
+		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = <%= entityInstance %>TemplateService.findOneByUserId(loggedInUser.getId())
+				.orElseThrow(() -> new EntityNotFoundException());
+
+		<%= entityInstance %>TemplateService.delete(<%= entityInstance %>TemplateDTO.getId());
+		return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, <%= entityClass %>TemplateResource.ENTITY_NAME, <%= entityInstance %>TemplateDTO.getId().toString())).build();
+	}
 <%_ } // end if - "templateFactory"_%>
 <%_ for (idx in relationships) {
         const otherEntityRelationshipName = relationships[idx].otherEntityRelationshipName;
