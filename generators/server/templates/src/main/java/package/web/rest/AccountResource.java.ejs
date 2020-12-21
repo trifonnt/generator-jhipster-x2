@@ -340,7 +340,8 @@ public class AccountResource {
      */
     @PostMapping("/account")
     <%_ if (!reactive) { _%>
-    public void saveAccount(@Valid @RequestBody <%= asDto('User') %> userDTO) {
+    //@Trifon - Return updated User
+    public UserDTO saveAccount(@Valid @RequestBody <%= asDto('User') %> userDTO) {
         String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new AccountResourceException("Current user login not found"));
         Optional<<%= asEntity('User') %>> existingUser = userRepository.findOneByEmailIgnoreCase(userDTO.getEmail());
         if (existingUser.isPresent() && (!existingUser.get().getLogin().equalsIgnoreCase(userLogin))) {
@@ -352,6 +353,10 @@ public class AccountResource {
         }
         userService.updateUser(userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail(),
             userDTO.getLangKey()<% if (['sql', 'mongodb', 'couchbase', 'neo4j'].includes(databaseType)) { %>, userDTO.getImageUrl()<% } %>);
+        //@Trifon - return updated user
+        return userService.getUserWithAuthorities()
+        		.map(UserDTO::new)
+        		.orElseThrow(() -> new AccountResourceException("User could not be found"));
     <%_ } else { _%>
     public Mono<Void> saveAccount(@Valid @RequestBody <%= asDto('User') %> userDTO) {
         return SecurityUtils.getCurrentUserLogin()
