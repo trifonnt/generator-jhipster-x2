@@ -1,5 +1,18 @@
 @Trifon
 
+-04) Added generation of OData artifacts 
+   OData Protocol Guide
+ + https://www.baeldung.com/odata
+   Intro to OData with Olingo
+ + https://www.baeldung.com/olingo
+
+   Template Project showing how to use Spring Boot and Olingo for creating oData based Rest Services
+ - https://github.com/rohitghatol/spring-boot-Olingo-oData
+
+   SLN Spotlight_SAP Labs India: options to provide OData/REST services through JPAContext
+ ? https://stackoverflow.com/questions/39543597/developing-a-spring-rest-service-with-odata-interface
+
+
 -03) ElasticSearch, disable indexing of some fields
    Disable indexing fields for all fields in the document in Elasticsearch
  - https://stackoverflow.com/questions/40613586/disable-indexing-fields-for-all-fields-in-the-document-in-elasticsearch

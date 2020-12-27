@@ -60,6 +60,7 @@ const serverFiles = {
                 'grafana/provisioning/dashboards/dashboard.yml',
                 'grafana/provisioning/dashboards/JVM.json',
                 'grafana/provisioning/datasources/datasource.yml',
+                'mailhog.yml', //@Trifon
             ],
         },
         {
@@ -168,10 +169,16 @@ const serverFiles = {
         },
         {//@Trifon - shell scripts
             templates: [
-                { file: 'script-01-get_auth_token-DEV-admin.sh', method: 'copy', noEjs: true },
+            	{ file: 'script-00_1-start-config-server-DEV.sh', method: 'copy', noEjs: true },
+            	{ file: 'script-00_1-start-config-server-PROD.sh', method: 'copy', noEjs: true },
+            	{ file: 'script-00_2-start-email-server-mailHog-DEV.sh', method: 'copy', noEjs: true },
+            	{ file: 'script-00_2-start-email-server-mailHog-PROD.sh', method: 'copy', noEjs: true },
+            	{ file: 'script-01-get_auth_token-DEV-admin.sh', method: 'copy', noEjs: true },
                 { file: 'script-01-get_auth_token-DEV-user.sh', method: 'copy', noEjs: true },
                 { file: 'script-02-import-all-initial-records.sh', method: 'copy', noEjs: true },
                 { file: 'script-03-import-all-fake-records.sh', method: 'copy', noEjs: true },
+                { file: 'update-dev.sh', method: 'copy', noEjs: true },
+                { file: 'update-prod.sh', method: 'copy', noEjs: true },
             ],
         },
         {
