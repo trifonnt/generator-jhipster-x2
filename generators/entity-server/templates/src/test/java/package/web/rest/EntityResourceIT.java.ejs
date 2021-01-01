@@ -103,6 +103,9 @@ import <%= packageName %>.service.<%= entityClass %>Service;
 import <%= packageName %>.service.dto.<%= asDto(entityClass) %>;
 import <%= packageName %>.service.mapper.<%= entityClass %>Mapper;
 <%_ } _%>
+<%_ if (requiredRoleForCreate || requiredRoleForRead || requiredRoleForUpdate || requiredRoleForDelete) { _%>
+import <%= packageName %>.security.AuthoritiesConstants; //@Trifon
+<%_ } _%>
 <%_ if (jpaMetamodelFiltering) { _%>
 import <%= packageName %>.service.dto.<%= entityClass %>Criteria;
 import <%= packageName %>.service.<%= entityClass %>QueryService;
@@ -549,6 +552,9 @@ public class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') {
 <%_ if (!readOnly) { _%>
 
     @Test<%= transactionalAnnotation %>
+    <%_ if (requiredRoleForCreate) { _%>
+    @WithMockUser(username="admin", authorities = {AuthoritiesConstants.<%= requiredRoleForCreate %>}) //@Trifon
+    <%_ } _%>
     public void create<%= entityClass %>() throws Exception {
         int databaseSizeBeforeCreate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
     <%_ if (reactive && searchEngine === 'elasticsearch') { _%>
@@ -603,6 +609,9 @@ public class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') {
     }
 
     @Test<%= transactionalAnnotation %>
+    <%_ if (requiredRoleForCreate) { _%>
+    @WithMockUser(username="admin", authorities = {AuthoritiesConstants.<%= requiredRoleForCreate %>}) //@Trifon
+    <%_ } _%>
     public void create<%= entityClass %>WithExistingId() throws Exception {
         int databaseSizeBeforeCreate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
 
@@ -1148,6 +1157,9 @@ public class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') {
 <%_ if (!readOnly) { _%>
 
     @Test<%= transactionalAnnotation %>
+    <%_ if (requiredRoleForUpdate) { _%>
+    @WithMockUser(username="admin", authorities = {AuthoritiesConstants.<%= requiredRoleForUpdate %>}) //@Trifon
+    <%_ } _%>
     public void update<%= entityClass %>() throws Exception {
     <%_ if (reactive && searchEngine === 'elasticsearch') { _%>
         // Configure the mock search repository
@@ -1226,6 +1238,9 @@ public class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') {
     }
 
     @Test<%= transactionalAnnotation %>
+    <%_ if (requiredRoleForUpdate) { _%>
+    @WithMockUser(username="admin", authorities = {AuthoritiesConstants.<%= requiredRoleForUpdate %>}) //@Trifon
+    <%_ } _%>
     public void updateNonExisting<%= entityClass %>() throws Exception {
         int databaseSizeBeforeUpdate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
 
@@ -1262,6 +1277,9 @@ public class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') {
     }
 
     @Test<%= transactionalAnnotation %>
+    <%_ if (requiredRoleForDelete) { _%>
+    @WithMockUser(username="admin", authorities = {AuthoritiesConstants.<%= requiredRoleForDelete %>}) //@Trifon
+    <%_ } _%>
     public void delete<%= entityClass %>() <% if (!reactive) { %>throws Exception <% } %>{
 <%_ if (reactive && searchEngine === 'elasticsearch') { _%>
         // Configure the mock search repository
