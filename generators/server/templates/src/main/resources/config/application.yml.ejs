@@ -117,7 +117,7 @@ management:
                 include: ["configprops", "env", <% if (applicationType === 'gateway' && reactive) { %>"gateway", <% } %>"health", "info", "jhimetrics", "logfile", "loggers", "prometheus", "threaddump"]
     endpoint:
         health:
-            show-details: when_authorized
+            show-details: when-authorized #@Trifon
             roles: "ROLE_ADMIN"
         jhimetrics:
             enabled: true
@@ -153,6 +153,12 @@ management:
                         enabled: true
 
 spring:
+#@Trifon-begin
+  servlet:
+    multipart:
+      max-file-size: 7MB
+      max-request-size: 7MB
+#@Trifon-end
     <%_ if (searchEngine === 'elasticsearch' && !reactive) { _%>
     autoconfigure:
         exclude: <% if (databaseType === 'sql' && messageBroker === 'kafka') { %>org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration,<% } %>org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchAutoConfiguration,org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
@@ -210,6 +216,13 @@ spring:
         jpa:
             repositories:
                 bootstrap-mode: deferred
+  #@Trifon-manual-begin - https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html
+        web:
+          pageable:
+            page-parameter: page
+            size-parameter: size
+            default-page-size: 50
+  #@Trifon-manual-end
     jpa:
         open-in-view: false
         properties:
