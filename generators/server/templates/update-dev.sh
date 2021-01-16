@@ -9,4 +9,4 @@ git pull
 #/opt/maven/3.5.2/bin/mvn clean compile package -Pprod,swagger -DskipTests=true
 ./mvnw clean compile package -Pprod,swagger -DskipTests=true
 
-java -Xms1025k -Xmx5G -jar ./target/<%= dasherizedBaseName %>-*.jar > trifon-<%= dasherizedBaseName %>.log &
+java -Xms1024k -Xmx4G -jar ./target/<%= dasherizedBaseName %>-*.jar > trifon-<%= dasherizedBaseName %>.log &
