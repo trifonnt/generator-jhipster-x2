@@ -468,21 +468,42 @@ public class <%= entityClass %>Resource {
         return ResponseUtil.wrapOrNotFound(<%= instanceName %>);
     }
 
+<%_ if (templateFactory) { _%>
+<%_ } else { _%>
 	/**
 	 * GET  /<%= entityApiUrl %>/template : get the Template JSON for <%= entityInstance %>.
 	 *
 	 * @return the ResponseEntity with status 200 (OK) and with body the <%= instanceName %>, or with status 404 (Not Found)
 	 */
 	@GetMapping("/<%= entityApiUrl %>/template")
-	<%_ if (requiredRoleForCreate) { _%>
+<%_ if (requiredRoleForCreate) { _%>
 	@PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForCreate %> + "\")") //@Trifon
-	<%_ } _%>
+<%_ } _%>
 	public ResponseEntity<<%= instanceType %>> getTemplate<%= entityClass %>() {
 		log.debug("REST request to get Template for <%= entityClass %>");
 
 		<%= instanceType %> <%= instanceName %> = new <%= instanceType %>();
-		// Populate all automatically populated fields!
+		// TODO - Fields which are sequence controlled should be with <GENERATED>
+		if (<%= instanceName %>.getValue() == null || <%= instanceName %>.getValue().isEmpty()) {
+			<%= instanceName %>.setValue("<GENERATED>");
+		}
+
+		return ResponseEntity.ok().body(<%= instanceName %>);
+	}
+<%_ } _%>
 <%_ if (templateFactory) { _%>
+	/**
+	 * GET  /<%= entityApiUrl %>/template : get the Template JSON for <%= entityInstance %>.
+	 *
+	 * @return the ResponseEntity with status 200 (OK) and with body the <%= instanceName %>, or with status 404 (Not Found)
+	 */
+	@GetMapping("/<%= entityApiUrl %>/template")
+<%_ if (requiredRoleForCreate) { _%>
+	@PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForCreate %> + "\")") //@Trifon
+<%_ } _%>
+	public ResponseEntity<<%= entityClass %>TemplateDTO> getTemplate<%= entityClass %>() {
+		log.debug("REST request to get Template for <%= entityClass %>");
+
 		// Search for <%= entityClass %>Template by:
 		// 1) Currently loggedIn User
 		// 2) null or SystemUser
@@ -494,20 +515,22 @@ public class <%= entityClass %>Resource {
 		if (optional<%= entityClass %>TemplateDTO.isEmpty()) {
 			optional<%= entityClass %>TemplateDTO = <%= entityInstance %>TemplateService.findOneByUserId(null);
 		}
-		if (optional<%= entityClass %>TemplateDTO.isPresent()) {
-			<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = optional<%= entityClass %>TemplateDTO.get();
-			// TODO - Fields which are sequence controlled should be with <GENERATED>
-			if (<%= instanceName %>.getValue() == null || <%= instanceName %>.getValue().isEmpty()) {
-				<%= instanceName %>.setValue("<GENERATED>");
-			}
-			// Convert <%= entityClass %>TemplateDTO to <%= entityClass %>DTO!!!
-			<%= instanceName %> = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
+		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = null;
+		if (optional<%= entityClass %>TemplateDTO.isEmpty()) {
+			<%= entityInstance %>TemplateDTO = new <%= entityClass %>TemplateDTO();
+		} else {
+			<%= entityInstance %>TemplateDTO = optional<%= entityClass %>TemplateDTO.get();
 		}
 
-<%_ } _%>
-		return ResponseEntity.ok().body(<%= instanceName %>);
+		// TODO - Fields which are sequence controlled should be with <GENERATED>
+		if (<%= entityInstance %>TemplateDTO.getValue() == null || <%= entityInstance %>TemplateDTO.getValue().isEmpty()) {
+			<%= entityInstance %>TemplateDTO.setValue("<GENERATED>");
+		}
+		// Convert <%= entityClass %>TemplateDTO to <%= entityClass %>DTO!!!
+//		<%= instanceName %> = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
+
+		return ResponseEntity.ok().body(<%= entityInstance %>TemplateDTO);
 	}
-<%_ if (templateFactory) { _%>
 
 	/**
 	 * POST  /<%= entityApiUrl %>/template : Create a new <%= entityClass %>Template.
@@ -518,14 +541,14 @@ public class <%= entityClass %>Resource {
 	<%_ if (requiredRoleForCreate) { _%>
 	@PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForCreate %> + "\")")
 	<%_ } _%>
-	public ResponseEntity<<%= instanceType %>> create<%= entityClass %>Template(@RequestBody <%= instanceType %> <%= instanceName %>) throws URISyntaxException {
-		log.debug("REST request to create <%= entityClass %>Template : {}", <%= instanceName %>);
-		if (<%= instanceName %>.getId() != null) {
-			throw new BadRequestAlertException("A new <%= entityClass %>Template cannot already have an ID", ENTITY_NAME, "idexists");
+	public ResponseEntity<<%= entityClass %>TemplateDTO> create<%= entityClass %>Template(@RequestBody <%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO) throws URISyntaxException {
+		log.debug("REST request to create <%= entityClass %>Template : {}", <%= entityInstance %>TemplateDTO);
+		if (<%= entityInstance %>TemplateDTO.getId() != null) {
+			throw new BadRequestAlertException("A new <%= entityClass %>TemplateDTO cannot already have an ID", <%= entityClass %>TemplateResource.ENTITY_NAME, "idexists");
 		}
 		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException());
 
-		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = <%= entityInstance %>TmplMapper.toTemplate(<%= instanceName %>);
+//		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = <%= entityInstance %>TmplMapper.toTemplate(<%= instanceName %>);
 		<%= entityInstance %>TemplateDTO.setUserId(loggedInUser.getId());
 
 		// TODO - Fields which are sequence controlled should be with <GENERATED>
@@ -535,37 +558,37 @@ public class <%= entityClass %>Resource {
 
 		<%= entityInstance %>TemplateDTO = <%= entityInstance %>TemplateService.save(<%= entityInstance %>TemplateDTO);
 
-		<%= instanceType %> result = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
-		return ResponseEntity.ok().body(result);
+//		<%= instanceType %> result = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
+		return ResponseEntity.ok().body(<%= entityInstance %>TemplateDTO);
 	}
 
 	/**
 	 * {@code PUT  /<%= entityApiUrl %>/template} : Updates an existing <%= entityClass %>Template.
 	 *
-	 * @param <%= instanceName %> the <%= instanceName %> to update.
-	 * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated <%= instanceName %>,
+	 * @param <%= entityInstance %>TemplateDTO the <%= entityInstance %>TemplateDTO to update.
+	 * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated <%= instanceName %>TemplateDTO,
 	 * or with status {@code 400 (Bad Request)} if the <%= instanceName %> is not valid,
 	 * or with status {@code 500 (Internal Server Error)} if the <%= instanceName %> couldn't be updated.
 	 * @throws URISyntaxException if the Location URI syntax is incorrect.
 	 */
 	@PutMapping("/<%= entityApiUrl %>/template")
-	public ResponseEntity<<%= instanceType %>> update<%= entityClass %>Template(@RequestBody <%= instanceType %> <%= instanceName %>) throws URISyntaxException {
-		log.debug("REST request to update <%= entityClass %>Template : {}", <%= instanceName %>);
+	public ResponseEntity<<%= entityClass %>TemplateDTO> update<%= entityClass %>Template(@RequestBody <%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO) throws URISyntaxException {
+		log.debug("REST request to update <%= entityClass %>Template : {}", <%= entityInstance %>TemplateDTO);
 
 		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException());
 		<%= entityClass %>TemplateDTO existing<%= entityClass %>TemplateDTO = <%= entityInstance %>TemplateService.findOneByUserId(loggedInUser.getId())
 				.orElseThrow(() -> new EntityNotFoundException());
 
-		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = <%= entityInstance %>TmplMapper.toTemplate(<%= instanceName %>);
+//		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = <%= entityInstance %>TmplMapper.toTemplate(<%= instanceName %>);
 		<%= entityInstance %>TemplateDTO.setId(existing<%= entityClass %>TemplateDTO.getId());
 		<%= entityInstance %>TemplateDTO.setUserId(loggedInUser.getId());
 
 		<%= entityInstance %>TemplateDTO = <%= entityInstance %>TemplateService.save(<%= entityInstance %>TemplateDTO);
 
-		<%= instanceType %> result = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
+//		<%= instanceType %> result = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
 		return ResponseEntity.ok()
 				.headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, <%= entityClass %>TemplateResource.ENTITY_NAME, <%= entityInstance %>TemplateDTO.getId().toString()))
-				.body(result);
+				.body(<%= entityInstance %>TemplateDTO);
 	}
 
 	// JSON PATCH - V3
@@ -582,7 +605,7 @@ public class <%= entityClass %>Resource {
 	@PatchMapping(value = "/<%= entityApiUrl %>/template", 
 		consumes = RestMediaType.APPLICATION_PATCH_JSON_VALUE,
 		produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<<%= instanceType %>> partialUpdate<%= entityClass %>Template(@RequestBody String patchCommand) {
+	public ResponseEntity<<%= entityClass %>TemplateDTO> partialUpdate<%= entityClass %>Template(@RequestBody String patchCommand) {
 		log.debug("REST request to PATCH <%= entityClass %>Template, patch command : {}", patchCommand);
 
 		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException());
@@ -601,10 +624,10 @@ public class <%= entityClass %>Resource {
 
 		<%= entityInstance %>TemplateDTO = <%= entityInstance %>TemplateService.save(<%= entityInstance %>TemplateDTO);
 
-		<%= instanceType %> result = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
+//		<%= instanceType %> result = <%= entityInstance %>TmplMapper.toDto(<%= entityInstance %>TemplateDTO);
 		return ResponseEntity.ok()
 				.headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, <%= entityClass %>TemplateResource.ENTITY_NAME, <%= entityInstance %>TemplateDTO.getId().toString()))
-				.body(result);
+				.body(<%= entityInstance %>TemplateDTO);
 	}
 
 	/**
