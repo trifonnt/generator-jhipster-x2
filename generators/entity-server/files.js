@@ -23,6 +23,7 @@ const fs = require('fs');
 const utils = require('../utils');
 const liquibaseUtils = require('../../utils/liquibase');
 const constants = require('../generator-constants');
+const pluralize = require('pluralize'); //@Trifon-aggregateParents
 
 /* Use customized randexp */
 const randexp = utils.RandexpWithFaker;
@@ -465,5 +466,40 @@ function writeFiles() {
                 }
             });
         },
+
+        //@Trifon-Aggregate and Composite
+        writeAggregateAndCompositeFiles() {
+            this.aggregateParents.forEach(aggregateParent => {
+//                if (!field.fieldIsEnum) {
+//                    return;
+//                }
+                const parentEntity = aggregateParent.parentEntity;
+                
+                this.securityLinkColumn = aggregateParent.securityLinkColumn;
+                this.parentEntity = parentEntity;
+                this.parentEntityNamePluralizedAndSpinalCased = _.kebabCase(pluralize(parentEntity));
+//                const enumInfo = {
+//                    ...utils.getEnumInfo(field, this.clientRootFolder),
+//                    angularAppName: this.angularAppName,
+//                    packageName: this.packageName,
+////                    service: true, //@Trifon-other parameters can be added here...
+//                };
+                // eslint-disable-next-line no-console
+                if (!this.skipServer) {
+                    const pathToTemplateFile = `${this.fetchFromInstalledJHipster(
+                        'entity-server/templates'
+                    )}/${SERVER_MAIN_SRC_DIR}package/web/rest/EntityAggregateResource.java.ejs`;
+                    
+                    this.template(
+                        pathToTemplateFile,
+                        `${SERVER_MAIN_SRC_DIR}${this.packageFolder}/web/rest/aggregate/${parentEntity}${this.entityClass}AggResource.java`,
+                        this,
+                        {},
+                        this //old: enumInfo
+                    );
+                }
+            });
+        },
+
     };
 }
