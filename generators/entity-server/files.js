@@ -488,7 +488,7 @@ function writeFiles() {
                 if (!this.skipServer) {
                     const pathToTemplateFile = `${this.fetchFromInstalledJHipster(
                         'entity-server/templates'
-                    )}/${SERVER_MAIN_SRC_DIR}package/web/rest/EntityAggregateResource.java.ejs`;
+                    )}/${SERVER_MAIN_SRC_DIR}package/web/rest/aggregate/EntityAggregateResource.java.ejs`;
                     
                     this.template(
                         pathToTemplateFile,
