@@ -301,6 +301,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
                     context.requiredRoleForUpdate = false; //@Trifon
                     context.requiredRoleForDelete = false; //@Trifon
                     context.templateFactory = false; //@Trifon
+                    context.aggregateParents = []; //@Trifon
                     context.pagination = 'no';
                     context.validation = false;
                     context.dto = 'no';
@@ -683,6 +684,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 storageData.requiredRoleForUpdate = context.requiredRoleForUpdate; //@Trifon
                 storageData.requiredRoleForDelete = context.requiredRoleForDelete; //@Trifon
                 storageData.templateFactory = context.templateFactory; //@Trifon
+                storageData.aggregateParents = context.aggregateParents; //@Trifon
                 
                 storageData.changelogDate = context.changelogDate;
                 storageData.dto = context.dto;
@@ -832,6 +834,10 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 	context.templateFactory = false;
                 } else {
                 	context.templateFactory = context.templateFactory;
+                }
+                //@Trifon
+                if (!context.aggregateParents) {
+                    context.aggregateParents = [];
                 }
 
                 context.differentRelationships = {};

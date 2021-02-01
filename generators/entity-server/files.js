@@ -473,11 +473,15 @@ function writeFiles() {
 //                if (!field.fieldIsEnum) {
 //                    return;
 //                }
-                const parentEntity = aggregateParent.parentEntity;
-                
+                const parentEntityLevel1 = aggregateParent.parentEntityLevel1;
+                const parentEntityLevel2 = aggregateParent.parentEntityLevel2;
+                const parentEntityLevel3 = aggregateParent.parentEntityLevel3;
+
                 this.securityLinkColumn = aggregateParent.securityLinkColumn;
-                this.parentEntity = parentEntity;
-                this.parentEntityNamePluralizedAndSpinalCased = _.kebabCase(pluralize(parentEntity));
+                this.parentEntityLevel1 = parentEntityLevel1;
+                this.parentEntityNamePluralizedAndSpinalCased = _.kebabCase(pluralize(parentEntityLevel1));
+                this.parentEntityLevel2 = parentEntityLevel2;
+                this.parentEntityLevel3 = parentEntityLevel3;
 //                const enumInfo = {
 //                    ...utils.getEnumInfo(field, this.clientRootFolder),
 //                    angularAppName: this.angularAppName,
@@ -492,7 +496,7 @@ function writeFiles() {
                     
                     this.template(
                         pathToTemplateFile,
-                        `${SERVER_MAIN_SRC_DIR}${this.packageFolder}/web/rest/aggregate/${parentEntity}${this.entityClass}AggResource.java`,
+                        `${SERVER_MAIN_SRC_DIR}${this.packageFolder}/web/rest/aggregate/${parentEntityLevel1}${this.entityClass}AggResource.java`,
                         this,
                         {},
                         this //old: enumInfo

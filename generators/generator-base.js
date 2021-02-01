@@ -1281,7 +1281,8 @@ module.exports = class extends PrivateBase {
         context.requiredRoleForUpdate = context.fileData.requiredRoleForUpdate; //@Trifon
         context.requiredRoleForDelete = context.fileData.requiredRoleForDelete; //@Trifon
         context.templateFactory = context.fileData.templateFactory; //@Trifon
-
+        context.aggregateParents = context.fileData.aggregateParents || []; //@Trifon
+        
         context.haveFieldWithJavadoc = false;
         context.fields.forEach(field => {
             if (field.javadoc) {

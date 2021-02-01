@@ -15,7 +15,7 @@
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
--%><%- include('../../common/functions.ejs') -%>
+-%><%- include('../../../common/functions.ejs') -%>
 package <%= packageName %>.web.rest.aggregate;
 
 <%_
@@ -29,6 +29,11 @@ for (idx in relationships) {
         break;
     }
 }
+let parentEntityToUse = parentEntityLevel1;
+if (parentEntityLevel2) {
+	parentEntityToUse = parentEntityLevel2;
+}
+
 let manyToManyWithUser = false;
 for (idx in relationships) {
     if (relationships[idx].otherEntityName === 'user' && relationships[idx].relationshipType === 'many-to-many') {
@@ -42,10 +47,16 @@ import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
 <%_ } _%>
 <%_ if (service !== 'no') { _%>
 import <%= packageName %>.service.<%= entityClass %>Service;
-import <%= packageName %>.service.<%= parentEntity %>Service; //@Trifon-parent
-import <%= packageName %>.service.<%= parentEntity %>QueryService; //@Trifon-parent
+import <%= packageName %>.service.<%= parentEntityLevel1 %>Service; //@Trifon-parent
+<%_ if (parentEntityLevel2) { _%>
+import <%= packageName %>.service.<%= parentEntityLevel2 %>Service; //@Trifon-parent
+<%_ } _%>
+<%_ if (parentEntityLevel3) { _%>
+import <%= packageName %>.service.<%= parentEntityLevel3 %>Service; //@Trifon-parent
+<%_ } _%>
+import <%= packageName %>.service.<%= parentEntityLevel1 %>QueryService; //@Trifon-parent
 import <%= packageName %>.security.SecurityUtils; //@Trifon
-import <%= packageName %>.repository.<%= parentEntity %>Repository; //@Trifon-parent
+import <%= packageName %>.repository.<%= parentEntityLevel1 %>Repository; //@Trifon-parent
 	<%_ if (templateFactory) { _%>
 import <%= packageName %>.service.<%= entityClass %>TemplateService; //@Trifon
 import <%= packageName %>.service.mapper.tmpl.<%= entityClass %>TmplMapper; //@Trifon
@@ -69,7 +80,7 @@ import <%= packageName %>.web.rest.errors.EntityNotFoundException; //@Trifon
 import <%= packageName %>.web.rest.common.JsonPatcher; //@Trifon
 import <%= packageName %>.web.rest.common.RestMediaType; //@Trifon
 import <%= packageName %>.web.rest.<%= entityClass %>Resource; //@Trifon
-//import <%= packageName %>.web.rest.<%= parentEntity %>Resource; //@Trifon
+//import <%= packageName %>.web.rest.<%= parentEntityLevel1 %>Resource; //@Trifon
 //import <%= packageName %>.service.dto.IdArrayDTO; //@Trifon
 <%_ for (idx in relationships) {
         // @Trifon - relationship with Image entity
@@ -195,9 +206,9 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 @Transactional
 <%_ } _%>
 @Api(tags={"<%= parentEntityNamePluralizedAndSpinalCased %>"})
-public class <%= parentEntity %><%= entityClass %>AggResource {
+public class <%= parentEntityLevel1 %><%= entityClass %>AggResource {
 
-	private final Logger log = LoggerFactory.getLogger(<%= parentEntity %><%= entityClass %>AggResource.class);
+	private final Logger log = LoggerFactory.getLogger(<%= parentEntityLevel1 %><%= entityClass %>AggResource.class);
 
 <%_ if (templateFactory) { _%>
 	@Autowired
@@ -240,21 +251,26 @@ public class <%= parentEntity %><%= entityClass %>AggResource {
 <%_ } _%>
 	@SuppressWarnings("unused")
 	@Autowired
-	private <%= parentEntity %>Repository <%= firstToLower(parentEntity) %>Repository;
+	private <%= parentEntityLevel1 %>Repository <%= firstToLower(parentEntityLevel1) %>Repository;
 	@Autowired
-	private <%= parentEntity %>Service <%= firstToLower(parentEntity) %>Service;
+	private <%= parentEntityLevel1 %>Service <%= firstToLower(parentEntityLevel1) %>Service;
 	@SuppressWarnings("unused")
 	@Autowired
-	private <%= parentEntity %>QueryService <%= firstToLower(parentEntity) %>QueryService;
+	private <%= parentEntityLevel1 %>QueryService <%= firstToLower(parentEntityLevel1) %>QueryService;
 //	@SuppressWarnings("unused")
 //	@Autowired
-//	private <%= parentEntity %>Facade <%= firstToLower(parentEntity) %>Facade;
+//	private <%= parentEntityLevel1 %>Facade <%= firstToLower(parentEntityLevel1) %>Facade;
+
+<%_ if (parentEntityLevel2) { _%>
+	@Autowired
+	private <%= parentEntityLevel2 %>Service <%= firstToLower(parentEntityLevel2) %>Service;
+<%_ } _%>
 	<%_
 	const instanceType = (dto === 'mapstruct') ? asDto(entityClass) : asEntity(entityClass);
 	const instanceName = (dto === 'mapstruct') ? asDto(entityInstance) : asEntity(entityInstance);
 	const mapper = entityInstance  + 'Mapper';
 	const entityToDtoReference = mapper + '::' + 'toDto';
-	_%><%- include('../../common/inject_template', {viaService: viaService, constructorName: parentEntity + entityClass + 'AggResource', queryService: jpaMetamodelFiltering, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: true}); -%>
+	_%><%- include('../../../common/inject_template', {viaService: viaService, constructorName: parentEntityLevel1 + entityClass + 'AggResource', queryService: jpaMetamodelFiltering, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: true}); -%>
 
 	/**
 	 * {@code GET  /<%= parentEntityNamePluralizedAndSpinalCased %>/{id}/<%= entityApiUrl %>} : get all <%= entityInstancePlural %>.
@@ -282,14 +298,14 @@ public class <%= parentEntity %><%= entityClass %>AggResource {
 	<%_ if (requiredRoleForRead) { _%>
 	@PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.<%= requiredRoleForRead %> + "\")")
 	<%_ } _%>
-	public ResponseEntity<List<<%= entityClass %>DTO>> get<%= parentEntity %><%= entityClassPlural %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntity) %>Id, <%= entityClass %>Criteria <%= firstToLower(entityClass) %>Criteria, BindingResult result, Pageable pageable) { //Works only if BindingResult is used!!!
-		log.debug("REST request to get <%= entityClassPlural %> for <%= firstToLower(parentEntity) %>Id: {}", <%= firstToLower(parentEntity) %>Id);
+	public ResponseEntity<List<<%= entityClass %>DTO>> get<%= parentEntityLevel1 %><%= entityClassPlural %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntityLevel1) %>Id, <%= entityClass %>Criteria <%= firstToLower(entityClass) %>Criteria, BindingResult result, Pageable pageable) { //Works only if BindingResult is used!!!
+		log.debug("REST request to get <%= entityClassPlural %> for <%= firstToLower(parentEntityLevel1) %>Id: {}", <%= firstToLower(parentEntityLevel1) %>Id);
 
-		<%= parentEntity %>DTO <%= firstToLower(parentEntity) %>DTO = <%= firstToLower(parentEntity) %>Service.findOne(<%= firstToLower(parentEntity) %>Id).orElseThrow(() -> new EntityNotFoundException());
+		<%= parentEntityLevel1 %>DTO <%= firstToLower(parentEntityLevel1) %>DTO = <%= firstToLower(parentEntityLevel1) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>Id).orElseThrow(() -> new EntityNotFoundException());
 
 		LongFilter longFilter = new LongFilter();
-		longFilter.setEquals(<%= firstToLower(parentEntity) %>DTO.getId());
-		<%= firstToLower(entityClass) %>Criteria.set<%= parentEntity %>Id(longFilter);
+		longFilter.setEquals(<%= firstToLower(parentEntityLevel1) %>DTO.getId());
+		<%= firstToLower(entityClass) %>Criteria.set<%= parentEntityLevel1 %>Id(longFilter);
 
 //		BooleanFilter activeFilter = new BooleanFilter();
 //		activeFilter.setEquals(Boolean.TRUE);
@@ -298,20 +314,20 @@ public class <%= parentEntity %><%= entityClass %>AggResource {
 		List<<%= entityClass %>DTO> <%= entityInstancePlural %> = <%= firstToLower(entityClass) %>QueryService.findByCriteria(<%= firstToLower(entityClass) %>Criteria);
 
 		HttpHeaders headers = null;
-//		headers = HeaderUtil.createHiddenFieldsHeader("<%= firstToLower(parentEntity) %>Id");
+//		headers = HeaderUtil.createHiddenFieldsHeader("<%= firstToLower(parentEntityLevel1) %>Id");
 
 		return ResponseEntity.ok().headers(headers).body(<%= entityInstancePlural %>);
 	}
 
 	@GetMapping("/<%= parentEntityNamePluralizedAndSpinalCased %>/{id}/<%= entityApiUrl %>/count")
-	public ResponseEntity<Long> count<%= parentEntity %><%= entityClassPlural %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntity) %>Id, <%= entityClass %>Criteria <%= firstToLower(entityClass) %>Criteria, BindingResult result) {
-		log.debug("REST request to count <%= entityClassPlural %> for <%= firstToLower(parentEntity) %>Id: {} by criteria: {}", <%= firstToLower(parentEntity) %>Id, <%= firstToLower(entityClass) %>Criteria);
+	public ResponseEntity<Long> count<%= parentEntityLevel1 %><%= entityClassPlural %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntityLevel1) %>Id, <%= entityClass %>Criteria <%= firstToLower(entityClass) %>Criteria, BindingResult result) {
+		log.debug("REST request to count <%= entityClassPlural %> for <%= firstToLower(parentEntityLevel1) %>Id: {} by criteria: {}", <%= firstToLower(parentEntityLevel1) %>Id, <%= firstToLower(entityClass) %>Criteria);
 
-		<%= parentEntity %>DTO <%= firstToLower(parentEntity) %>DTO = <%= firstToLower(parentEntity) %>Service.findOne(<%= firstToLower(parentEntity) %>Id).orElseThrow(() -> new EntityNotFoundException());
+		<%= parentEntityLevel1 %>DTO <%= firstToLower(parentEntityLevel1) %>DTO = <%= firstToLower(parentEntityLevel1) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>Id).orElseThrow(() -> new EntityNotFoundException());
 
 		LongFilter longFilter = new LongFilter();
-		longFilter.setEquals(<%= firstToLower(parentEntity) %>DTO.getId());
-		<%= firstToLower(entityClass) %>Criteria.set<%= parentEntity %>Id(longFilter);
+		longFilter.setEquals(<%= firstToLower(parentEntityLevel1) %>DTO.getId());
+		<%= firstToLower(entityClass) %>Criteria.set<%= parentEntityLevel1 %>Id(longFilter);
 
 		return ResponseEntity.ok().body(<%= firstToLower(entityClass) %>QueryService.countByCriteria(<%= firstToLower(entityClass) %>Criteria));
 	}
@@ -325,28 +341,31 @@ public class <%= parentEntity %><%= entityClass %>AggResource {
 	 * @throws URISyntaxException if the Location URI syntax is incorrect.
 	 */
 	@PostMapping("/<%= parentEntityNamePluralizedAndSpinalCased %>/{id}/<%= entityApiUrl %>")
-	public ResponseEntity<<%= entityClass %>DTO> create<%= parentEntity %><%= entityClass %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntity) %>Id, @Valid @RequestBody <%= entityClass %>DTO <%= firstToLower(entityClass) %>DTO) throws URISyntaxException {
-		log.debug("REST request to save <%= entityClass %> for <%= firstToLower(parentEntity) %>Id: {}, <%= firstToLower(entityClass) %>DTO: {}", <%= firstToLower(parentEntity) %>Id, <%= firstToLower(entityClass) %>DTO);
+	public ResponseEntity<<%= entityClass %>DTO> create<%= parentEntityLevel1 %><%= entityClass %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntityLevel1) %>Id, @Valid @RequestBody <%= entityClass %>DTO <%= firstToLower(entityClass) %>DTO) throws URISyntaxException {
+		log.debug("REST request to save <%= entityClass %> for <%= firstToLower(parentEntityLevel1) %>Id: {}, <%= firstToLower(entityClass) %>DTO: {}", <%= firstToLower(parentEntityLevel1) %>Id, <%= firstToLower(entityClass) %>DTO);
 		if (<%= firstToLower(entityClass) %>DTO.getId() != null) {
 			throw new BadRequestAlertException("A new <%= entityClass %> cannot already have an ID", <%= entityClass %>Resource.ENTITY_NAME, "idexists");
 		}
 
-		<%= parentEntity %>DTO <%= firstToLower(parentEntity) %>DTO = <%= firstToLower(parentEntity) %>Service.findOne(<%= firstToLower(parentEntity) %>Id).orElseThrow(() -> new EntityNotFoundException());
+		<%= parentEntityLevel1 %>DTO <%= firstToLower(parentEntityLevel1) %>DTO = <%= firstToLower(parentEntityLevel1) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>Id).orElseThrow(() -> new EntityNotFoundException());
+<%_ if (parentEntityLevel2) { _%>
 
-		//Check is currently logged-in user is the same as <%= firstToLower(parentEntity) %>.owner!!!
-		if (<%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>() == null || <%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>().isEmpty() || !<%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>().equals(SecurityUtils.getCurrentUserLogin().get())) {
+		<%= parentEntityLevel2 %>DTO <%= firstToLower(parentEntityLevel2) %>DTO = <%= firstToLower(parentEntityLevel2) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>DTO.get<%= parentEntityLevel2 %>Id()).orElseThrow(() -> new EntityNotFoundException());
+<%_ } _%>
+		//Check is currently logged-in user is the same as <%= firstToLower(parentEntityToUse) %>.owner!!!
+		if (<%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>() == null || <%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>().isEmpty() || !<%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>().equals(SecurityUtils.getCurrentUserLogin().get())) {
 			throw new EntityNotFoundException();
 		}
-		// Override <%= firstToLower(parentEntity) %>Id if any is send in the request!
-		<%= firstToLower(entityClass) %>DTO.set<%= parentEntity %>Id(<%= firstToLower(parentEntity) %>DTO.getId());
-		<%= firstToLower(entityClass) %>DTO.set<%= parentEntity %>Code(<%= firstToLower(parentEntity) %>DTO.getCode());
+		// Override <%= firstToLower(parentEntityLevel1) %>Id if any is send in the request!
+		<%= firstToLower(entityClass) %>DTO.set<%= parentEntityLevel1 %>Id(<%= firstToLower(parentEntityLevel1) %>DTO.getId());
+		<%= firstToLower(entityClass) %>DTO.set<%= parentEntityLevel1 %>Code(<%= firstToLower(parentEntityLevel1) %>DTO.getCode());
 
 		<%= entityClass %>DTO result = <%= firstToLower(entityClass) %>Service.save(<%= firstToLower(entityClass) %>DTO);
 		HttpHeaders headers = null;
-//		headers = HeaderUtil.createHiddenFieldsHeader("<%= firstToLower(parentEntity) %>Id");
+//		headers = HeaderUtil.createHiddenFieldsHeader("<%= firstToLower(parentEntityLevel1) %>Id");
 		headers = HeaderUtil.createEntityCreationAlert(applicationName, true, <%= entityClass %>Resource.ENTITY_NAME, result.getId().toString());
 
-		return ResponseEntity.created(new URI("/api/<%= parentEntityNamePluralizedAndSpinalCased %>/" + <%= firstToLower(parentEntity) %>Id + "/<%= entityApiUrl %>/" + result.getId()))
+		return ResponseEntity.created(new URI("/api/<%= parentEntityNamePluralizedAndSpinalCased %>/" + <%= firstToLower(parentEntityLevel1) %>Id + "/<%= entityApiUrl %>/" + result.getId()))
 			.headers(headers)
 			.body(result);
 	}
@@ -361,25 +380,28 @@ public class <%= parentEntity %><%= entityClass %>AggResource {
 	 * @throws URISyntaxException if the Location URI syntax is incorrect.
 	 */
 	@PutMapping("/<%= parentEntityNamePluralizedAndSpinalCased %>/{id}/<%= entityApiUrl %>/{<%= firstToLower(entityClass) %>Id}")
-	public ResponseEntity<<%= entityClass %>DTO> update<%= parentEntity %><%= entityClass %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntity) %>Id, @PathVariable(name = "<%= firstToLower(entityClass) %>Id") Long <%= firstToLower(entityClass) %>Id, @Valid @RequestBody <%= entityClass %>DTO <%= firstToLower(entityClass) %>DTO) throws URISyntaxException {
-		log.debug("REST request to update <%= entityClass %> for <%= firstToLower(parentEntity) %>Id: {}, <%= firstToLower(entityClass) %>DTO: {}", <%= firstToLower(parentEntity) %>Id, <%= firstToLower(entityClass) %>DTO);
-		if (<%= firstToLower(entityClass) %>DTO.get<%= parentEntity %>Id() == null || <%= firstToLower(entityClass) %>DTO.getId() == null || !<%= firstToLower(entityClass) %>DTO.getId().equals(<%= firstToLower(entityClass) %>Id)) {
+	public ResponseEntity<<%= entityClass %>DTO> update<%= parentEntityLevel1 %><%= entityClass %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntityLevel1) %>Id, @PathVariable(name = "<%= firstToLower(entityClass) %>Id") Long <%= firstToLower(entityClass) %>Id, @Valid @RequestBody <%= entityClass %>DTO <%= firstToLower(entityClass) %>DTO) throws URISyntaxException {
+		log.debug("REST request to update <%= entityClass %> for <%= firstToLower(parentEntityLevel1) %>Id: {}, <%= firstToLower(entityClass) %>DTO: {}", <%= firstToLower(parentEntityLevel1) %>Id, <%= firstToLower(entityClass) %>DTO);
+		if (<%= firstToLower(entityClass) %>DTO.get<%= parentEntityLevel1 %>Id() == null || <%= firstToLower(entityClass) %>DTO.getId() == null || !<%= firstToLower(entityClass) %>DTO.getId().equals(<%= firstToLower(entityClass) %>Id)) {
 			throw new BadRequestAlertException("Invalid id", <%= entityClass %>Resource.ENTITY_NAME, "idnull");
 		}
 
-		<%= parentEntity %>DTO <%= firstToLower(parentEntity) %>DTO = <%= firstToLower(parentEntity) %>Service.findOne(<%= firstToLower(parentEntity) %>Id).orElseThrow(() -> new EntityNotFoundException());
+		<%= parentEntityLevel1 %>DTO <%= firstToLower(parentEntityLevel1) %>DTO = <%= firstToLower(parentEntityLevel1) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>Id).orElseThrow(() -> new EntityNotFoundException());
+<%_ if (parentEntityLevel2) { _%>
 
-		//Check is currently logged-in user is the same as <%= firstToLower(parentEntity) %>.owner!!!
-		if (<%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>() == null || <%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>().isEmpty() || !<%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>().equals(SecurityUtils.getCurrentUserLogin().get())) {
+		<%= parentEntityLevel2 %>DTO <%= firstToLower(parentEntityLevel2) %>DTO = <%= firstToLower(parentEntityLevel2) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>DTO.get<%= parentEntityLevel2 %>Id()).orElseThrow(() -> new EntityNotFoundException());
+<%_ } _%>
+		//Check is currently logged-in user is the same as <%= firstToLower(parentEntityToUse) %>.owner!!!
+		if (<%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>() == null || <%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>().isEmpty() || !<%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>().equals(SecurityUtils.getCurrentUserLogin().get())) {
 			throw new EntityNotFoundException();
 		}
-		// Override <%= firstToLower(parentEntity) %>Id if any is send in the request!
-		<%= firstToLower(entityClass) %>DTO.set<%= parentEntity %>Id(<%= firstToLower(parentEntity) %>DTO.getId());
-		<%= firstToLower(entityClass) %>DTO.set<%= parentEntity %>Code(<%= firstToLower(parentEntity) %>DTO.getCode());
+		// Override <%= firstToLower(parentEntityLevel1) %>Id if any is send in the request!
+		<%= firstToLower(entityClass) %>DTO.set<%= parentEntityLevel1 %>Id(<%= firstToLower(parentEntityLevel1) %>DTO.getId());
+		<%= firstToLower(entityClass) %>DTO.set<%= parentEntityLevel1 %>Code(<%= firstToLower(parentEntityLevel1) %>DTO.getCode());
 
 		<%= entityClass %>DTO result = <%= firstToLower(entityClass) %>Service.save(<%= firstToLower(entityClass) %>DTO);
 		HttpHeaders headers = null;
-//		headers = HeaderUtil.createHiddenFieldsHeader("<%= firstToLower(parentEntity) %>Id");
+//		headers = HeaderUtil.createHiddenFieldsHeader("<%= firstToLower(parentEntityLevel1) %>Id");
 		headers = HeaderUtil.createEntityUpdateAlert(applicationName, true, <%= entityClass %>Resource.ENTITY_NAME, result.getId().toString());
 
 		return ResponseEntity.ok()
@@ -391,7 +413,7 @@ public class <%= parentEntity %><%= entityClass %>AggResource {
 	// JSON PATCH - V3
 	// echo '[{ "op": "replace", "path": "/description", "value": "Patched Description" }]' | http PATCH :10000/api/<%= parentEntityNamePluralizedAndSpinalCased %>/1/<%= entityApiUrl %>/2 Content-Type:application/json-patch+json
 	/**
-	 * PATCH  /<%= parentEntityNamePluralizedAndSpinalCased %>/:id/<%= entityApiUrl %>/:<%= firstToLower(entityClass) %>Id : Patches an existing <%= entityClass %> of <%= parentEntity %>.
+	 * PATCH  /<%= parentEntityNamePluralizedAndSpinalCased %>/:id/<%= entityApiUrl %>/:<%= firstToLower(entityClass) %>Id : Patches an existing <%= entityClass %> of <%= parentEntityLevel1 %>.
 	 *
 	 * @param <%= firstToLower(entityClass) %>DTO the <%= firstToLower(entityClass) %>DTO to update
 	 * @return the ResponseEntity with status 200 (OK) and with body the updated <%= firstToLower(entityClass) %>DTO,
@@ -402,18 +424,21 @@ public class <%= parentEntity %><%= entityClass %>AggResource {
 	@PatchMapping(value = "/<%= parentEntityNamePluralizedAndSpinalCased %>/{id}/<%= entityApiUrl %>/{<%= firstToLower(entityClass) %>Id}", 
 		consumes = RestMediaType.APPLICATION_PATCH_JSON_VALUE,
 		produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<<%= entityClass %>DTO> partialUpdate<%= parentEntity %><%= entityClass %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntity) %>Id, @PathVariable(name = "<%= firstToLower(entityClass) %>Id") Long <%= firstToLower(entityClass) %>Id, @RequestBody String patchCommand) {
-		log.debug("REST request to PATCH <%= entityClass %>, <%= firstToLower(entityClass) %>Id: {} for <%= firstToLower(parentEntity) %>Id: {}", <%= firstToLower(entityClass) %>Id, <%= firstToLower(parentEntity) %>Id);
+	public ResponseEntity<<%= entityClass %>DTO> partialUpdate<%= parentEntityLevel1 %><%= entityClass %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntityLevel1) %>Id, @PathVariable(name = "<%= firstToLower(entityClass) %>Id") Long <%= firstToLower(entityClass) %>Id, @RequestBody String patchCommand) {
+		log.debug("REST request to PATCH <%= entityClass %>, <%= firstToLower(entityClass) %>Id: {} for <%= firstToLower(parentEntityLevel1) %>Id: {}", <%= firstToLower(entityClass) %>Id, <%= firstToLower(parentEntityLevel1) %>Id);
 
-		<%= parentEntity %>DTO <%= firstToLower(parentEntity) %>DTO = <%= firstToLower(parentEntity) %>Service.findOne(<%= firstToLower(parentEntity) %>Id).orElseThrow(() -> new EntityNotFoundException());
+		<%= parentEntityLevel1 %>DTO <%= firstToLower(parentEntityLevel1) %>DTO = <%= firstToLower(parentEntityLevel1) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>Id).orElseThrow(() -> new EntityNotFoundException());
+<%_ if (parentEntityLevel2) { _%>
 
-		//Check is currently logged-in user is the same as <%= firstToLower(parentEntity) %>.owner!!!
-		if (<%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>() == null || <%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>().isEmpty() || !<%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>().equals(SecurityUtils.getCurrentUserLogin().get())) {
+		<%= parentEntityLevel2 %>DTO <%= firstToLower(parentEntityLevel2) %>DTO = <%= firstToLower(parentEntityLevel2) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>DTO.get<%= parentEntityLevel2 %>Id()).orElseThrow(() -> new EntityNotFoundException());
+<%_ } _%>
+		//Check is currently logged-in user is the same as <%= firstToLower(parentEntityToUse) %>.owner!!!
+		if (<%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>() == null || <%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>().isEmpty() || !<%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>().equals(SecurityUtils.getCurrentUserLogin().get())) {
 			throw new EntityNotFoundException();
 		}
 
 		<%= entityClass %>DTO existing<%= entityClass %>DTO = <%= firstToLower(entityClass) %>Service.findOne(<%= firstToLower(entityClass) %>Id).orElseThrow(() -> new EntityNotFoundException());
-		if (!existing<%= entityClass %>DTO.get<%= parentEntity %>Id().equals(<%= firstToLower(parentEntity) %>DTO.getId())) {
+		if (!existing<%= entityClass %>DTO.get<%= parentEntityLevel1 %>Id().equals(<%= firstToLower(parentEntityLevel1) %>DTO.getId())) {
 			throw new EntityNotFoundException();
 		}
 		<%= entityClass %>DTO <%= firstToLower(entityClass) %>DTO = null;
@@ -425,13 +450,13 @@ public class <%= parentEntity %><%= entityClass %>AggResource {
 			}
 		}
 
-		// Override <%= firstToLower(parentEntity) %>Id if any is send in the request!
-		<%= firstToLower(entityClass) %>DTO.set<%= parentEntity %>Id(<%= firstToLower(parentEntity) %>DTO.getId());
-		<%= firstToLower(entityClass) %>DTO.set<%= parentEntity %>Code(<%= firstToLower(parentEntity) %>DTO.getCode());
+		// Override <%= firstToLower(parentEntityLevel1) %>Id if any is send in the request!
+		<%= firstToLower(entityClass) %>DTO.set<%= parentEntityLevel1 %>Id(<%= firstToLower(parentEntityLevel1) %>DTO.getId());
+		<%= firstToLower(entityClass) %>DTO.set<%= parentEntityLevel1 %>Code(<%= firstToLower(parentEntityLevel1) %>DTO.getCode());
 
 		<%= entityClass %>DTO result = <%= firstToLower(entityClass) %>Service.save(<%= firstToLower(entityClass) %>DTO);
 		HttpHeaders headers = null;
-//		headers = HeaderUtil.createHiddenFieldsHeader("<%= firstToLower(parentEntity) %>Id");
+//		headers = HeaderUtil.createHiddenFieldsHeader("<%= firstToLower(parentEntityLevel1) %>Id");
 		headers = HeaderUtil.createEntityUpdateAlert(applicationName, true, <%= entityClass %>Resource.ENTITY_NAME, result.getId().toString());
 
 		return ResponseEntity.ok()
@@ -440,17 +465,20 @@ public class <%= parentEntity %><%= entityClass %>AggResource {
 	}
 
 	@DeleteMapping("/<%= parentEntityNamePluralizedAndSpinalCased %>/{id}/<%= entityApiUrl %>/{<%= firstToLower(entityClass) %>Id}")
-	public ResponseEntity<Void> delete<%= parentEntity %><%= entityClass %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntity) %>Id, @PathVariable(name = "<%= firstToLower(entityClass) %>Id") Long <%= firstToLower(entityClass) %>Id) throws URISyntaxException {
-		log.debug("REST request to delete <%= entityClass %> for <%= firstToLower(parentEntity) %>Id: {}, <%= firstToLower(entityClass) %>Id: {}", <%= firstToLower(parentEntity) %>Id, <%= firstToLower(entityClass) %>Id);
+	public ResponseEntity<Void> delete<%= parentEntityLevel1 %><%= entityClass %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntityLevel1) %>Id, @PathVariable(name = "<%= firstToLower(entityClass) %>Id") Long <%= firstToLower(entityClass) %>Id) throws URISyntaxException {
+		log.debug("REST request to delete <%= entityClass %> for <%= firstToLower(parentEntityLevel1) %>Id: {}, <%= firstToLower(entityClass) %>Id: {}", <%= firstToLower(parentEntityLevel1) %>Id, <%= firstToLower(entityClass) %>Id);
 
-		<%= parentEntity %>DTO <%= firstToLower(parentEntity) %>DTO = <%= firstToLower(parentEntity) %>Service.findOne(<%= firstToLower(parentEntity) %>Id).orElseThrow(() -> new EntityNotFoundException());
+		<%= parentEntityLevel1 %>DTO <%= firstToLower(parentEntityLevel1) %>DTO = <%= firstToLower(parentEntityLevel1) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>Id).orElseThrow(() -> new EntityNotFoundException());
+<%_ if (parentEntityLevel2) { _%>
 
-		//Check is currently logged-in user is the same as <%= firstToLower(parentEntity) %>.owner!!!
-		if (<%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>() == null || <%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>().isEmpty() || !<%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>().equals(SecurityUtils.getCurrentUserLogin().get())) {
+		<%= parentEntityLevel2 %>DTO <%= firstToLower(parentEntityLevel2) %>DTO = <%= firstToLower(parentEntityLevel2) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>DTO.get<%= parentEntityLevel2 %>Id()).orElseThrow(() -> new EntityNotFoundException());
+<%_ } _%>
+		//Check is currently logged-in user is the same as <%= firstToLower(parentEntityToUse) %>.owner!!!
+		if (<%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>() == null || <%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>().isEmpty() || !<%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>().equals(SecurityUtils.getCurrentUserLogin().get())) {
 			throw new EntityNotFoundException();
 		}
 		<%= entityClass %>DTO <%= firstToLower(entityClass) %>DTO = <%= firstToLower(entityClass) %>Service.findOne(<%= firstToLower(entityClass) %>Id).orElseThrow(() -> new EntityNotFoundException());
-		if (!<%= firstToLower(entityClass) %>DTO.get<%= parentEntity %>Id().equals(<%= firstToLower(parentEntity) %>DTO.getId())) {
+		if (!<%= firstToLower(entityClass) %>DTO.get<%= parentEntityLevel1 %>Id().equals(<%= firstToLower(parentEntityLevel1) %>DTO.getId())) {
 			throw new EntityNotFoundException();
 		}
 		<%= firstToLower(entityClass) %>Service.delete(<%= firstToLower(entityClass) %>DTO.getId());
@@ -460,23 +488,26 @@ public class <%= parentEntity %><%= entityClass %>AggResource {
 <%_ } // end - (!readOnly) _%>
 
 	@GetMapping("/<%= parentEntityNamePluralizedAndSpinalCased %>/{id}/<%= entityApiUrl %>/{<%= firstToLower(entityClass) %>Id}")
-	public ResponseEntity<<%= entityClass %>DTO> get<%= parentEntity %><%= entityClass %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntity) %>Id, @PathVariable(name = "<%= firstToLower(entityClass) %>Id") Long <%= firstToLower(entityClass) %>Id) throws URISyntaxException {
-		log.debug("REST request to get <%= entityClass %> for <%= firstToLower(parentEntity) %>Id: {}, <%= firstToLower(entityClass) %>Id: {}", <%= firstToLower(parentEntity) %>Id, <%= firstToLower(entityClass) %>Id);
+	public ResponseEntity<<%= entityClass %>DTO> get<%= parentEntityLevel1 %><%= entityClass %>(@PathVariable(name = "id") Long <%= firstToLower(parentEntityLevel1) %>Id, @PathVariable(name = "<%= firstToLower(entityClass) %>Id") Long <%= firstToLower(entityClass) %>Id) throws URISyntaxException {
+		log.debug("REST request to get <%= entityClass %> for <%= firstToLower(parentEntityLevel1) %>Id: {}, <%= firstToLower(entityClass) %>Id: {}", <%= firstToLower(parentEntityLevel1) %>Id, <%= firstToLower(entityClass) %>Id);
 
-		<%= parentEntity %>DTO <%= firstToLower(parentEntity) %>DTO = <%= firstToLower(parentEntity) %>Service.findOne(<%= firstToLower(parentEntity) %>Id).orElseThrow(() -> new EntityNotFoundException());
+		<%= parentEntityLevel1 %>DTO <%= firstToLower(parentEntityLevel1) %>DTO = <%= firstToLower(parentEntityLevel1) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>Id).orElseThrow(() -> new EntityNotFoundException());
+<%_ if (parentEntityLevel2) { _%>
 
-		//Check is currently logged-in user is the same as <%= firstToLower(parentEntity) %>.owner!!!
-		if (<%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>() == null || <%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>().isEmpty() || !<%= firstToLower(parentEntity) %>DTO.get<%= securityLinkColumn %>().equals(SecurityUtils.getCurrentUserLogin().get())) {
-			throw new EntityNotFoundException();
-		}
+//		<%= parentEntityLevel2 %>DTO <%= firstToLower(parentEntityLevel2) %>DTO = <%= firstToLower(parentEntityLevel2) %>Service.findOne(<%= firstToLower(parentEntityLevel1) %>DTO.get<%= parentEntityLevel2 %>Id()).orElseThrow(() -> new EntityNotFoundException());
+<%_ } _%>
+		//Check is currently logged-in user is the same as <%= firstToLower(parentEntityToUse) %>.owner!!!
+//		if (<%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>() == null || <%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>().isEmpty() || !<%= firstToLower(parentEntityToUse) %>DTO.get<%= securityLinkColumn %>().equals(SecurityUtils.getCurrentUserLogin().get())) {
+//			throw new EntityNotFoundException();
+//		}
 		<%= entityClass %>DTO <%= firstToLower(entityClass) %>DTO = <%= firstToLower(entityClass) %>Service.findOne(<%= firstToLower(entityClass) %>Id).orElseThrow(() -> new EntityNotFoundException());
-		if (!<%= firstToLower(entityClass) %>DTO.get<%= parentEntity %>Id().equals(<%= firstToLower(parentEntity) %>DTO.getId())) {
+		if (!<%= firstToLower(entityClass) %>DTO.get<%= parentEntityLevel1 %>Id().equals(<%= firstToLower(parentEntityLevel1) %>DTO.getId())) {
 			throw new EntityNotFoundException();
 		}
-		<%= firstToLower(entityClass) %>DTO.set<%= parentEntity %>Code(<%= firstToLower(parentEntity) %>DTO.getCode());
+		<%= firstToLower(entityClass) %>DTO.set<%= parentEntityLevel1 %>Code(<%= firstToLower(parentEntityLevel1) %>DTO.getCode());
 
 		HttpHeaders headers = null;
-//		headers = HeaderUtil.createHiddenFieldsHeader("<%= firstToLower(parentEntity) %>Id");
+//		headers = HeaderUtil.createHiddenFieldsHeader("<%= firstToLower(parentEntityLevel1) %>Id");
 
 		return ResponseEntity.ok()
 			.headers(headers)
