@@ -114,7 +114,7 @@ import <%= packageName %>.service.dto.<%= entityClass %>Criteria;
 import <%= packageName %>.service.<%= entityClass %>QueryService;
 <%_ } _%>
 <%_ if (requiredRoleForCreate || requiredRoleForRead || requiredRoleForUpdate || requiredRoleForDelete) { _%>
-//import <%= packageName %>.security.AuthoritiesConstants; //@Trifon
+import <%= packageName %>.security.AuthoritiesConstants; //@Trifon
 <%_ } _%>
 
 import io.github.jhipster.web.util.HeaderUtil;
@@ -152,7 +152,7 @@ import org.springframework.http.MediaType; //@Trifon
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired; //@Trifon
 <%_ if (requiredRoleForCreate || requiredRoleForRead || requiredRoleForUpdate || requiredRoleForDelete) { _%>
-//import org.springframework.security.access.prepost.PreAuthorize; //@Trifon
+import org.springframework.security.access.prepost.PreAuthorize; //@Trifon
 <%_ } _%>
 //import org.springframework.web.multipart.MultipartFile; //@Trifon
 import org.springframework.validation.BindingResult; //@Trifon
