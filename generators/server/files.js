@@ -1220,6 +1220,10 @@ const serverFiles = {
             path: SERVER_MAIN_SRC_DIR,
             templates: [
                 { file: 'package/service/package-info.java', renameTo: generator => `${generator.javaDir}service/package-info.java` },
+                {
+                  file: 'package/service/error/EntityNotFoundException.java',
+                  renameTo: generator => `${generator.javaDir}service/error/EntityNotFoundException.java`,
+                }, /* Trifon */
             ],
         },
         {
@@ -1257,10 +1261,6 @@ const serverFiles = {
                     file: 'package/web/rest/errors/FieldErrorVM.java',
                     renameTo: generator => `${generator.javaDir}web/rest/errors/FieldErrorVM.java`,
                 },
-                {
-                    file: 'package/web/rest/errors/EntityNotFoundException.java',
-                    renameTo: generator => `${generator.javaDir}web/rest/errors/EntityNotFoundException.java`,
-                }, /* Trifon */
             ],
         },
         {
