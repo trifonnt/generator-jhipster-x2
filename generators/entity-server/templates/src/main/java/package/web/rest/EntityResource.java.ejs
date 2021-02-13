@@ -385,7 +385,7 @@ public class <%= entityClass %>Resource {
     public ResponseEntity<<%= instanceType %>> partialUpdate<%= entityClass %>(@PathVariable Long id, @RequestBody String patchCommand) {
         log.debug("REST request to PATCH <%= entityClass %> : {}", id);
 
-		<%= instanceType %> existing<%= instanceType %> = <%= entityInstance %>Service.findOne(id).orElseThrow(() -> new EntityNotFoundException());
+		<%= instanceType %> existing<%= instanceType %> = <%= entityInstance %>Service.findOne(id).orElseThrow(() -> new EntityNotFoundException(ENTITY_NAME, id));
 		<%= instanceType %> <%= instanceName %> = null;
 		try {
 			<%= instanceName %> = (<%= instanceType %>)jsonPatcher.patch(patchCommand, existing<%= instanceType %>).get();
@@ -546,7 +546,7 @@ public class <%= entityClass %>Resource {
 		if (<%= entityInstance %>TemplateDTO.getId() != null) {
 			throw new BadRequestAlertException("A new <%= entityClass %>TemplateDTO cannot already have an ID", <%= entityClass %>TemplateResource.ENTITY_NAME, "idexists");
 		}
-		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException());
+		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException(UserResource.ENTITY_NAME, -1L));
 
 //		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = <%= entityInstance %>TmplMapper.toTemplate(<%= instanceName %>);
 		<%= entityInstance %>TemplateDTO.setUserId(loggedInUser.getId());
@@ -575,7 +575,7 @@ public class <%= entityClass %>Resource {
 	public ResponseEntity<<%= entityClass %>TemplateDTO> update<%= entityClass %>Template(@RequestBody <%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO) throws URISyntaxException {
 		log.debug("REST request to update <%= entityClass %>Template : {}", <%= entityInstance %>TemplateDTO);
 
-		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException());
+		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException(UserResource.ENTITY_NAME, -1L));
 		<%= entityClass %>TemplateDTO existing<%= entityClass %>TemplateDTO = <%= entityInstance %>TemplateService.findOneByUserId(loggedInUser.getId())
 				.orElseThrow(() -> new EntityNotFoundException());
 
@@ -608,7 +608,7 @@ public class <%= entityClass %>Resource {
 	public ResponseEntity<<%= entityClass %>TemplateDTO> partialUpdate<%= entityClass %>Template(@RequestBody String patchCommand) {
 		log.debug("REST request to PATCH <%= entityClass %>Template, patch command : {}", patchCommand);
 
-		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException());
+		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException(UserResource.ENTITY_NAME, -1L));
 		<%= entityClass %>TemplateDTO existing<%= entityClass %>TemplateDTO = <%= entityInstance %>TemplateService.findOneByUserId(loggedInUser.getId())
 				.orElseThrow(() -> new EntityNotFoundException());
 		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = null;
@@ -639,7 +639,7 @@ public class <%= entityClass %>Resource {
 	public ResponseEntity<Void> delete<%= entityClass %>Template() {
 		log.debug("REST request to delete <%= entityClass %>Template.");
 
-		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException());
+		User loggedInUser = userService.getUserWithAuthorities().orElseThrow(() -> new EntityNotFoundException(UserResource.ENTITY_NAME, -1L));
 		<%= entityClass %>TemplateDTO <%= entityInstance %>TemplateDTO = <%= entityInstance %>TemplateService.findOneByUserId(loggedInUser.getId())
 				.orElseThrow(() -> new EntityNotFoundException());
 
@@ -671,7 +671,7 @@ public class <%= entityClass %>Resource {
     public ResponseEntity<<%= otherEntityNameCapitalized %>DTO> get<%= firstToUpper(relationshipName) %>Template(@PathVariable Long id) {
         log.debug("REST request to get Template for <%= firstToUpper(relationshipNamePlural) %> in <%= entityClass %> : {}", id);
 
-        <%= instanceType %> <%= instanceName %> = <%= entityInstance %>Service.findOne(id).orElseThrow(() -> new EntityNotFoundException());
+        <%= instanceType %> <%= instanceName %> = <%= entityInstance %>Service.findOne(id).orElseThrow(() -> new EntityNotFoundException(ENTITY_NAME, id));
 
         <%= otherEntityNameCapitalized %>DTO <%= otherEntityName %>DTO = new <%= otherEntityNameCapitalized %>DTO();
         <%= otherEntityName %>DTO.set<%= firstToUpper(otherEntityRelationshipName) %>Id(<%= instanceName %>.getId());

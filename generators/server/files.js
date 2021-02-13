@@ -1261,6 +1261,10 @@ const serverFiles = {
                     file: 'package/web/rest/errors/FieldErrorVM.java',
                     renameTo: generator => `${generator.javaDir}web/rest/errors/FieldErrorVM.java`,
                 },
+                {    /* @Trifon */
+                    file: 'package/web/rest/errors/EntityNotFoundException.java',
+                    renameTo: generator => `${generator.javaDir}web/rest/errors/EntityNotFoundException.java`,
+                  }, /* Trifon */
             ],
         },
         {

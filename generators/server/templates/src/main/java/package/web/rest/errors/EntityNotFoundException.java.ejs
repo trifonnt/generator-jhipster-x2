@@ -16,25 +16,17 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= packageName %>.service.error;
+package <%= packageName %>.web.rest.errors;
+
+import org.zalando.problem.AbstractThrowableProblem;
+import org.zalando.problem.Status;
 
 //@Trifon
-public class EntityNotFoundException extends RuntimeException {
+public class EntityNotFoundException extends AbstractThrowableProblem {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private Long id;
-	
-//	public EntityNotFoundException() {
-//		super("Not found entity");
-//	}
-
-	public EntityNotFoundException(Long id) {
-		super("Not found entity with id:" + id);
-		this.id = id;
-	}
-
-	public Long getId() {
-		return id;
-	}
+    public EntityNotFoundException() {
+        super(ErrorConstants.ENTITY_NOT_FOUND_TYPE, "Entity not found", Status.NOT_FOUND);
+    }
 }
