@@ -303,7 +303,7 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     <%_ if (databaseType === 'neo4j') { _%>
     @Property("<%=fieldNameUnderscored %>")
     <%_ } _%>
-    <%_ if (fields[idx].encrypted) { } _%>
+    <%_ if (fields[idx].encrypted) { _%>
 	@Convert(converter = AttributeEncryptor.class) //@Trifon
     <%_ } _%>
     <%_ if (fields[idx].defaultValueConstant && fields[idx].defaultValueConstant !== '') {
