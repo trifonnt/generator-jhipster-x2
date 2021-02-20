@@ -127,6 +127,8 @@ Object.keys(uniqueEnums).forEach(function(element) { _%>
 import <%= packageName %>.domain.enumeration.<%= element %>;
 <%_ }); _%>
 
+import <%= packageName %>.repository.util.AttributeEncryptor; //@Trifon
+
 <%_ if (databaseType === 'couchbase' && !embedded) { _%>
 import static <%= packageName %>.config.Constants.ID_DELIMITER;
 import static org.springframework.data.couchbase.core.mapping.id.GenerationStrategy.UNIQUE;
@@ -300,6 +302,9 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     <%_ } _%>
     <%_ if (databaseType === 'neo4j') { _%>
     @Property("<%=fieldNameUnderscored %>")
+    <%_ } _%>
+    <%_ if (fields[idx].encrypted) { } _%>
+	@Convert(converter = AttributeEncryptor.class) //@Trifon
     <%_ } _%>
     <%_ if (fields[idx].defaultValueConstant && fields[idx].defaultValueConstant !== '') {
     	if (fields[idx].fieldType === "String") {

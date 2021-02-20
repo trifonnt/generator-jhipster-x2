@@ -1010,6 +1010,7 @@ function askForField(done) {
                 fieldSequence: props.fieldSequence, //@Trifon
                 fieldType: props.enumType || props.fieldType, //@Trifon-taken from v6.10.4
                 visibleInTableMode: props.visibleInTableMode, //@Trifon
+                encrypted: props.encrypted, //@Trifon
                 fieldTypeBlobContent: props.fieldTypeBlobContent,
                 fieldValues: props.fieldValues,
                 fieldValidateRules: props.fieldValidateRules,

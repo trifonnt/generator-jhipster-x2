@@ -1668,7 +1668,13 @@ const serverFiles = {
                     file: 'package/web/rest/vm/ManagedUserVM.java',
                     renameTo: generator => `${generator.javaDir}web/rest/vm/ManagedUserVM.java`,
                 },
+                //@Trifon
                 { file: 'package/web/AngularJsForwardController.java', renameTo: generator => `${generator.javaDir}web/AngularJsForwardController.java` }, /* @Trifon */
+                //@Trifon
+                {
+                    file: 'package/repository/util/AttributeEncryptor.java',
+                    renameTo: generator => `${generator.javaDir}repository/util/AttributeEncryptor.java`,
+                },
             ],
         },
         {
