@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2020 the original author or authors from the JHipster project.
+ Copyright 2013-2021 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -24,9 +24,23 @@ import org.zalando.problem.Status;
 //@Trifon
 public class EntityNotFoundException extends AbstractThrowableProblem {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public EntityNotFoundException() {
-        super(ErrorConstants.ENTITY_NOT_FOUND_TYPE, "Entity not found", Status.NOT_FOUND);
-    }
+	private final String entityName;
+
+	private final Long id;
+
+	public EntityNotFoundException(String entityName, Long id) {
+		super(ErrorConstants.ENTITY_NOT_FOUND_TYPE, "Entity not found", Status.NOT_FOUND);
+		this.entityName = entityName;
+		this.id = id;
+	}
+
+	public String getEntityName() {
+		return entityName;
+	}
+
+	public String getErrorKey() {
+		return id == null ? "null" : id.toString();
+	}
 }
