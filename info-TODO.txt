@@ -1,5 +1,11 @@
 @Trifon
 
+-06) Add Re-captcha
+
+
+-05) Add API request limiter
+
+
 -04) Added generation of OData artifacts 
    OData Protocol Guide
  + https://www.baeldung.com/odata
