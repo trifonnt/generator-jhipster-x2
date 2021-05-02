@@ -127,7 +127,7 @@ Object.keys(uniqueEnums).forEach(function(element) { _%>
 import <%= packageName %>.domain.enumeration.<%= element %>;
 <%_ }); _%>
 
-import <%= packageName %>.repository.util.AttributeEncryptor; //@Trifon
+import <%= packageName %>.domain.util.AttributeEncryptor; //@Trifon
 
 <%_ if (databaseType === 'couchbase' && !embedded) { _%>
 import static <%= packageName %>.config.Constants.ID_DELIMITER;

@@ -1,4 +1,4 @@
-package <%= packageName %>.repository.util;
+package <%= packageName %>.domain.util;
 
 import java.security.Key;
 import java.security.InvalidKeyException;
@@ -13,7 +13,7 @@ import javax.persistence.AttributeConverter;
 
 import org.springframework.stereotype.Component;
 
-//@Trifon-manual
+//@Trifon
 /*
  *   DATABASE COLUMN-LEVEL ENCRYPTION WITH SPRING DATA JPA
  * - https://sultanov.dev/blog/database-column-level-encryption-with-spring-data-jpa/
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 public class AttributeEncryptor implements AttributeConverter<String, String> {
 
 	private static final String AES = "AES";
-	private static final String SECRET = "Hmz2PXWJ9<vmTKE}\r'G&&%uUT\"8n,-"; //MUST be 32 characters long!!!
+	private static final String SECRET = "4<$+Tb[,]{ZJ1JlMn5<ALLpLY$0SFg5s"; //MUST be 32 characters long!!!
 
 	private final Key key;
 	private final Cipher cipher;

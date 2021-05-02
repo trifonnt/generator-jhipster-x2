@@ -125,6 +125,7 @@ import <%= packageName %>.security.AuthoritiesConstants; //@Trifon
 <%_ } _%>
 
 import io.github.jhipster.web.util.HeaderUtil;
+import io.github.jhipster.web.util.PaginationUtil;
 <%_ if (pagination !== 'no') { _%>
 //import io.github.jhipster.web.util.PaginationUtil;
 <%_ } _%>
@@ -145,7 +146,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
     <%_ } _%>
     <%_ if (!reactive) { _%>
-//import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
     <%_ } else { _%>
 import org.springframework.web.util.UriComponentsBuilder;
     <%_ } _%>
