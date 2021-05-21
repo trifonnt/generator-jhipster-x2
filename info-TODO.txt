@@ -1,12 +1,17 @@
 @Trifon
 
+-07) Import Initial records from Google Sheets
+ - https://www.baeldung.com/google-sheets-java-client
+ - https://developers.google.com/sheets/api/quickstart/java
+
+
 -06) Add Re-captcha
 
 
 -05) Add API request limiter
 
 
--04) Added generation of OData artifacts 
+-04) Add generation of OData artifacts 
    OData Protocol Guide
  + https://www.baeldung.com/odata
    Intro to OData with Olingo
