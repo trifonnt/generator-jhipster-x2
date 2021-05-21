@@ -1,2 +1,6 @@
+= Generate SQL files from Liquibase files
    Using Liquibase to generate SQL file only - Liquibase Users - Liquibase
  - https://forum.liquibase.org/t/using-liquibase-to-generate-sql-file-only/2790
+
+   Best choice to generate scripts for different databases - Stack Overflow
+ - https://stackoverflow.com/questions/20733777/best-choice-to-generate-scripts-for-different-databases
