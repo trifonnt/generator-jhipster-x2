@@ -1,5 +1,10 @@
 @Trifon
 
+-08) Quarkus based application
+   Build an API using Quarkus from the ground up
+ - https://developers.redhat.com/blog/2021/05/11/building-an-api-using-quarkus-from-the-ground-up
+
+
 -07) Import Initial records from Google Sheets
  - https://www.baeldung.com/google-sheets-java-client
  - https://developers.google.com/sheets/api/quickstart/java
