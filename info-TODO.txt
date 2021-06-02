@@ -1,5 +1,10 @@
 @Trifon
 
+-09) Extend Arch Unit tests
+   Introducing Coding Constraints Using ArchUnit - DZone Java
+ - https://dzone.com/articles/introducing-coding-constraints-using-archunit
+
+
 -08) Quarkus based application
    Build an API using Quarkus from the ground up
  - https://developers.redhat.com/blog/2021/05/11/building-an-api-using-quarkus-from-the-ground-up
