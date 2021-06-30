@@ -154,10 +154,10 @@ management:
 
 spring:
 #@Trifon-begin
-  servlet:
-    multipart:
-      max-file-size: 7MB
-      max-request-size: 7MB
+    servlet:
+        multipart:
+            max-file-size: 7MB
+            max-request-size: 7MB
 #@Trifon-end
     <%_ if (searchEngine === 'elasticsearch' && !reactive) { _%>
     autoconfigure:
@@ -168,9 +168,9 @@ spring:
     <%_ } _%>
     application:
         name: <%= baseName %>
-    <%_ if (serviceDiscoveryType === 'consul' || (applicationType === 'gateway' && reactive)) { _%>
+  <%_ if (serviceDiscoveryType === 'consul' || (applicationType === 'gateway' && reactive)) { _%>
     cloud:
-        <%_ if (serviceDiscoveryType === 'consul') { _%>
+    <%_ if (serviceDiscoveryType === 'consul') { _%>
         consul:
             discovery:
                 healthCheckPath: /management/health
@@ -216,13 +216,13 @@ spring:
         jpa:
             repositories:
                 bootstrap-mode: deferred
-  #@Trifon-manual-begin - https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html
+#@Trifon-manual-begin - https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html
         web:
-          pageable:
-            page-parameter: page
-            size-parameter: size
-            default-page-size: 50
-  #@Trifon-manual-end
+            pageable:
+                page-parameter: page
+                size-parameter: size
+                default-page-size: 50
+#@Trifon-manual-end
     jpa:
         open-in-view: false
         properties:
@@ -376,7 +376,7 @@ jhipster:
     <%_ } _%>
 <%_ if (messageBroker === 'kafka') { _%>
 kafka:
-  bootstrap-servers: localhost:9092
+  boot-strap-servers: localhost:9092
   consumer:
     key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
     value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
