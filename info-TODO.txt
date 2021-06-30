@@ -1,5 +1,11 @@
 @Trifon
 
+-10)
+   How to use the audit system of jhipster to audit password changes?
+ - https://stackoverflow.com/questions/50509886/how-to-use-the-audit-system-of-jhipster-to-audit-password-changes
+   - https://www.baeldung.com/spring-boot-authentication-audit
+
+
 -09) Extend Arch Unit tests
    Introducing Coding Constraints Using ArchUnit - DZone Java
  - https://dzone.com/articles/introducing-coding-constraints-using-archunit
