@@ -4,3 +4,7 @@
 
    Best choice to generate scripts for different databases - Stack Overflow
  - https://stackoverflow.com/questions/20733777/best-choice-to-generate-scripts-for-different-databases
+
+
+= Steps when checkout generator-jhipster on new computer
+$ git clone --branch v6.9.1-axx https://github.com/trifonnt/generator-jhipster-x2.git generator-jhipster
