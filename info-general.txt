@@ -10,3 +10,8 @@
 $ git clone --branch v6.9.1-axx https://github.com/trifonnt/generator-jhipster-x2.git generator-jhipster
 $ cd generator-jhipster
 $ sudo npm link
+
+
+= Kafka and WebSocket
+   Demo application reads data from Apache Kafka topic and updating the View using Spring Websocket on real-time.
+ - https://github.com/sulthan309/Live-Dashboard-using-Kafka-and-Spring-Websocket
