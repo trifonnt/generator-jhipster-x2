@@ -284,7 +284,11 @@ public class UserService {
         <%_ if (['sql', 'mongodb', 'couchbase', 'neo4j'].includes(databaseType)) { _%>
         newUser.setImageUrl(userDTO.getImageUrl());
         <%_ } _%>
-        newUser.setLangKey(userDTO.getLangKey());
+        if (userDTO.getLangKey() == null) { //@Trifon
+            newUser.setLangKey(Constants.DEFAULT_LANGUAGE); // default language
+        } else {
+            newUser.setLangKey(userDTO.getLangKey());
+        }
         // new user is not active
         newUser.setActivated(false);
         // new user gets registration key
@@ -347,7 +351,11 @@ public class UserService {
                 <%_ if (['sql', 'mongodb', 'neo4j', 'couchbase'].includes(databaseType)) { _%>
                 newUser.setImageUrl(userDTO.getImageUrl());
                 <%_ } _%>
-                newUser.setLangKey(userDTO.getLangKey());
+		        if (userDTO.getLangKey() == null) { //@Trifon
+		            newUser.setLangKey(Constants.DEFAULT_LANGUAGE); // default language
+		        } else {
+		            newUser.setLangKey(userDTO.getLangKey());
+		        }
                 // new user is not active
                 newUser.setActivated(false);
                 // new user gets registration key
