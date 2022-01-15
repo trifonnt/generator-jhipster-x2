@@ -78,7 +78,7 @@
         "progress": "2.0.3",
         "randexp": "0.5.3",
         "semver": "7.3.2",
-        "shelljs": "0.8.4",
+        "shelljs": "0.8.5",
         "sync-request": "6.1.0",
         "tabtab": "2.2.2",
         "test": "^0.6.0",
