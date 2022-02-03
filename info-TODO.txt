@@ -1,5 +1,9 @@
 @Trifon
 
+-11) Generic .csv file export like in:
+ - /test-now-backend/src/main/java/name/trifon/testnow/web/rest/ext/ProductResourceExt.java
+
+
 -10)
    How to use the audit system of jhipster to audit password changes?
  - https://stackoverflow.com/questions/50509886/how-to-use-the-audit-system-of-jhipster-to-audit-password-changes
