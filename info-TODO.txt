@@ -1,5 +1,10 @@
 @Trifon
 
+-12) Add REST methofds to process batch requests
+   Supporting bulk operations in REST APIs
+ - https://www.javacodegeeks.com/2021/05/supporting-bulk-operations-in-rest-apis.html
+
+
 -11) Generic .csv file export like in:
  - /test-now-backend/src/main/java/name/trifon/testnow/web/rest/ext/ProductResourceExt.java
 
