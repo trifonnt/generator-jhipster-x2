@@ -54,8 +54,17 @@ export class RegisterComponent implements AfterViewInit {
         <%_ } _%>
         private loginModalService: LoginModalService,
         private registerService: RegisterService,
-        private fb: FormBuilder
-    ) {}
+        private fb: FormBuilder,
+        private router: Router, // @Trifon-manual
+        private route: ActivatedRoute, // @Trifon-manual
+    ) {
+      // @Trifon-manual
+      this.route.queryParams.pipe(take(1)).subscribe((params) => {
+      // eslint-disable-next-line no-console
+      // console.log('@PM params => ', params)
+      this.queryParams = params
+    })
+    }
 
     ngAfterViewInit(): void {
         if (this.login) {
@@ -75,9 +84,13 @@ export class RegisterComponent implements AfterViewInit {
         } else {
             const login = this.registerForm.get(['login'])!.value;
             const email = this.registerForm.get(['email'])!.value;
+            // @Trifon-manual
+            const account = { login, email, password, langKey: <% if (enableTranslation) { %>this.languageService.getCurrentLanguage()<% } else { %>'en'<% } %> };
+            // @Trifon-manual
             this.registerService
-                .save({ login, email, password, langKey: <% if (enableTranslation) { %>this.languageService.getCurrentLanguage()<% } else { %>'en'<% } %> })
-                .subscribe(() => (this.success = true), response => this.processError(response));
+                .save(account, this.queryParams )
+                .subscribe(() => (this.success = true), response => this.processError(response)
+            );
         }
     }
 
