@@ -27,6 +27,9 @@ import { EMAIL_ALREADY_USED_TYPE, LOGIN_ALREADY_USED_TYPE } from 'app/shared/con
 import { LoginModalService } from 'app/core/login/login-modal.service';
 import { RegisterService } from './register.service';
 
+import { Router, ActivatedRoute } from '@angular/router'; // @Trifon-manual
+import { take } from 'rxjs/operators'; // @Trifon-manual
+
 @Component({
     selector: '<%= jhiPrefixDashed %>-register',
     templateUrl: './register.component.html'
@@ -62,8 +65,8 @@ export class RegisterComponent implements AfterViewInit {
       this.route.queryParams.pipe(take(1)).subscribe((params) => {
       // eslint-disable-next-line no-console
       // console.log('@PM params => ', params)
-      this.queryParams = params
-    })
+      this.queryParams = params;
+    });
     }
 
     ngAfterViewInit(): void {

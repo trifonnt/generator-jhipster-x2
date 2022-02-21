@@ -25,9 +25,9 @@ import { IUser } from 'app/core/user/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class RegisterService {
-    constructor(private http: HttpClient, queryParams: any) {} // @Trifon-manual
+    constructor(private http: HttpClient) {}
 
-    save(account: IUser): Observable<{}> {
+    save(account: IUser, queryParams: any): Observable<{}> { // @Trifon-manual
         // @Trifon-manual
         return this.http.post(SERVER_API_URL + '<%- apiUaaPath %>api/register', account, { params: queryParams });
     }
