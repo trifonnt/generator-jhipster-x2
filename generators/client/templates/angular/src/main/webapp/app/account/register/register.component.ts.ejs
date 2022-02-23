@@ -43,6 +43,7 @@ export class RegisterComponent implements AfterViewInit {
     errorEmailExists = false;
     errorUserExists = false;
     success = false;
+    queryParams: any; // @Trifon-manual
 
     registerForm = this.fb.group({
         login: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(50), Validators.pattern("<%- LOGIN_REGEX %>")]],
