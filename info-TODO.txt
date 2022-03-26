@@ -1,6 +1,6 @@
 @Trifon
 
--12) Add REST methofds to process batch requests
+-12) Add REST methods to process batch requests
    Supporting bulk operations in REST APIs
  - https://www.javacodegeeks.com/2021/05/supporting-bulk-operations-in-rest-apis.html
 

@@ -7,6 +7,11 @@
 
 
 = Steps when checkout generator-jhipster on new computer
+ -- Modify package.json and set...:
+   "name": "generator-jhipster",
+    "bin": {
+        "jhipster": "./cli/jhipster.js"
+    },
 $ git clone --branch v6.9.1-axx https://github.com/trifonnt/generator-jhipster-x2.git generator-jhipster
 $ cd generator-jhipster
 $ sudo npm link
