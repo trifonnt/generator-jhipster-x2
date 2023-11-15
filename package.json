@@ -30,7 +30,7 @@
     },
     "main": "cli/index.js",
     "bin": {
-        "jhipster-x2": "./cli/jhipster.js"
+        "jhipster": "./cli/jhipster.js"
     },
     "repository": {
         "type": "git",
@@ -52,7 +52,7 @@
     "dependencies": {
         "aws-sdk": "2.665.0",
         "axios": "0.19.2",
-        "chalk": "4.0.0",
+        "chalk": "^4.0.0",
         "commander": "4.1.1",
         "conf": "6.2.4",
         "didyoumean": "1.2.1",
@@ -74,9 +74,10 @@
         "pluralize": "8.0.0",
         "prettier": "2.0.5",
         "prettier-plugin-java": "0.8.0",
+        "process-nextick-args": "^2.0.1",
         "progress": "2.0.3",
         "randexp": "0.5.3",
-        "semver": "7.3.2",
+        "semver": "^7.3.2",
         "shelljs": "0.8.4",
         "sync-request": "6.1.0",
         "tabtab": "2.2.2",
